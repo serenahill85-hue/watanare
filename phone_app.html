@@ -4062,7 +4062,7 @@ function renderGuide(navigate=true){
         <p>功能都在主屏 App 里。聊天、动态和设置会自动保留，不需要每次重新配置。</p>
         <div class="guide-quick"><span><b>点开</b>选择 App</span><span><b>修改</b>先点铅笔</span><span><b>返回</b>用底部横条</span></div>
       </section>
-      <div class="guide-tip"><b>推荐：</b>第一次使用先到设置确认正文语言，并保持“通讯摘要注入”和“自动记忆整理”开启。</div>
+      <div class="guide-tip"><b>推荐：</b>第一次使用先到设置确认正文语言规则，再到酒馆的角色正则里手动选择对应美化；“通讯摘要注入”和“自动记忆整理”建议保持开启。</div>
       <div class="guide-list">
         <details class="guide-sec" open><summary>打开、关闭与移动</summary><div class="guide-copy">
           <p>点未展开的小手机即可打开；酒馆魔杖菜单里也有“手机”。拖动它可以换位置，贴到屏幕边缘时最多能藏起一半。</p>
@@ -4089,7 +4089,8 @@ function renderGuide(navigate=true){
           <p><b>手账</b>查看当前篇章、剧情偏移和主线推演。<b>世界书</b>可查看并真实开关当前主世界书条目；关闭条目会影响所有共用这本世界书的聊天，受保护条目只能查看。</p>
         </div></details>
         <details class="guide-sec"><summary>设置怎么选</summary><div class="guide-copy">
-          <p><b>正文对话语言</b>默认中文；切到中日双语后会同时显示日文原句和中文内容。固定开场白也会跟随这个选择，切换从下一次正文回复起生效。</p>
+          <p><b>正文语言规则</b>默认中文；切到中日双语后，只会开关当前主世界书中的两条对话格式规则，并从下一次正文回复起生效。固定开场白始终只保留中文。</p>
+          <p><b>对话美化不会跟着手机自动切换。</b>请到酒馆的角色正则里，在“中文·深色 / 中文·浅色 / 中日双语·深色 / 中日双语·浅色”中手动启用一条，其余三条关闭。手机的深浅主题只影响手机界面。</p>
           <p><b>通讯摘要注入</b>建议开启，让正文记得手机里发生过的往来；<b>自动记忆整理</b>也建议开启，长时间聊天时更不容易忘记旧消息。</p>
           <p><b>正文预设参考</b>只让手机参考当前正文预设的通用表达，不会修改预设。<b>自动来信与动态</b>会增加角色主动活动，想要更热闹时再开。</p>
           <p><b>手机界面更新</b>会在每次正常进入或刷新酒馆页面后静默检查一次，不会反复打扰。想立即确认时点旁边的<b>手动检查</b>；发现新版后会在安全时机应用。</p>
@@ -4149,8 +4150,8 @@ function dialogueLanguageNote(){
   if(dl.loading) return '正在读取当前主世界书…';
   if(dl.error) return dl.error;
   if(!dl.loaded) return '读取当前主世界书后显示';
-  if(!dl.valid) return '两条格式规则状态异常，选择一种即可修复';
-  return dl.mode==='bilingual'?'当前：日文原句与中文内容':'当前：中文';
+  if(!dl.valid) return '两条世界书格式规则状态异常，选择一种即可修复';
+  return dl.mode==='bilingual'?'当前：中日双语世界书规则':'当前：中文世界书规则';
 }
 function paintDialogueLanguageControls(){
   const dl=S.dialogueLang, note=$id('dialogue-lang-note');
@@ -4185,10 +4186,10 @@ function renderSettings(navigate=true){
   const tempVal = (api.temp==null || api.temp==='' || !isFinite(tempRaw)) ? 0.8 : Math.min(2, Math.max(0, tempRaw));
   ensureScr('scr-settings', el=>{
     el.innerHTML=apphead('设置','')+`<div class="body"><div class="set">
-      <div class="srow"><span class="t">深浅主题<small>当前：${c.theme==='light'?'浅色':'深色'}</small></span>
+      <div class="srow"><span class="t">手机深浅主题<small>当前：${c.theme==='light'?'浅色':'深色'}，不影响对话正则</small></span>
         <button class="sw ${c.theme==='light'?'':'on'}" onclick="WN.set('theme','${c.theme==='light'?'dark':'light'}')"></button></div>
-      <div class="srow"><span class="t">正文对话语言<small id="dialogue-lang-note">${esc(dialogueLanguageNote())}</small></span>
-        <span class="lang-seg" role="group" aria-label="正文对话语言">
+      <div class="srow"><span class="t">正文语言规则<small id="dialogue-lang-note">${esc(dialogueLanguageNote())}；美化正则请手动选择</small></span>
+        <span class="lang-seg" role="group" aria-label="正文世界书语言规则">
           <button type="button" data-dialogue-lang="zh" onclick="WN.setDialogueLanguage('zh')">中文</button>
           <button type="button" data-dialogue-lang="bilingual" onclick="WN.setDialogueLanguage('bilingual')">中日双语</button>
         </span></div>
@@ -4272,7 +4273,7 @@ WN.setDialogueLanguage=async mode=>{
         if(entry) entry.enabled=changed.enabled;
       }
     }
-    toast(mode==='bilingual'?'已切换为中日双语，下一次正文回复起生效':'已切换为中文，下一次正文回复起生效');
+    toast(mode==='bilingual'?'已启用中日双语世界书规则；美化正则请手动切换':'已启用中文世界书规则；美化正则请手动切换');
   }catch(e){
     S.dialogueLang.busy=false; S.dialogueLang.error='切换失败：'+String(e&&e.message||e||'写入错误').slice(0,100);
     toast(S.dialogueLang.error);
