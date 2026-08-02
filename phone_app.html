@@ -829,7 +829,7 @@
 <script>
 "use strict";
 /* =========================================================================
- * 恋人不行 · 悬浮手机 App 本体  v0.30.4
+ * 恋人不行 · 悬浮手机 App 本体  v0.30.5
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -3917,6 +3917,7 @@ function renderGuide(navigate=true){
         <details class="guide-sec"><summary>设置怎么选</summary><div class="guide-copy">
           <p><b>通讯摘要注入</b>建议开启，让正文记得手机里发生过的往来；<b>自动记忆整理</b>也建议开启，长时间聊天时更不容易忘记旧消息。</p>
           <p><b>正文预设参考</b>开启后会读取当前正文预设里的通用文风和表达提示，只给手机生成作参考，不会修改正文预设；聊天记录、世界书占位内容和变量规则不会带入。读取失败时手机仍按原有提示词工作。</p>
+          <p><b>手机界面更新</b>会在后台自动检查维护地址并静默应用通过校验的新界面，不需要重新导入角色卡。正在编辑或发送内容时会延后应用；网络不可用时继续使用已验证缓存或卡内界面。</p>
           <p><b>自动来信与动态</b>会额外生成角色的主动活动，想要更热闹时再开。没有单独的手机接口时，<b>手机专用 API</b>保持关闭即可；若开启，填好地址、密钥和模型后先点测试连接，温度不确定时保持 0.80。</p>
           <p>不想显示悬浮小手机时，开启<b>仅用魔杖菜单打开</b>。清空手机数据会删除聊天、动态、论坛和媒体内容，操作前请确认不再需要；已经解锁的相册图片不会重新上锁。</p>
         </div></details>
@@ -3928,15 +3929,15 @@ function renderGuide(navigate=true){
 /* ---------- 设置 ---------- */
 function remotePhoneNote(){
   const r=S.remote||{};
-  if(!r.url) return '未设置，当前使用卡内界面';
+  if(!r.url) return '自动更新地址不可用，当前使用卡内界面';
   const ver=r.version||'当前版本';
-  if(r.status==='checking') return '正在检查远程清单…';
-  if(r.status==='ready' && r.candidateVersion && r.candidateVersion!==r.version) return `发现远程 ${esc(r.candidateVersion)}，准备应用`;
+  if(r.status==='checking') return '后台检查中…';
+  if(r.status==='update-ready' && r.candidateVersion && r.candidateVersion!==r.version) return `发现远程 ${esc(r.candidateVersion)}，将在安全时应用`;
   if(r.source==='remote' && r.status==='ready') return `当前使用远程 ${esc(ver)}`;
   if(r.source==='cache') return `网络不可用，使用已验证缓存 ${esc(ver)}`;
   if(r.status==='error') return `检查失败，仍使用${r.source==='embedded'?'卡内':'当前'}界面`;
   if(r.status==='fallback') return `远程不可用，使用卡内 ${esc(ver)}`;
-  return '地址已保存，点击检查并应用';
+  return '等待后台自动检查';
 }
 function remotePhoneDetails(){
   const r=S.remote||{};
@@ -4006,16 +4007,7 @@ function renderSettings(navigate=true){
           style="background:var(--card);box-shadow:var(--shadow);border-radius:10px;padding:7px 14px;font-size:12px;color:var(--ink2)"
           onclick="WN.reloadAlbum()">${ALBUM_INFO.loading?'检查中':'检查更新'}</button></div>
       <div class="srow"><span class="t">手机界面更新<small id="phone-remote-note">${remotePhoneNote()}${remotePhoneDetails()}</small></span>
-        <button type="button" ${S.remote&&S.remote.status==='checking'?'disabled':''}
-          style="background:var(--card);box-shadow:var(--shadow);border-radius:10px;padding:7px 14px;font-size:12px;color:var(--ink2)"
-          onclick="WN.remoteCheck()">${S.remote&&S.remote.status==='checking'?'检查中':'检查并应用'}</button></div>
-      <div class="apibox">
-        <label for="phone-remote-url">远程清单地址（可选）</label>
-        <input id="phone-remote-url" type="url" spellcheck="false" value="${esc((S.remote&&S.remote.url)||'')}"
-          placeholder="https://你的账号.github.io/仓库/phone-manifest.json">
-        <label style="margin-top:-4px">只更新手机界面；桥接、变量和世界书规则仍随卡包更新。留空即可关闭远程更新。</label>
-        <button class="refresh" type="button" onclick="WN.remoteSave()">保存地址</button>
-      </div>
+        <span class="chip acc">后台自动</span></div>
       ${ui?`<div class="sect">入口与位置</div>
       <div class="srow"><span class="t">仅用魔杖菜单打开<small>${wandOnly?'当前：只保留酒馆魔杖里的「手机」，已隐藏悬浮球':'当前：魔杖菜单与悬浮球并存'}</small></span>
         <button class="sw ${wandOnly?'on':''}" onclick="WN.setEntry('${wandOnly?'both':'wand'}')"></button></div>`:''}
@@ -4029,7 +4021,7 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">恋人不行·乱入卡 手机 v0.30.4</div>
+<div class="empty" style="padding:14px">恋人不行·乱入卡 手机 v0.30.5</div>
     </div></div>`;
   });
   if(navigate) WN.go('scr-settings');
@@ -4054,36 +4046,6 @@ WN.setEntry=m=>{
 WN.recenter=()=>{
   const ui=S.B.ui; if(!ui||typeof ui.recenter!=='function'){ toast('当前外壳不支持复位'); return; }
   try{ ui.recenter(); toast('已回到居中位置'); }catch(_){ toast('复位失败'); } };
-WN.remoteSave=async()=>{
-  const input=document.getElementById('phone-remote-url');
-  const value=input?String(input.value||'').trim():'';
-  if(!S.B || typeof S.B.setPhoneRemoteManifest!=='function'){ toast('当前外壳不支持远程更新'); return; }
-  try{
-    const wasRemote=!!(S.remote && S.remote.source && S.remote.source!=='embedded');
-    S.remote=await S.B.setPhoneRemoteManifest(value);
-    toast(value?'地址已保存，正在检查':'已关闭远程更新');
-    if(value){
-      await WN.remoteCheck();
-    }else if(wasRemote && typeof S.B.reloadPhone==='function'){
-      S.remote=await S.B.reloadPhone()||S.remote;
-      renderSettings(false);
-    }
-  }catch(e){ toast('地址无效：'+(e&&e.message||e)); }
-};
-WN.remoteCheck=async()=>{
-  if(!S.B || typeof S.B.checkPhoneRemote!=='function'){ toast('当前外壳不支持远程更新'); return; }
-  try{
-    S.remote=Object.assign({},S.remote,{status:'checking'}); renderSettings(false);
-    const state=await S.B.checkPhoneRemote(); S.remote=state;
-    if(state.status==='ready'){
-      const applied=typeof S.B.reloadPhone==='function' ? await S.B.reloadPhone() : state;
-      S.remote=applied||state;
-      toast(S.remote.source==='remote'?'远程手机已更新':'远程版本不可用，已保留卡内界面');
-    }else if(state.status==='disabled') toast('远程更新未启用');
-    else toast('远程检查失败，继续使用当前界面');
-    renderSettings(false);
-  }catch(e){ toast('远程检查失败：'+(e&&e.message||e)); renderSettings(false); }
-};
   WN.testApi=async()=>{ try{
     /* 不限 token：推理模型会把小额度全花在思维链上，回复体留空 */
     const r=await S.B.apiCall({...S.cfg.api},[{role:'user',content:'回复"OK"两个字母'}]);
@@ -4715,10 +4677,10 @@ setTimeout(()=>{ if(S.B) return;
     apiCall:async()=>{ throw new Error('演示模式无独立API'); },
     apiModels:async()=>{ throw new Error('演示模式无独立API'); },
     scanSms:async()=>[],
-    getPhoneRemoteState:async()=>({url:'',source:'embedded',version:'0.30.4',status:'disabled',candidateVersion:'',checkedAt:0,error:''}),
+    getPhoneRemoteState:async()=>({url:'',source:'embedded',version:'0.30.5',status:'disabled',candidateVersion:'',checkedAt:0,error:''}),
     setPhoneRemoteManifest:async()=>{ throw new Error('演示模式不支持远程更新'); },
-    checkPhoneRemote:async()=>({url:'',source:'embedded',version:'0.30.4',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:''}),
-    reloadPhone:async()=>({url:'',source:'embedded',version:'0.30.4',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:''}),
+    checkPhoneRemote:async()=>({url:'',source:'embedded',version:'0.30.5',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:''}),
+    reloadPhone:async()=>({url:'',source:'embedded',version:'0.30.5',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:''}),
     onUpdate:()=>{}, setOrbBadge:()=>{}, notify:()=>{},
     diag:()=>({th:false,mvu:false,ejs:false,worldbook:true}),
     /* 演示桥：只停在内存，让设置页的入口/复位开关也能看到效果 */
