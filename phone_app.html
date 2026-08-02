@@ -125,16 +125,31 @@
   .sect{padding:12px 16px 4px;font-size:11.5px;font-weight:600;letter-spacing:0;color:var(--muted)}
 
   /* ── 说明书 ── */
-  .guide-intro{padding:16px;color:var(--ink2);font-size:13px;line-height:1.75;border-bottom:1px solid var(--hair)}
-  .guide-list{padding:0 16px 18px}
-  .guide-sec{border-bottom:1px solid var(--hair)}
-  .guide-sec>summary{display:flex;align-items:center;min-height:48px;cursor:pointer;list-style:none;
-    color:var(--ink);font-size:14px;font-weight:700}
+  .guide-hero{margin:12px 12px 9px;padding:17px 16px 15px;border-radius:18px;
+    background:linear-gradient(145deg,color-mix(in srgb,var(--fav) 16%,var(--card)) 0,var(--card) 52%,color-mix(in srgb,var(--int) 11%,var(--card)) 100%);
+    box-shadow:var(--shadow),inset 0 0 0 1px var(--ring)}
+  .guide-hero .eyebrow{display:block;color:var(--fav);font-size:9.5px;font-weight:750;letter-spacing:.12em}
+  .guide-hero h2{margin:4px 0 4px;font-size:18px;line-height:1.35;letter-spacing:0}
+  .guide-hero p{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.65}
+  .guide-quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:13px}
+  .guide-quick span{min-width:0;padding:8px 6px;border-radius:11px;background:color-mix(in srgb,var(--screen) 62%,transparent);
+    color:var(--ink2);font-size:10.5px;line-height:1.35;text-align:center;box-shadow:inset 0 0 0 1px var(--ring)}
+  .guide-quick b{display:block;margin-bottom:2px;color:var(--ink);font-size:13px}
+  .guide-tip{margin:0 12px 10px;padding:10px 12px 10px 15px;border-radius:13px;position:relative;
+    background:color-mix(in srgb,var(--lime) 8%,var(--card));color:var(--ink2);font-size:11.5px;line-height:1.6}
+  .guide-tip::before{content:'';position:absolute;left:6px;top:9px;bottom:9px;width:3px;border-radius:2px;background:var(--lime)}
+  .guide-tip b{color:var(--ink);font-weight:700}
+  .guide-list{display:grid;gap:8px;padding:0 12px 18px}
+  .guide-sec{border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+  .guide-sec>summary{display:flex;align-items:center;min-height:50px;padding:0 13px;cursor:pointer;list-style:none;
+    color:var(--ink);font-size:13.5px;font-weight:700}
   .guide-sec>summary::-webkit-details-marker{display:none}
   .guide-sec>summary::after{content:'›';margin-left:auto;color:var(--muted);font-size:19px;font-weight:400;
     transform:rotate(0);transition:transform .16s ease}
   .guide-sec[open]>summary::after{transform:rotate(90deg)}
-  .guide-copy{padding:0 0 14px;color:var(--ink2);font-size:13px;line-height:1.75}
+  .guide-copy{padding:0 13px 14px;color:var(--ink2);font-size:12.5px;line-height:1.7;
+    border-top:1px solid color-mix(in srgb,var(--hair) 72%,transparent)}
+  .guide-copy::before{content:'';display:block;height:10px}
   .guide-copy p{margin:0 0 8px}
   .guide-copy p:last-child{margin-bottom:0}
   .guide-copy b{color:var(--ink);font-weight:650}
@@ -202,7 +217,7 @@
   .brow.cont{margin-top:-6px}
   .bava{width:40px;height:40px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);flex:none;
     display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;
-    align-self:flex-end;overflow:hidden}
+    align-self:flex-start;overflow:hidden}
   .bava img{width:100%;height:100%;object-fit:cover;display:block}
   .brow.cont .bava{visibility:hidden}
   .bcol{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -325,24 +340,11 @@
   #viewer .vnav{display:flex;justify-content:space-between;padding:10px 14px;color:#ccc}
   #viewer .vnav button{min-width:70px;min-height:40px;font-size:13px;color:#eee}
 
-  /* ── 备忘录/手账 ── */
-  .pact{margin:8px 14px;padding:12px 14px;border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
-  .pact .r1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .pact .nm{font-weight:700}
+  /* ── 手账 ── */
   .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
   .badge i{width:7px;height:7px;border-radius:50%;flex:none}
   .b-good i{background:var(--good)} .b-warn i{background:var(--warn)} .b-crit i{background:var(--crit)}
   .b-mut i{background:var(--muted)}
-  .pact .who,.pact .bd{font-size:12px;color:var(--ink2);margin-top:3px}
-  .pact.done{opacity:.55}
-  .m4{margin:2px 14px 12px;padding:12px 14px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);
-    display:grid;gap:8px;font-size:13px}
-  .m4 div{display:grid;grid-template-columns:58px 1fr;gap:8px}
-  .m4 em{font-style:normal;color:var(--muted);font-size:11px;padding-top:2px}
-  .m4 span{color:var(--ink2)}
-  .arcline{padding:14px 16px 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .arcline .arc{font-weight:700;font-size:16px;font-family:var(--font-ui)}
-  .pat{padding:2px 16px 4px;font-size:13px;color:var(--ink2)}
 
   /* ── 校园圈 ── */
   .ftabs{display:flex;border-bottom:1px solid var(--hair);background:var(--surface)}
@@ -396,6 +398,24 @@
   #vedit .row .go{background:var(--fav);color:#fff}
   #vedit .row .clear{color:var(--crit);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--crit) 38%,var(--hair))}
   #vedit .row button[disabled]{opacity:.5}
+  #pactsheet{position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;align-items:flex-end;z-index:71}
+  #pactsheet.on{display:flex}
+  #pactsheet .pane{width:100%;max-height:min(88%,610px);overflow-y:auto;background:var(--surface);
+    border-radius:20px 20px 0 0;box-shadow:0 -10px 36px rgba(0,0,0,.34);padding:15px 14px 14px}
+  #pactsheet .ph{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  #pactsheet .ph b{font-size:15px;flex:1;min-width:0}
+  #pactsheet .ph button{width:40px;height:40px;border-radius:50%;font-size:18px;color:var(--muted)}
+  #pactsheet label{display:block;margin:9px 1px 5px;font-size:11px;color:var(--muted)}
+  #pactsheet input,#pactsheet select,#pactsheet textarea{width:100%;border:0;border-radius:12px;background:var(--card2);
+    color:var(--ink);padding:9px 12px;font:13.5px var(--font-ui);outline:none;box-shadow:inset 0 0 0 1px var(--hair)}
+  #pactsheet input,#pactsheet select{min-height:42px}
+  #pactsheet textarea{min-height:78px;max-height:180px;resize:vertical}
+  #pactsheet .grid2{display:grid;grid-template-columns:minmax(0,1fr) 104px;gap:9px}
+  #pactsheet .err{min-height:18px;margin:6px 1px 0;color:var(--crit);font-size:11.5px}
+  #pactsheet .row{display:flex;gap:8px;margin-top:5px}
+  #pactsheet .row button{flex:1;min-height:42px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:13px}
+  #pactsheet .row .go{background:var(--fav);color:#fff}
+  #pactsheet .row button[disabled]{opacity:.5}
   .var-danger{display:none;min-height:34px;padding:0 11px;border-radius:10px;color:var(--crit);
     background:color-mix(in srgb,var(--crit) 8%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--crit) 34%,var(--hair));
     font-size:11.5px;font-weight:650;white-space:nowrap}
@@ -410,11 +430,20 @@
   .srow:last-child::after{display:none}
   .srow .t{flex:1}
   .srow .t small{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:2px}
+  .set-action{flex:none;min-height:34px;padding:0 11px;border-radius:10px;background:var(--card);
+    color:var(--ink2);box-shadow:var(--shadow);font-size:11.5px;white-space:nowrap}
+  .set-action[disabled]{opacity:.5;cursor:default}
   .sw{width:40px;height:24px;border-radius:13px;background:var(--press);position:relative;flex:none;
     box-shadow:inset 0 0 0 1px var(--hair)}
   .sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;
     background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:.15s}
   .sw.on{background:var(--lime);box-shadow:none} .sw.on::after{left:19px}
+  .lang-seg{display:inline-flex;flex:none;padding:2px;border-radius:10px;background:var(--card2);
+    box-shadow:inset 0 0 0 1px var(--hair)}
+  .lang-seg button{min-height:30px;padding:0 9px;border-radius:8px;color:var(--muted);font-size:11.5px;
+    white-space:nowrap;transition:background .15s,color .15s}
+  .lang-seg button.on{background:var(--fav);color:#fff;box-shadow:var(--shadow)}
+  .lang-seg button[disabled]{opacity:.48;cursor:default}
   .srow input[type=text],.srow input[type=password]{width:100%;min-height:36px;border:0;
     border-radius:10px;background:var(--card2);color:var(--ink);padding:0 12px;font:13.5px var(--font-ui);
     outline:none;box-shadow:inset 0 0 0 1px var(--hair)}
@@ -482,17 +511,6 @@
   .mini2 b{display:block;height:3px;border-radius:2px;background:var(--press);overflow:hidden}
   .mini2 i{display:block;height:100%;border-radius:2px}
 
-  /* ── 备忘录：状态色轨、期限右置与已了结折叠 ── */
-  .pact{position:relative;padding-left:18px}
-  .pact::before{content:'';position:absolute;left:8px;top:14px;bottom:14px;width:3px;
-    border-radius:2px;background:var(--muted);opacity:.8}
-  .pact.s-crit::before{background:var(--crit)} .pact.s-good::before{background:var(--good)}
-  .pact.s-warn::before{background:var(--warn)} .pact.s-mut::before{background:var(--muted)}
-  .pact .r1 .dl{margin-left:auto}
-  .pact .r1 .dl.hot{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
-  .pact .who em{font-style:normal;color:var(--muted);font-size:11px;margin-right:5px}
-  .pact.done{background:var(--card2);box-shadow:none}
-  .pact.done::before{opacity:.35}
   .fold{margin:0 0 10px}
   .fold summary{list-style:none;cursor:pointer;padding:12px 16px 4px;font-size:11.5px;font-weight:600;
     letter-spacing:0;color:var(--muted);display:flex;gap:7px;align-items:center;user-select:none}
@@ -501,49 +519,67 @@
   .fold[open] summary::before{transform:rotate(90deg)}
   .fold summary .c{font-size:11px}
   /* ── 日程 ── */
-  .sched-calendar{margin:10px 10px 8px;padding:10px 8px 9px;border-radius:16px;background:var(--card);
-    box-shadow:var(--shadow);overflow:hidden}
-  .sched-cal-head{display:flex;align-items:center;gap:7px;padding:0 0 8px}
-  .sched-cal-head .nav{width:38px;height:38px;flex:none;border-radius:50%;font-size:19px;color:var(--ink2)}
+  .sched-calendar{margin:10px 10px 8px;padding:11px 9px 10px;border-radius:18px;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--card) 92%,var(--int) 8%) 0,var(--card) 52%);
+    box-shadow:var(--shadow),inset 0 0 0 1px var(--ring);overflow:hidden}
+  .sched-cal-head{display:flex;align-items:center;gap:7px;padding:0 1px 9px}
+  .sched-cal-head .nav{width:36px;height:36px;flex:none;border-radius:50%;font-size:19px;color:var(--ink2);
+    background:color-mix(in srgb,var(--card2) 82%,transparent);box-shadow:inset 0 0 0 1px var(--ring)}
   .sched-cal-head .nav:active,.sched-cal-foot button:active{background:var(--press)}
-  .sched-cal-head .mid{flex:1;min-width:0;text-align:center;display:grid;gap:1px}
-  .sched-cal-head .month{font-size:15px;font-weight:700;color:var(--ink)}
+  .sched-cal-head .mid{flex:1;min-width:0;text-align:center;display:grid;gap:2px}
+  .sched-cal-head .month{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:0}
   .sched-cal-head .context{font-size:9.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .sched-weekdays,.sched-days,.sched-events{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
-  .sched-weekdays{padding:0 0 5px;text-align:center;font-size:9.5px;color:var(--muted)}
-  .sched-weekdays span:first-child{color:var(--crit)}
+  .sched-weekdays{padding:0 2px 6px;text-align:center;font-size:10px;letter-spacing:0;color:var(--muted)}
+  .sched-weekdays span:first-child{color:color-mix(in srgb,var(--crit) 78%,var(--ink))}
   .sched-weekdays span:last-child{color:color-mix(in srgb,var(--trust) 76%,var(--ink))}
-  .sched-grid{overflow:hidden;border-radius:10px;background:var(--card2)}
-  .sched-week{position:relative;height:74px;border-bottom:1px solid var(--hair)}
+  .sched-grid{overflow:hidden;border-radius:13px;background:var(--card2);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hair) 85%,transparent)}
+  .sched-week{position:relative;height:80px;border-bottom:1px solid color-mix(in srgb,var(--hair) 72%,transparent)}
   .sched-week:last-child{border-bottom:0}
   .sched-days{height:100%}
-  .sched-day{height:100%;min-width:0;padding:6px 4px;text-align:left;color:var(--ink2);font-size:11px;
-    background:color-mix(in srgb,var(--card) 70%,transparent);border-right:1px solid color-mix(in srgb,var(--hair) 66%,transparent)}
+  .sched-day{height:100%;min-width:0;padding:2px 4px 0;text-align:left;color:var(--ink2);
+    display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;
+    background:color-mix(in srgb,var(--card) 62%,transparent);
+    border-right:1px solid color-mix(in srgb,var(--hair) 55%,transparent)}
   .sched-day:last-child{border-right:0}
   .sched-day:active{background:var(--press)}
-  .sched-day.outside{opacity:.3}
-  .sched-day.sunday .n{color:var(--crit)}
-  .sched-day.saturday .n{color:color-mix(in srgb,var(--trust) 76%,var(--ink))}
-  .sched-day.selected{background:color-mix(in srgb,var(--int) 10%,var(--card))}
-  .sched-day.current{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--int) 78%,var(--ink));border-radius:8px}
-  .sched-day.current .n{display:inline-grid;place-items:center;min-width:21px;height:21px;padding:0 5px;
-    border-radius:7px;background:var(--int);color:#fff}
-  .sched-day .n{font-weight:700;font-variant-numeric:tabular-nums}
-  .sched-events{position:absolute;left:0;right:0;top:31px;grid-auto-rows:16px;gap:2px 0;pointer-events:none}
-  .sched-event{z-index:2;height:16px;margin:0 1px;padding:0 4px;border-radius:4px;display:flex;align-items:center;
-    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:16px;font-weight:600;
-    color:var(--ink2);background:color-mix(in srgb,var(--int) 22%,var(--card2))}
-  .sched-event.ongoing,.sched-event.future,.sched-event.open{background:color-mix(in srgb,var(--int) 22%,var(--card2))}
-  .sched-event.soon{background:color-mix(in srgb,var(--warn) 26%,var(--card2));color:color-mix(in srgb,var(--warn) 68%,var(--ink))}
-  .sched-event.today,.sched-event.overdue{background:color-mix(in srgb,var(--crit) 25%,var(--card2));color:color-mix(in srgb,var(--crit) 62%,var(--ink))}
-  .sched-event.done{background:color-mix(in srgb,var(--muted) 16%,var(--card2));color:var(--muted)}
-  .sched-event.cont-left{margin-left:0;border-radius:0 4px 4px 0}
-  .sched-event.cont-right{margin-right:0;border-radius:4px 0 0 4px}
+  .sched-day.outside{opacity:.28}
+  .sched-day.sunday{background:color-mix(in srgb,var(--crit) 5%,color-mix(in srgb,var(--card) 62%,transparent))}
+  .sched-day.saturday{background:color-mix(in srgb,var(--trust) 5%,color-mix(in srgb,var(--card) 62%,transparent))}
+  .sched-day.selected{background:color-mix(in srgb,var(--int) 13%,var(--card))}
+  .sched-day .n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 4px;
+    border-radius:7px;font-size:11.5px;font-weight:700;line-height:20px;font-variant-numeric:tabular-nums}
+  .sched-day.sunday .n,.sched-day.holiday .n{color:color-mix(in srgb,var(--crit) 82%,var(--ink))}
+  .sched-day.saturday .n{color:color-mix(in srgb,var(--trust) 80%,var(--ink))}
+  .sched-day.current .n{background:linear-gradient(180deg,color-mix(in srgb,var(--int) 96%,#fff) 0,var(--int) 100%);
+    color:#fff;box-shadow:0 1px 5px rgba(0,0,0,.32)}
+  .sched-day .hd{display:block;margin:0 1px;font-size:8px;line-height:9px;font-weight:600;letter-spacing:0;
+    color:color-mix(in srgb,var(--crit) 62%,var(--ink2));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sched-events{position:absolute;left:0;right:0;top:33px;grid-auto-rows:15px;gap:3px 0;pointer-events:none}
+  .sched-event{z-index:2;height:15px;margin:0 2px;padding:0 5px;border-radius:5px;display:flex;align-items:center;justify-content:flex-start;text-align:left;
+    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:15px;font-weight:600;
+    letter-spacing:0;--tone:var(--int);color:color-mix(in srgb,var(--tone) 55%,var(--ink));
+    background:linear-gradient(180deg,color-mix(in srgb,var(--tone) 30%,var(--card2)) 0,color-mix(in srgb,var(--tone) 18%,var(--card2)) 100%);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tone) 30%,transparent)}
+  .sched-event.t0{--tone:var(--int)} .sched-event.t1{--tone:var(--fav)} .sched-event.t2{--tone:var(--trust)}
+  .sched-event.t3{--tone:var(--attr)} .sched-event.t4{--tone:var(--lime)}
+  .sched-event.multi{justify-content:center;text-align:center}
+  .sched-event.soon{--tone:var(--warn)}
+  .sched-event.today,.sched-event.overdue{--tone:var(--crit)}
+  .sched-event.done{--tone:var(--muted);color:var(--muted);box-shadow:none;
+    background:color-mix(in srgb,var(--muted) 14%,var(--card2))}
+  .sched-event.cont-left{margin-left:0;border-radius:0 5px 5px 0}
+  .sched-event.cont-right{margin-right:0;border-radius:5px 0 0 5px}
   .sched-event.cont-left.cont-right{border-radius:0}
-  .sched-week-more{position:absolute;right:3px;bottom:2px;font-size:8.5px;color:var(--muted)}
-  .sched-cal-foot{display:flex;align-items:center;gap:8px;padding:9px 2px 0;color:var(--muted);font-size:9.5px}
-  .sched-cal-foot button{min-height:30px;padding:0 8px;border-radius:9px;color:color-mix(in srgb,var(--int) 72%,var(--ink2));font-size:10px}
+  .sched-week-more{position:absolute;right:4px;bottom:3px;font-size:8.5px;color:var(--muted)}
+  .sched-cal-foot{display:flex;align-items:center;gap:8px;padding:10px 2px 0;color:var(--muted);font-size:9.5px}
+  .sched-cal-foot button{min-height:30px;padding:0 10px;border-radius:9px;font-size:10px;
+    color:color-mix(in srgb,var(--int) 78%,var(--ink2));background:color-mix(in srgb,var(--int) 10%,transparent);
+    box-shadow:inset 0 0 0 1px var(--ring)}
   .sched-cal-foot span{margin-left:auto;text-align:right}
+  .sched-add{min-height:34px;padding:0 11px;border-radius:10px;background:color-mix(in srgb,var(--fav) 12%,var(--card));
+    color:var(--fav);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fav) 24%,var(--hair));font-size:11.5px;font-weight:700;white-space:nowrap}
   .sched-invalid{margin:12px 14px 8px;padding:13px 14px;border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
   .sched-invalid b{display:block;margin-bottom:3px}
   .sched-invalid span{font-size:11px;color:var(--muted)}
@@ -551,6 +587,9 @@
   .sched-detail-head .date{font-weight:700;color:var(--ink)}
   .sched-detail-head .note{font-size:10px;color:var(--muted)}
   .sched-detail-head .count{margin-left:auto;padding:2px 7px;border-radius:999px;background:var(--card2);font-size:10px;color:var(--muted)}
+  .sched-holiday{margin:4px 14px 0;padding:7px 11px;border-radius:11px;font-size:11.5px;
+    color:color-mix(in srgb,var(--crit) 66%,var(--ink));background:color-mix(in srgb,var(--crit) 9%,transparent);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--crit) 22%,transparent)}
   .sched-section{padding:10px 16px 3px;color:var(--muted);font-size:11.5px;font-weight:650}
   .sched-item{margin:7px 14px;padding:12px 14px 12px 18px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);position:relative}
   .sched-item::before{content:'';position:absolute;left:8px;top:13px;bottom:13px;width:3px;border-radius:2px;background:var(--muted)}
@@ -562,9 +601,12 @@
   .sched-item.today .dl,.sched-item.overdue .dl{color:var(--crit);font-weight:650}
   .sched-item .bd,.sched-item .who{font-size:12px;color:var(--ink2);margin-top:4px;line-height:1.58}
   .sched-item .who{color:var(--muted);font-size:11.5px}
+  .sched-item .who em{font-style:normal;color:var(--muted);font-size:11px;margin-right:5px}
+  .sched-item .actions{display:none;justify-content:flex-end;margin-top:9px}
+  body.wn-edit-mode .sched-item .actions{display:flex}
   @media(max-width:340px){
     .sched-calendar{margin-left:8px;margin-right:8px;padding-left:6px;padding-right:6px}
-    .sched-week{height:70px}
+    .sched-week{height:78px}
     .sched-day{padding-left:3px;padding-right:3px}
     .sched-event{font-size:8.5px;padding-left:3px;padding-right:3px}
   }
@@ -755,7 +797,8 @@
   @media (pointer: coarse){
     .compose input, .srow input[type=text], .srow input[type=password],
     .apibox select, #gsheet textarea, #msheet textarea, .memota, .ginp,
-    .wb-search, #vedit input, #vedit select, #vedit textarea { font-size:16px }
+    .wb-search, #vedit input, #vedit select, #vedit textarea,
+    #pactsheet input, #pactsheet select, #pactsheet textarea { font-size:16px }
   }
 </style>
 </head>
@@ -822,6 +865,16 @@
   <div class="err" id="ve-error" role="alert"></div>
   <div class="row"><button type="button" class="clear" id="ve-clear" onclick="WN.clearEdit()">清空</button><button type="button" onclick="WN.closeEdit()">取消</button><button class="go" id="ve-save" type="submit">保存</button></div>
 </form></div>
+<div id="pactsheet" aria-hidden="true"><form class="pane" role="dialog" aria-modal="true" aria-labelledby="pact-title" onsubmit="WN.savePromise(event)">
+  <div class="ph"><b id="pact-title">新增约定</b><button type="button" aria-label="关闭" onclick="WN.closePromiseSheet()">×</button></div>
+  <label for="pact-name">约定名称</label><input id="pact-name" type="text" maxlength="40" autocomplete="off" placeholder="例如：周六一起去水族馆">
+  <label for="pact-content">约定内容</label><textarea id="pact-content" maxlength="500" placeholder="写清约好了什么"></textarea>
+  <div class="grid2"><div><label for="pact-who">相关者</label><input id="pact-who" type="text" maxlength="200" autocomplete="off" placeholder="例如：真唯、玲奈子"></div>
+    <div><label for="pact-status">状态</label><select id="pact-status"><option>进行中</option><option>达成</option><option>破弃</option><option>悬置</option></select></div></div>
+  <label for="pact-deadline">期限</label><input id="pact-deadline" type="text" maxlength="80" autocomplete="off" placeholder="日期、时间段，或“待定”">
+  <div class="err" id="pact-error" role="alert"></div>
+  <div class="row"><button type="button" onclick="WN.closePromiseSheet()">取消</button><button class="go" id="pact-save" type="submit">保存约定</button></div>
+</form></div>
 <input type="file" id="wallpick" accept="image/*" style="display:none">
 <input type="file" id="chatpick" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
 <input type="file" id="momentpick" accept="image/jpeg,image/png,image/webp,image/gif" multiple style="display:none">
@@ -829,7 +882,7 @@
 <script>
 "use strict";
 /* =========================================================================
- * 恋人不行 · 悬浮手机 App 本体  v0.30.5
+ * 恋人不行 · 悬浮手机 App 本体  v0.31.0
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -907,6 +960,7 @@ const S = {
   imagePicker:{mode:'',id:'',items:[],selected:[]}, chatOps:{id:'',seq:0},
   momentDraft:[], momentImageBusy:false, momentPostBusy:false,
   wb:{name:'',entries:[],loaded:false,loading:false,error:'',query:'',filter:'all',category:''}, wbBusy:new Set(),
+  dialogueLang:{mode:'',valid:false,loaded:false,loading:false,busy:false,error:'',name:'',entries:[]},
   remote:{url:'',source:'embedded',version:'',status:'disabled',candidateVersion:'',checkedAt:0,error:''},
 };
 const REPLY_WINDOW_MS=5000;
@@ -1413,6 +1467,9 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape' && $id('vedit').classList.contains('on')){
     e.preventDefault(); WN.closeEdit(); return;
   }
+  if(e.key==='Escape' && $id('pactsheet').classList.contains('on')){
+    e.preventDefault(); WN.closePromiseSheet(); return;
+  }
   const edit=e.target.closest && e.target.closest('[data-wn-edit]');
   if(S.editMode && edit && (e.key==='Enter' || e.key===' ')){
     e.preventDefault(); WN.openEdit(edit.dataset.wnEdit,edit); return;
@@ -1432,9 +1489,10 @@ function noteReplyIntentFromEvent(e,kind){
   const el=e.target && e.target.closest && e.target.closest('[data-wn-thread-input]'); if(!el) return;
   const key=keyFromToken(el.dataset.wnThreadInput); if(key!==undefined) noteReplyIntent(key,kind);
 }
-['focusin','pointerdown','beforeinput','input','paste','compositionstart','compositionupdate','compositionend']
+['focusin','focusout','pointerdown','beforeinput','input','paste','compositionstart','compositionupdate','compositionend']
   .forEach(type=>document.addEventListener(type,e=>noteReplyIntentFromEvent(e,type)));
 const EDIT_STATE={desc:null,opener:null,busy:false};
+const PROMISE_STATE={opener:null,busy:false};
 WN.renameRole=function(name,opener){
   if(!S.editMode || !characterOf(name)) return;
   const field=$id('ve-field'); field.textContent='';
@@ -1571,6 +1629,51 @@ WN.clearEdit=async function(){
     $id('ve-error').textContent=String(err&&err.message||err||'清空失败').slice(0,120);
   }
 };
+WN.openPromiseSheet=function(opener){
+  if(!S.B||typeof S.B.insertStatPromise!=='function'){
+    toast('当前手机外壳不支持新增约定，请更新角色卡后再试'); return;
+  }
+  const fields=['pact-name','pact-content','pact-who','pact-deadline'];
+  fields.forEach(id=>{ const input=$id(id); if(input) input.value=''; });
+  $id('pact-status').value='进行中'; $id('pact-error').textContent=''; $id('pact-save').disabled=false;
+  PROMISE_STATE.opener=opener||document.activeElement; PROMISE_STATE.busy=false;
+  const sheet=$id('pactsheet'); sheet.classList.add('on'); sheet.setAttribute('aria-hidden','false');
+  requestAnimationFrame(()=>{ const input=$id('pact-name'); input&&input.focus(); });
+};
+WN.closePromiseSheet=function(restore=true){
+  if(PROMISE_STATE.busy) return;
+  const opener=PROMISE_STATE.opener;
+  $id('pactsheet').classList.remove('on'); $id('pactsheet').setAttribute('aria-hidden','true');
+  PROMISE_STATE.opener=null;
+  if(restore&&opener&&opener.isConnected){ try{ opener.focus(); }catch(_){} }
+};
+WN.savePromise=async function(e){
+  e&&e.preventDefault(); if(PROMISE_STATE.busy) return;
+  const name=String($id('pact-name').value||'').trim();
+  const content=String($id('pact-content').value||'').trim();
+  const related=String($id('pact-who').value||'').trim();
+  const deadline=String($id('pact-deadline').value||'').trim();
+  const status=String($id('pact-status').value||'');
+  const error=$id('pact-error'); error.textContent='';
+  if(!name){ error.textContent='请填写约定名称'; return; }
+  if(!content){ error.textContent='请写明约定内容'; return; }
+  if(/[.\/\[\]~"'\\\x00-\x1F\x7F]/u.test(name)||['__proto__','prototype','constructor'].includes(name)){
+    error.textContent='约定名称含有不允许的字符'; return;
+  }
+  const pacts=get(S.stat,'世界.约定',{});
+  if(obj(pacts)&&own(pacts,name)){ error.textContent='已经存在同名约定，请换一个名称'; return; }
+  if(!['进行中','达成','破弃','悬置'].includes(status)){ error.textContent='请选择有效状态'; return; }
+  PROMISE_STATE.busy=true; $id('pact-save').disabled=true;
+  try{
+    const next=await S.B.insertStatPromise(name,{内容:content,相关者:related,期限:deadline,状态:status});
+    if(obj(next)) S.stat=next; else await refreshStat();
+    PROMISE_STATE.busy=false; WN.closePromiseSheet(false); renderSchedule(false); renderSys();
+    toast('已新增约定 '+name);
+  }catch(err){
+    PROMISE_STATE.busy=false; $id('pact-save').disabled=false;
+    error.textContent=String(err&&err.message||err||'新增失败').slice(0,120);
+  }
+};
 async function applyStatRemoval(path,label,opener,note){
   if(!S.editMode) return;
   if(!S.B.removeStatPath){ toast('当前手机桥不支持变量删除'); return; }
@@ -1595,6 +1698,7 @@ WN.removePromise=function(name,opener){
 };
 document.addEventListener('click',e=>{
   if(e.target===$id('vedit')) WN.closeEdit();
+  if(e.target===$id('pactsheet')) WN.closePromiseSheet();
   if(e.target===$id('qsheet')) WN.closeChatOps();
   if(e.target===$id('ipsheet')) WN.closeImagePicker();
 });
@@ -1714,7 +1818,6 @@ const APPS = [
   {id:'contacts', nm:'通讯录', ic:'<circle cx="12" cy="8" r="3.4"/><path d="M5 19c1.4-3.2 4-4.8 7-4.8s5.6 1.6 7 4.8"/>'},
   {id:'lime', nm:'LIME', ic:'<path d="M4 6h16v10H9l-5 4z"/>', badge:unreadLimeAll},
   {id:'album', nm:'相册', ic:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M5 17l4.5-4.5 3 3L17 11l2.5 2.5"/>'},
-  {id:'memo', nm:'备忘录', ic:'<path d="M7 3h10v18H7z"/><path d="M9.5 8h5M9.5 12h5M9.5 16h3"/>'},
   {id:'journal', nm:'手账', ic:'<path d="M4 18l5-5 3.5 3.5L20 9"/><path d="M15 9h5v5"/>'},
   {id:'schedule', nm:'日程', ic:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 14h3M8 17h6"/>'},
   {id:'campus', nm:'广场', ic:'<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17-2.6-2.4-2.6-14.6 0-17z"/>', badge:unreadCampus},
@@ -1744,7 +1847,7 @@ function renderHome(){
 }
 WN.open = function(app){
   const fn = { contacts:renderContacts, lime:renderLime, album:renderAlbum,
-    memo:renderMemo, journal:renderJournal, schedule:renderSchedule, campus:renderCampus, settings:renderSettings,
+    journal:renderJournal, schedule:renderSchedule, campus:renderCampus, settings:renderSettings,
     worldbook:renderWorldbook, help:renderGuide }[app];
   fn && fn();
 };
@@ -2303,13 +2406,15 @@ function fireReplyWindow(id,batchId){
   p.timer=null;
   if(S.busyThreads.has(id)) return;
   const now=Date.now(), input=replyInput(id);
+  const focused=!!(input && document.activeElement===input);
   const hasDraft=!!(input && String(input.value||'').trim());
   const recentIntent=Number(p.intentAt)>0 && now-Number(p.intentAt)<REPLY_INPUT_GRACE_MS;
   const hard=Number(p.hardDeadline)||now;
-  if(now<hard && (p.composing||hasDraft||recentIntent)){
+  if(now<hard && (p.composing||(focused&&(hasDraft||recentIntent)))){
     p.intentDeadline=Math.min(hard,now+REPLY_INPUT_GRACE_MS);
     scheduleReplyWindow(id,p); return;
   }
+  if(!focused&&!p.composing){ p.intentAt=0; p.intentDeadline=0; }
   const deadline=replyDeadline(p,now);
   if(now<deadline){ scheduleReplyWindow(id,p); return; }
   S.replyTimers.delete(id);
@@ -2332,6 +2437,15 @@ function armReplyWindow(id,batchId,options={}){
 function noteReplyIntent(id,kind){
   const p=S.replyTimers.get(id); if(!p) return;
   const now=Date.now();
+  if(kind==='focusout'){
+    p.composing=false;
+    p.intentAt=0;
+    p.intentDeadline=0;
+    scheduleReplyWindow(id,p);
+    return;
+  }
+  const input=replyInput(id);
+  if(!input || document.activeElement!==input) return;
   if(kind==='compositionstart'||kind==='compositionupdate') p.composing=true;
   if(kind==='compositionend') p.composing=false;
   p.intentAt=now;
@@ -3329,20 +3443,94 @@ function scheduleRowsForDay(rows,key){
   const parts=schedulePartsFromKey(key), index=scheduleDayIndex(parts); if(!Number.isFinite(index)) return [];
   return rows.filter(row=>row.due&&row.due.startIndex<=index&&index<=row.due.endIndex);
 }
+const SCHEDULE_JP_HOLIDAY_CACHE=new Map();
+function scheduleNthMonday(year,month,nth){
+  const first=new Date(Date.UTC(year,month-1,1));
+  return 1+((1-first.getUTCDay()+7)%7)+(nth-1)*7;
+}
+function scheduleEquinoxDay(year,spring){
+  if(year<1980||year>2099) return 0;
+  const base=spring?20.8431:23.2488;
+  return Math.floor(base+0.242194*(year-1980)-Math.floor((year-1980)/4));
+}
+function scheduleJapanHolidays(year){
+  year=Math.trunc(Number(year));
+  if(SCHEDULE_JP_HOLIDAY_CACHE.has(year)) return SCHEDULE_JP_HOLIDAY_CACHE.get(year);
+  const holidays=new Map();
+  SCHEDULE_JP_HOLIDAY_CACHE.set(year,holidays);
+  if(year<2000||year>2099) return holidays;
+  const putParts=(parts,name)=>{ const key=scheduleDateKey(parts); if(key) holidays.set(key,name); };
+  const put=(month,day,name)=>putParts(scheduleBuildParts(year,month,day),name);
+  put(1,1,'元旦');
+  put(1,scheduleNthMonday(year,1,2),'成人节');
+  put(2,11,'建国纪念日');
+  if(year>=2020) put(2,23,'天皇诞辰');
+  else if(year<=2018) put(12,23,'天皇诞辰');
+  put(3,scheduleEquinoxDay(year,true),'春分日');
+  put(4,29,year>=2007?'昭和日':'绿之日');
+  put(5,3,'宪法纪念日');
+  if(year>=2007) put(5,4,'绿之日');
+  put(5,5,'儿童节');
+  if(year===2020) put(7,23,'海之日');
+  else if(year===2021) put(7,22,'海之日');
+  else put(7,year>=2003?scheduleNthMonday(year,7,3):20,'海之日');
+  if(year>=2016){
+    if(year===2020) put(8,10,'山之日');
+    else if(year===2021) put(8,8,'山之日');
+    else put(8,11,'山之日');
+  }
+  put(9,year>=2003?scheduleNthMonday(year,9,3):15,'敬老节');
+  put(9,scheduleEquinoxDay(year,false),'秋分日');
+  if(year===2020) put(7,24,'体育节');
+  else if(year===2021) put(7,23,'体育节');
+  else put(10,scheduleNthMonday(year,10,2),'体育节');
+  put(11,3,'文化节');
+  put(11,23,'劳动感谢节');
+  if(year===2019){
+    put(5,1,'天皇即位日');
+    put(10,22,'即位礼正殿之仪');
+  }
+  for(const key of [...holidays.keys()].sort()){
+    const parts=schedulePartsFromKey(key), middle=scheduleShiftDays(parts,1), after=scheduleShiftDays(parts,2);
+    if(!middle||!after||new Date(Date.UTC(middle.year,middle.month-1,middle.day)).getUTCDay()===0) continue;
+    const middleKey=scheduleDateKey(middle), afterKey=scheduleDateKey(after);
+    if(!holidays.has(middleKey)&&holidays.has(afterKey)) holidays.set(middleKey,'国民假日');
+  }
+  for(const key of [...holidays.keys()].sort()){
+    const parts=schedulePartsFromKey(key);
+    if(!parts||new Date(Date.UTC(parts.year,parts.month-1,parts.day)).getUTCDay()!==0) continue;
+    let next=scheduleShiftDays(parts,1);
+    while(next&&holidays.has(scheduleDateKey(next))) next=scheduleShiftDays(next,1);
+    if(next) holidays.set(scheduleDateKey(next),'振替休日');
+  }
+  return holidays;
+}
+function scheduleHolidayName(parts){
+  return parts?(scheduleJapanHolidays(parts.year).get(scheduleDateKey(parts))||''):'';
+}
+function scheduleEventTone(name){
+  let hash=0;
+  for(const ch of String(name||'')) hash=(hash*31+ch.codePointAt(0))%9973;
+  return `t${hash%5}`;
+}
 function scheduleMonthCells(year,month){
   const first=new Date(Date.UTC(year,month-1,1)), offset=first.getUTCDay();
   const base=new Date(Date.UTC(year,month-1,1-offset));
-  return Array.from({length:42},(_,i)=>{ const d=new Date(base.getTime()+i*86400000); return scheduleBuildParts(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()); });
+  const weeks=Math.ceil((offset+scheduleDaysInMonth(year,month))/7);
+  return Array.from({length:weeks*7},(_,i)=>{ const d=new Date(base.getTime()+i*86400000); return scheduleBuildParts(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()); });
 }
 function scheduleWeekHtml(cells,weekIndex,rows,todayKey,selectedKey){
   const week=cells.slice(weekIndex*7,weekIndex*7+7), weekStart=scheduleDayIndex(week[0]), weekEnd=scheduleDayIndex(week[6]);
   const dayHtml=week.map((parts,col)=>{
-    const key=scheduleDateKey(parts), outside=parts.month!==SCHEDULE_VIEW.month, dayRows=scheduleRowsForDay(rows,key), classes=['sched-day'];
+    const key=scheduleDateKey(parts), outside=parts.month!==SCHEDULE_VIEW.month, holiday=scheduleHolidayName(parts);
+    const dayRows=scheduleRowsForDay(rows,key), classes=['sched-day'];
     if(outside) classes.push('outside'); if(col===0) classes.push('sunday'); if(col===6) classes.push('saturday');
+    if(holiday) classes.push('holiday');
     if(key===todayKey) classes.push('current'); if(key===selectedKey) classes.push('selected');
     const names=dayRows.slice(0,3).map(row=>row.name).join('、');
-    const aria=`${parts.year}年${parts.month}月${parts.day}日${names?'，'+names:''}`;
-    return `<button type="button" class="${classes.join(' ')}" aria-label="${esc(aria)}" onclick="WN.scheduleSelect('${key}')"><span class="n num">${parts.day}</span></button>`;
+    const aria=`${parts.year}年${parts.month}月${parts.day}日${holiday?'，'+holiday:''}${names?'，'+names:''}`;
+    const holidayHtml=holiday?`<span class="hd" title="${esc(holiday)}">${esc(holiday)}</span>`:'';
+    return `<button type="button" class="${classes.join(' ')}" aria-label="${esc(aria)}" onclick="WN.scheduleSelect('${key}')"><span class="n num">${parts.day}</span>${holidayHtml}</button>`;
   }).join('');
   const candidates=rows.filter(row=>row.due&&row.due.startIndex<=weekEnd&&row.due.endIndex>=weekStart)
     .map(row=>({row,start:Math.max(row.due.startIndex,weekStart),end:Math.min(row.due.endIndex,weekEnd)}))
@@ -3355,7 +3543,8 @@ function scheduleWeekHtml(cells,weekIndex,rows,todayKey,selectedKey){
   }
   const eventHtml=visible.map(item=>{
     const row=item.row, left=item.start-weekStart+1, right=item.end-weekStart+2;
-    const classes=['sched-event',row.state];
+    const classes=['sched-event',scheduleEventTone(row.name),row.state];
+    if(row.due.startIndex!==row.due.endIndex) classes.push('multi');
     if(row.due.startIndex<weekStart) classes.push('cont-left'); if(row.due.endIndex>weekEnd) classes.push('cont-right');
     return `<span class="${classes.join(' ')}" style="grid-column:${left}/${right};grid-row:${item.lane+1}" aria-hidden="true">${esc(row.name)}</span>`;
   }).join('');
@@ -3388,10 +3577,16 @@ WN.scheduleSelect=function(key){
   renderSchedule(false);
 };
 function scheduleRowHtml(row){
-  const p=row.p||{}, deadline=String(p.期限||'无'), dueText=row.due?(row.due.label+(row.due.time?' · '+row.due.time:'')):deadline;
+  const p=row.p||{}, n=row.name, deadline=String(p.期限||'无');
+  const dueText=row.due?(row.due.label+(row.due.time?' · '+row.due.time:'')):deadline;
+  const statusEdit={choices:['进行中','达成','破弃','悬置'],clearLabel:'恢复默认',clearHint:'约定状态将恢复为“悬置”，约定本身不会删除。'};
   return `<article class="sched-item ${row.state}">
-    <div class="r1"><span class="nm">${esc(row.name)}</span><span class="chip">${esc(row.label)}</span><span class="dl">${esc(dueText)}</span></div>
-    <div class="bd">${esc(p.内容||'—')}</div><div class="who">相关者：${esc(p.相关者||'—')}</div>
+    <div class="r1"><span class="nm">${esc(n)}</span>
+      <span class="chip wn-edit" ${editData(['世界','约定',n,'状态'],n+' · 状态','text',statusEdit)}>${esc(row.label)}</span>
+      <span class="dl wn-edit" ${editData(['世界','约定',n,'期限'],n+' · 期限','text',{maxLen:80})}>${esc(dueText)}</span></div>
+    <div class="bd wn-edit" ${editData(['世界','约定',n,'内容'],n+' · 内容','text',{long:true,maxLen:500})}>${esc(p.内容||'—')}</div>
+    <div class="who"><em>相关者</em><span class="wn-edit" ${editData(['世界','约定',n,'相关者'],n+' · 相关者','text',{long:true,maxLen:200})}>${esc(p.相关者||'—')}</span></div>
+    <div class="actions"><button class="var-danger" type="button" aria-label="删除约定${esc(n)}" ${keyAttrs('stat-remove-pact',n)}>删除约定</button></div>
   </article>`;
 }
 function scheduleCalendarHtml(world,rows,now){
@@ -3404,14 +3599,16 @@ function scheduleCalendarHtml(world,rows,now){
     <div class="mid"><span class="month">${SCHEDULE_VIEW.year}年${SCHEDULE_VIEW.month}月</span><span class="context">${esc(context)}</span></div>
     <button type="button" class="nav" aria-label="下个月" onclick="WN.scheduleShift(1)">›</button>
   </div><div class="sched-weekdays" aria-hidden="true"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
-  <div class="sched-grid">${Array.from({length:6},(_,i)=>scheduleWeekHtml(cells,i,monthRows,SCHEDULE_VIEW.today,SCHEDULE_VIEW.selected)).join('')}</div>
+  <div class="sched-grid">${Array.from({length:cells.length/7},(_,i)=>scheduleWeekHtml(cells,i,monthRows,SCHEDULE_VIEW.today,SCHEDULE_VIEW.selected)).join('')}</div>
   <div class="sched-cal-foot"><button type="button" onclick="WN.scheduleToday()">回到剧情今天</button><span>${monthRows.length} 个有安排的约定</span></div></div>`;
 }
 function scheduleDetailHtml(rows,key,now){
   const parts=schedulePartsFromKey(key), picked=scheduleRowsForDay(rows,key), index=scheduleDayIndex(parts), weekdays=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
   const title=parts?`${parts.month}月${parts.day}日 · ${weekdays[new Date(Date.UTC(parts.year,parts.month-1,parts.day)).getUTCDay()]}`:'日期未明';
-  const note=key===scheduleDateKey(now)?'当前剧情日期':'查看当天安排';
-  return `<div class="sched-detail-head"><span class="date">${esc(title)}</span><span class="note">${note}</span><span class="count">${picked.length} 项</span></div>
+  const note=key===scheduleDateKey(now)?'<span class="note">当前剧情日期</span>':'';
+  const holiday=scheduleHolidayName(parts), holidayText=holiday?`${key===scheduleDateKey(now)?'今天':'这一天'}是${holiday}（日本法定假日）`:'';
+  return `<div class="sched-detail-head"><span class="date">${esc(title)}</span>${note}<span class="count">${picked.length} 项</span></div>
+    ${holidayText?`<div class="sched-holiday">${esc(holidayText)}</div>`:''}
     ${picked.length?picked.map(scheduleRowHtml).join(''):'<div class="empty">这一天没有已记录的安排。</div>'}`;
 }
 function renderSchedule(navigate=true){
@@ -3424,7 +3621,7 @@ function renderSchedule(navigate=true){
       `<div class="sched-invalid"><b>当前剧情日期无法识别</b><span>请先把世界日期写成“YYYY年MM月DD日”，日程月历才能定位。</span></div>
       ${active.length?'<div class="sched-section">当前事项</div>'+active.map(scheduleRowHtml).join(''):'<div class="empty">当前没有进行中的约定。</div>'}
       ${done.length?`<details class="fold"><summary>已结束事项 <span class="c">${done.length}</span></summary>${done.map(scheduleRowHtml).join('')}</details>`:''}`;
-    el.innerHTML=apphead('日程','月历')+`<div class="body">${body}</div>`;
+    el.innerHTML=apphead('日程','月历','<button type="button" class="sched-add" onclick="WN.openPromiseSheet(this)">＋ 新增约定</button>')+`<div class="body">${body}</div>`;
   });
   if(navigate) WN.go('scr-schedule');
 }
@@ -3451,30 +3648,6 @@ async function syncScheduleReminders(){
     }
   }catch(e){ console.warn('[WN] schedule reminder',e); }
   finally{ scheduleSyncBusy=false; }
-}
-
-/* ---------- 备忘录 ---------- */
-function renderMemo(navigate=true){
-  const pacts=Object.entries(get(S.stat,'世界.约定',{}));
-  const act=pacts.filter(([,p])=>String(p.状态||'')==='进行中');
-  const done=pacts.filter(([,p])=>String(p.状态||'')!=='进行中');
-  const row=([n,p],dim)=>{
-    p=obj(p)?p:{};
-    const sc={进行中:'s-crit',达成:'s-good',破弃:'s-mut',悬置:'s-warn'}[p.状态]||'s-mut';
-    return `<div class="pact ${sc}${dim?' done':''}">
-    <div class="r1"><span class="nm">${esc(n)}</span>
-      <span class="badge wn-edit ${({进行中:'b-crit',达成:'b-good',破弃:'b-mut',悬置:'b-warn'})[p.状态]||'b-mut'}" ${editData(['世界','约定',n,'状态'],n+' · 状态','text',{choices:['进行中','达成','破弃','悬置'],clearLabel:'恢复默认',clearHint:'约定状态将恢复为“悬置”，约定本身不会删除。'})}><i></i>${esc(p.状态||'—')}</span>
-      <span class="chip num dl wn-edit${dim?'':' hot'}" ${editData(['世界','约定',n,'期限'],n+' · 期限','text',{maxLen:80})}>期限 ${esc(p.期限||'无')}</span>
-      <button class="var-danger" type="button" aria-label="删除约定${esc(n)}" ${keyAttrs('stat-remove-pact',n)}>删除约定</button></div>
-    <div class="bd wn-edit" ${editData(['世界','约定',n,'内容'],n+' · 内容','text',{long:true,maxLen:500})}>${esc(p.内容||'—')}</div>
-    <div class="who"><em>相关者</em><span class="wn-edit" ${editData(['世界','约定',n,'相关者'],n+' · 相关者','text',{long:true,maxLen:200})}>${esc(p.相关者||'—')}</span></div></div>`; };
-  ensureScr('scr-memo', el=>{
-    el.innerHTML=apphead('备忘录','约定')+`<div class="body">
-      ${act.length?`<div class="sect">进行中</div>${act.map(p=>row(p,false)).join('')}`:'<div class="empty">当前没有进行中的约定</div>'}
-      ${done.length?`<details class="fold"><summary>已了结<span class="c num">${done.length}</span></summary>${done.map(p=>row(p,true)).join('')}</details>`:''}
-    </div>`;
-  });
-  if(navigate) WN.go('scr-memo');
 }
 
 /* ---------- 手账 ---------- */
@@ -3709,6 +3882,7 @@ const WB_CATEGORIES=['剧情','角色','叙事与世界规则','变量与系统'
 const WB_PROTECTED=new Set([
   '[InitVar]','[相册清单]','[手机协议]','[通讯摘要]','变量列表',
   '[mvu_update]变量更新规则','[mvu_update]变量输出格式','[细纲使用说明]',
+  '[mvu_plot]对话输出格式·中文（二选一）','[mvu_plot]对话输出格式·中日双语（二选一）',
 ]);
 function wbCategoryOf(entry){
   const name=String(entry&&entry.name||'');
@@ -3883,42 +4057,43 @@ WN.wbToggle=async function(uid,enable,opener){
 function renderGuide(navigate=true){
   ensureScr('scr-help',el=>{
     el.innerHTML=apphead('说明书','')+`<div class="body">
-      <div class="guide-intro">从主屏选择 App 就能使用。下面只写实际操作；点开标题查看对应说明。</div>
+      <section class="guide-hero">
+        <span class="eyebrow">QUICK GUIDE</span><h2>小手机怎么用</h2>
+        <p>功能都在主屏 App 里。聊天、动态和设置会自动保留，不需要每次重新配置。</p>
+        <div class="guide-quick"><span><b>点开</b>选择 App</span><span><b>修改</b>先点铅笔</span><span><b>返回</b>用底部横条</span></div>
+      </section>
+      <div class="guide-tip"><b>推荐：</b>第一次使用先到设置确认正文语言，并保持“通讯摘要注入”和“自动记忆整理”开启。</div>
       <div class="guide-list">
         <details class="guide-sec" open><summary>打开、关闭与移动</summary><div class="guide-copy">
-          <p>点击未展开的小手机即可打开；酒馆的魔杖菜单里也有“手机”入口。拖动小手机可以自由摆放，靠近屏幕边缘时最多能藏起一半。</p>
-          <p>手机内底部横条用于回到主屏。关闭窗口后，再次打开会停在上次浏览的页面。若拖得找不到了，到<b>设置 → 回到居中位置</b>复位。</p>
-          <p>收到回信、动态评论或广场刷新完成时，手机内外都会出现提醒；点开提醒后会自动消失。</p>
-        </div></details>
-        <details class="guide-sec"><summary>通讯录与变量编辑</summary><div class="guide-copy">
-          <p>通讯录会显示当前正在追踪的角色。点联系人可查看关系、四项关系数值、近况、身体状态和重要经历；已经交换联系方式的人可以直接进入 LIME。</p>
-          <p>需要改错变量时，先点手机顶部的铅笔进入编辑模式，再点带浅色提示的内容修改。编辑面板里的“清空”只恢复该字段的空值或默认值，不会删掉变量结构。</p>
-          <p>编辑模式下，联系人详情可修改角色名或移除整张角色变量，备忘录可删除整条约定；操作前都会再次确认。修改角色名会同步迁移该角色的聊天和备忘，不能覆盖已有同名角色；移除角色不会一并删除已有 LIME 聊天记录或相册资源。改完后再点一次铅笔退出。相册没有变量编辑入口。</p>
+          <p>点未展开的小手机即可打开；酒馆魔杖菜单里也有“手机”。拖动它可以换位置，贴到屏幕边缘时最多能藏起一半。</p>
+          <p>底部横条回主屏，右上角关闭手机。若窗口或小手机被拖远，到<b>设置 → 回到居中位置</b>复位。</p>
+          <p>回信、动态评论、日程提醒和广场刷新完成后都会出现通知，打开对应内容后自动消失。</p>
         </div></details>
         <details class="guide-sec"><summary>LIME 聊天与动态</summary><div class="guide-copy">
-          <p>在私聊或群聊中输入文字后发送。连续发送的内容会等待约 5 秒再一起交给对方回复；对方可以回一条、多条，也可能暂时不回。图片按钮可以从设备或已解锁相册选择图片，并把一张图片加入这一批消息。</p>
-          <p>点单条消息右侧的“···”可以引用它再回复；引用只保留当时看到的简短内容，不会改变关系数值。</p>
-          <p>聊天页右上角的重试按钮会撤掉对应的旧回复，再重新生成。想删某条消息时向右滑，露出红色删除按钮后点击并确认；垃圾桶按钮可删除整个对话及该会话的长期备忘。</p>
-          <p>动态必须带文字，最多可配 9 张图。发出后，角色会按自己看到的内容决定是否评论；动态也可以右滑删除。</p>
+          <p>连续发送的消息会先合并约 5 秒再交给对方；输入框保持选中时会多留最多 30 秒，离开输入框就恢复正常等待。对方可以回一条、多条，也可以暂时不回。</p>
+          <p>图片可从设备或已解锁相册选择。点消息旁“···”可引用；右滑可删单条消息，聊天页垃圾桶会删除整个对话和这段对话的长期备忘。</p>
+          <p>动态必须带文字，最多配 9 张图。角色会根据自己实际看到的内容决定是否评论；动态也可右滑删除。</p>
         </div></details>
-        <details class="guide-sec"><summary>相册、备忘录与手账</summary><div class="guide-copy">
-          <p><b>相册</b>不会提前显示尚未遇见的角色；角色出现后，其分册会显示已解锁图片和未解锁位置。锁定位置会写明解锁方法与当前进度，满足条件后永久解锁；该角色的情感倾向达到 200 时，整册全部解锁。</p>
-          <p>手机打开时会自动检查图床里的最新清单；暂时连不上时会使用上次缓存，再不行则使用卡内备用清单。需要立刻检查新图片时，到<b>设置 → 相册资源</b>点“检查更新”。</p>
-          <p><b>备忘录</b>整理正在进行和已经结束的约定；<b>日程</b>会按剧情日期显示月历，期限写成日期范围时会横跨起止日期，并在临近、当天或逾期时提醒；<b>手账</b>显示当前篇章、剧情偏移和主线推演。相关内容都可在编辑模式下修正。</p>
+        <details class="guide-sec"><summary>通讯录与变量修改</summary><div class="guide-copy">
+          <p>通讯录显示当前追踪的角色。点联系人可看关系、四项数值、近况与重要经历；取得联系方式后可直接进入 LIME。</p>
+          <p>改错内容时，先点顶部铅笔，再点被标出的字段。<b>清空</b>只恢复该字段，<b>删除</b>只用于整张角色变量或整条约定，执行前都会确认。</p>
+          <p>修改角色名会一起迁移该角色的聊天和备忘，但不能覆盖已有同名角色。删除角色变量不会顺带删掉已有聊天或相册资源。</p>
         </div></details>
-        <details class="guide-sec"><summary>广场</summary><div class="guide-copy">
+        <details class="guide-sec"><summary>相册与日程</summary><div class="guide-copy">
+          <p><b>相册</b>会显示已经遇见角色的分册。锁定图片内会直接写解锁条件和当前进度；条件达成后永久解锁，角色情感倾向达到 200 时整册解锁。</p>
+          <p>手机会自动检查相册清单；需要立刻确认新图片时，到<b>设置 → 相册资源</b>点“检查更新”。</p>
+          <p><b>日程</b>按剧情日期显示约定和日本法定假日。点右上角<b>新增约定</b>可填写名称、内容、相关者、期限与状态；点某天查看当天事项。已有约定可在编辑模式下修改或删除。</p>
+        </div></details>
+        <details class="guide-sec"><summary>广场、手账与世界书</summary><div class="guide-copy">
           <p>广场分为论坛和媒体两个标签。下拉页面会直接刷新当前标签；右上角和页面底部的刷新按钮可以先填写这次想看的话题。</p>
-          <p>论坛与媒体中的单条内容都可向右滑删除。刷新会调用一次模型，完成后会出现提醒。</p>
-        </div></details>
-        <details class="guide-sec"><summary>世界书</summary><div class="guide-copy">
-          <p>这里管理当前角色使用的主世界书。可按分类、搜索和开关状态查找条目；点条目可查看正文，列表右侧开关会真实开启或关闭它。</p>
-          <p>关闭普通条目前会要求确认，并会影响所有共用这本世界书的聊天。标为“受保护”的条目只能查看。右上角<b>重读</b>用于重新读取当前开关状态。</p>
+          <p><b>手账</b>查看当前篇章、剧情偏移和主线推演。<b>世界书</b>可查看并真实开关当前主世界书条目；关闭条目会影响所有共用这本世界书的聊天，受保护条目只能查看。</p>
         </div></details>
         <details class="guide-sec"><summary>设置怎么选</summary><div class="guide-copy">
+          <p><b>正文对话语言</b>默认中文；切到中日双语后会同时显示日文原句和中文内容。固定开场白也会跟随这个选择，切换从下一次正文回复起生效。</p>
           <p><b>通讯摘要注入</b>建议开启，让正文记得手机里发生过的往来；<b>自动记忆整理</b>也建议开启，长时间聊天时更不容易忘记旧消息。</p>
-          <p><b>正文预设参考</b>开启后会读取当前正文预设里的通用文风和表达提示，只给手机生成作参考，不会修改正文预设；聊天记录、世界书占位内容和变量规则不会带入。读取失败时手机仍按原有提示词工作。</p>
-          <p><b>手机界面更新</b>会在后台自动检查维护地址并静默应用通过校验的新界面，不需要重新导入角色卡。正在编辑或发送内容时会延后应用；网络不可用时继续使用已验证缓存或卡内界面。</p>
-          <p><b>自动来信与动态</b>会额外生成角色的主动活动，想要更热闹时再开。没有单独的手机接口时，<b>手机专用 API</b>保持关闭即可；若开启，填好地址、密钥和模型后先点测试连接，温度不确定时保持 0.80。</p>
+          <p><b>正文预设参考</b>只让手机参考当前正文预设的通用表达，不会修改预设。<b>自动来信与动态</b>会增加角色主动活动，想要更热闹时再开。</p>
+          <p><b>手机界面更新</b>会在每次正常进入或刷新酒馆页面后静默检查一次，不会反复打扰。想立即确认时点旁边的<b>手动检查</b>；发现新版后会在安全时机应用。</p>
+          <p>没有单独接口时，<b>手机专用 API</b>保持关闭即可；若开启，填好地址、密钥和模型后先测试连接，温度不确定时保持 0.80。</p>
           <p>不想显示悬浮小手机时，开启<b>仅用魔杖菜单打开</b>。清空手机数据会删除聊天、动态、论坛和媒体内容，操作前请确认不再需要；已经解锁的相册图片不会重新上锁。</p>
         </div></details>
       </div></div>`;
@@ -3934,10 +4109,11 @@ function remotePhoneNote(){
   if(r.status==='checking') return '后台检查中…';
   if(r.status==='update-ready' && r.candidateVersion && r.candidateVersion!==r.version) return `发现远程 ${esc(r.candidateVersion)}，将在安全时应用`;
   if(r.source==='remote' && r.status==='ready') return `当前使用远程 ${esc(ver)}`;
-  if(r.source==='cache') return `网络不可用，使用已验证缓存 ${esc(ver)}`;
+  if(r.source==='cache') return `当前使用已验证缓存 ${esc(ver)}`;
+  if(r.source==='embedded' && r.status==='ready') return `卡内界面 ${esc(ver)} 已是最新`;
   if(r.status==='error') return `检查失败，仍使用${r.source==='embedded'?'卡内':'当前'}界面`;
   if(r.status==='fallback') return `远程不可用，使用卡内 ${esc(ver)}`;
-  return '等待后台自动检查';
+  return '等待后台检查';
 }
 function remotePhoneDetails(){
   const r=S.remote||{};
@@ -3947,6 +4123,55 @@ function remotePhoneDetails(){
 async function syncRemotePhoneState(){
   try{ if(S.B && typeof S.B.getPhoneRemoteState==='function') S.remote=await S.B.getPhoneRemoteState(); }
   catch(_){ }
+}
+function paintRemotePhoneControls(){
+  const note=$id('phone-remote-note'), button=$id('phone-remote-btn');
+  if(note) note.innerHTML=remotePhoneNote()+remotePhoneDetails();
+  if(button){
+    const checking=S.remote&&S.remote.status==='checking';
+    button.disabled=checking||!S.B||typeof S.B.checkPhoneRemote!=='function';
+    button.setAttribute('aria-busy',checking?'true':'false');
+    button.textContent=checking?'检查中':'手动检查';
+  }
+}
+function normalizeDialogueLanguageState(data){
+  const mode=data&&['zh','bilingual'].includes(data.mode)?data.mode:'';
+  const entries=Array.isArray(data&&data.entries)?data.entries.filter(obj).map(entry=>({
+    mode:String(entry.mode||''),uid:Number(entry.uid),name:String(entry.name||''),enabled:entry.enabled===true,
+  })):[];
+  return {mode,valid:data&&data.valid===true&&!!mode,loaded:true,loading:false,busy:false,error:'',
+    name:String(data&&data.name||''),entries};
+}
+function dialogueLanguageNote(){
+  const dl=S.dialogueLang;
+  if(!S.B||typeof S.B.getDialogueLanguage!=='function'||typeof S.B.setDialogueLanguage!=='function')
+    return '当前手机外壳不支持切换';
+  if(dl.loading) return '正在读取当前主世界书…';
+  if(dl.error) return dl.error;
+  if(!dl.loaded) return '读取当前主世界书后显示';
+  if(!dl.valid) return '两条格式规则状态异常，选择一种即可修复';
+  return dl.mode==='bilingual'?'当前：日文原句与中文内容':'当前：中文';
+}
+function paintDialogueLanguageControls(){
+  const dl=S.dialogueLang, note=$id('dialogue-lang-note');
+  if(note) note.textContent=dialogueLanguageNote();
+  document.querySelectorAll('[data-dialogue-lang]').forEach(button=>{
+    const mode=button.dataset.dialogueLang;
+    button.classList.toggle('on',dl.valid&&dl.mode===mode);
+    button.disabled=dl.loading||dl.busy||!S.B||typeof S.B.setDialogueLanguage!=='function';
+    button.setAttribute('aria-pressed',String(dl.valid&&dl.mode===mode));
+  });
+}
+async function syncDialogueLanguageState(force=false){
+  const dl=S.dialogueLang;
+  if(dl.loading||(!force&&dl.loaded)) return;
+  if(!S.B||typeof S.B.getDialogueLanguage!=='function'){
+    dl.loaded=true; dl.error='当前手机外壳不支持切换'; paintDialogueLanguageControls(); return;
+  }
+  dl.loading=true; dl.error=''; paintDialogueLanguageControls();
+  try{ S.dialogueLang=normalizeDialogueLanguageState(await S.B.getDialogueLanguage()); }
+  catch(e){ dl.loaded=true; dl.loading=false; dl.valid=false; dl.error='读取失败：'+String(e&&e.message||e||'未知错误').slice(0,100); }
+  paintDialogueLanguageControls();
 }
 function renderSettings(navigate=true){
   const c=S.cfg, api=c.api||{};
@@ -3962,6 +4187,11 @@ function renderSettings(navigate=true){
     el.innerHTML=apphead('设置','')+`<div class="body"><div class="set">
       <div class="srow"><span class="t">深浅主题<small>当前：${c.theme==='light'?'浅色':'深色'}</small></span>
         <button class="sw ${c.theme==='light'?'':'on'}" onclick="WN.set('theme','${c.theme==='light'?'dark':'light'}')"></button></div>
+      <div class="srow"><span class="t">正文对话语言<small id="dialogue-lang-note">${esc(dialogueLanguageNote())}</small></span>
+        <span class="lang-seg" role="group" aria-label="正文对话语言">
+          <button type="button" data-dialogue-lang="zh" onclick="WN.setDialogueLanguage('zh')">中文</button>
+          <button type="button" data-dialogue-lang="bilingual" onclick="WN.setDialogueLanguage('bilingual')">中日双语</button>
+        </span></div>
       <div class="srow"><span class="t">显示内心独白<small>通讯录详情页的"里层声音"</small></span>
         <button class="sw ${c.showMono?'on':''}" onclick="WN.set('showMono',${!c.showMono})"></button></div>
       <div class="srow"><span class="t">自动来信与动态<small>不在场角色主动发 LIME（可多人连发），偶尔有人发动态（每剧情轮≤1次触发，默认关）</small></span>
@@ -4007,7 +4237,8 @@ function renderSettings(navigate=true){
           style="background:var(--card);box-shadow:var(--shadow);border-radius:10px;padding:7px 14px;font-size:12px;color:var(--ink2)"
           onclick="WN.reloadAlbum()">${ALBUM_INFO.loading?'检查中':'检查更新'}</button></div>
       <div class="srow"><span class="t">手机界面更新<small id="phone-remote-note">${remotePhoneNote()}${remotePhoneDetails()}</small></span>
-        <span class="chip acc">后台自动</span></div>
+        <button id="phone-remote-btn" type="button" class="set-action" aria-busy="${S.remote&&S.remote.status==='checking'?'true':'false'}"
+          ${!S.B||typeof S.B.checkPhoneRemote!=='function'?'disabled':''} onclick="WN.checkPhoneUi()">${S.remote&&S.remote.status==='checking'?'检查中':'手动检查'}</button></div>
       ${ui?`<div class="sect">入口与位置</div>
       <div class="srow"><span class="t">仅用魔杖菜单打开<small>${wandOnly?'当前：只保留酒馆魔杖里的「手机」，已隐藏悬浮球':'当前：魔杖菜单与悬浮球并存'}</small></span>
         <button class="sw ${wandOnly?'on':''}" onclick="WN.setEntry('${wandOnly?'both':'wand'}')"></button></div>`:''}
@@ -4021,11 +4252,50 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">恋人不行·乱入卡 手机 v0.30.5</div>
+<div class="empty" style="padding:14px">恋人不行·乱入卡 手机 v0.31.0</div>
     </div></div>`;
   });
+  paintDialogueLanguageControls();
+  if(!S.dialogueLang.loaded&&!S.dialogueLang.loading) setTimeout(()=>syncDialogueLanguageState(),0);
   if(navigate) WN.go('scr-settings');
 }
+WN.setDialogueLanguage=async mode=>{
+  if(!['zh','bilingual'].includes(mode)||S.dialogueLang.busy) return;
+  if(!S.B||typeof S.B.setDialogueLanguage!=='function'){ toast('当前手机外壳不支持切换'); return; }
+  S.dialogueLang.busy=true; S.dialogueLang.error=''; paintDialogueLanguageControls();
+  try{
+    const next=normalizeDialogueLanguageState(await S.B.setDialogueLanguage(mode));
+    S.dialogueLang=next;
+    if(S.wb.loaded){
+      for(const changed of next.entries){
+        const entry=S.wb.entries.find(item=>item.uid===changed.uid||item.name===changed.name);
+        if(entry) entry.enabled=changed.enabled;
+      }
+    }
+    toast(mode==='bilingual'?'已切换为中日双语，下一次正文回复起生效':'已切换为中文，下一次正文回复起生效');
+  }catch(e){
+    S.dialogueLang.busy=false; S.dialogueLang.error='切换失败：'+String(e&&e.message||e||'写入错误').slice(0,100);
+    toast(S.dialogueLang.error);
+  }
+  paintDialogueLanguageControls();
+};
+WN.checkPhoneUi=async()=>{
+  if(!S.B||typeof S.B.checkPhoneRemote!=='function'){ toast('当前手机外壳不支持手动检查'); return; }
+  if(S.remote&&S.remote.status==='checking') return;
+  S.remote={...(obj(S.remote)?S.remote:{}),status:'checking',error:''}; paintRemotePhoneControls();
+  try{
+    const next=await S.B.checkPhoneRemote();
+    if(obj(next)) S.remote=next;
+    if(S.remote.status==='update-ready') toast('发现新版，关闭手机后会自动应用');
+    else if(S.remote.status==='error'||S.remote.status==='fallback') toast('检查失败，仍可继续使用当前界面');
+    else if(S.remote.status==='disabled') toast('自动更新地址不可用，当前使用卡内界面');
+    else toast('手机界面已是最新');
+  }catch(e){
+    S.remote={...(obj(S.remote)?S.remote:{}),status:'error',error:String(e&&e.message||e||'检查失败').slice(0,120)};
+    toast('检查失败，仍可继续使用当前界面');
+  }
+  paintRemotePhoneControls();
+};
 WN.set=(k,v)=>{ S.cfg[k]=v; saveCfg();
   if(k==='digest'){ mutStore(st=>{ st.digestOff = !v; }).catch(()=>{}); } /* EJS 摘要条目读 store 内开关 */
   WN.back(); setTimeout(renderSettings,0); };
@@ -4497,7 +4767,6 @@ async function refreshCurrentViewNow(){
   else if(view==='thread' && key!==undefined && threadOf(key)) renderThread(key,false);
   else if(currentId==='scr-album') await renderAlbum(false);
   else if(view==='folder' && key!==undefined) await WN.folder(key,false);
-  else if(currentId==='scr-memo') renderMemo(false);
   else if(currentId==='scr-journal') renderJournal(false);
   else if(currentId==='scr-schedule') renderSchedule(false);
   else if(currentId==='scr-campus') renderCampus(false);
@@ -4560,6 +4829,7 @@ async function boot(bridge){
   bridge.onUpdate && bridge.onUpdate(async ev=>{
     if(ev && ev.type==='chat'){
       S.wb={name:'',entries:[],loaded:false,loading:false,error:'',query:'',filter:'all',category:''}; S.wbBusy.clear();
+      S.dialogueLang={mode:'',valid:false,loaded:false,loading:false,busy:false,error:'',name:'',entries:[]};
       await refreshStat(); await loadStore(); await syncAlbumUnlocks(); await syncScheduleReminders(); recoverPendingReplies(); await moveSms(); paintNotes(); WN.home(); refreshBadges(); return;
     }
     if(ev && ev.type==='player-turn'){
@@ -4626,7 +4896,17 @@ setTimeout(()=>{ if(S.B) return;
     {uid:1,name:'[人设]真唯·基础档案',enabled:true,content:'演示模式中的角色档案正文。',strategy:'selective',keys:['真唯'],probability:100},
     {uid:2,name:'[剧情细纲]第一章：真唯卷',enabled:true,content:'演示模式中的剧情细纲正文。',strategy:'constant',keys:[],probability:100},
     {uid:3,name:'[手机协议]',enabled:true,content:'演示模式中的受保护条目。',strategy:'constant',keys:[],probability:100},
+    {uid:4,name:'[mvu_plot]对话输出格式·中文（二选一）',enabled:true,content:'演示模式中的中文对话格式。',strategy:'constant',keys:[],probability:100},
+    {uid:5,name:'[mvu_plot]对话输出格式·中日双语（二选一）',enabled:false,content:'演示模式中的中日双语对话格式。',strategy:'constant',keys:[],probability:100},
   ];
+  const demoDialogueLanguage=()=>{
+    const zh=demoWorldbook.find(entry=>entry.uid===4), bilingual=demoWorldbook.find(entry=>entry.uid===5);
+    const valid=!!zh&&!!bilingual&&zh.enabled!==bilingual.enabled;
+    return {name:'演示主世界书',mode:valid?(bilingual.enabled?'bilingual':'zh'):'',valid,
+      entries:[{mode:'zh',...zh},{mode:'bilingual',...bilingual}].map(entry=>({
+        mode:entry.mode,uid:entry.uid,name:entry.name,enabled:entry.enabled,
+      }))};
+  };
   window.WNBoot({
     demo:true,
     getStat:async()=>demoStat,
@@ -4659,6 +4939,15 @@ setTimeout(()=>{ if(S.B) return;
       if(after!==before&&own(roles,after)) throw new Error('已存在同名角色，不能覆盖');
       const renamed={}; Object.entries(roles).forEach(([key,value])=>{ renamed[key===before?after:key]=value; });
       demoStat.角色=renamed; return JSON.parse(JSON.stringify(demoStat)); },
+    insertStatPromise:async(name,record)=>{
+      const key=String(name||'').trim(), promises=demoStat.世界&&demoStat.世界.约定;
+      if(!obj(promises)) throw new Error('约定变量不存在');
+      if(!key||key.length>40) throw new Error('约定名称长度须为 1-40 字');
+      if(own(promises,key)) throw new Error('已经存在同名约定');
+      if(!obj(record)||!String(record.内容||'').trim()) throw new Error('约定内容不能为空');
+      promises[key]={内容:String(record.内容).trim(),相关者:String(record.相关者||'').trim(),
+        期限:String(record.期限||'').trim(),状态:['进行中','达成','破弃','悬置'].includes(record.状态)?record.状态:'进行中'};
+      return JSON.parse(JSON.stringify(demoStat)); },
     getPhoneStore:async()=>demoStore,
     setPhoneStore:async st=>{demoStore=st;},
     getWorldEntry:async()=>JSON.stringify(cg),
@@ -4669,6 +4958,13 @@ setTimeout(()=>{ if(S.B) return;
       demoWorldbook=demoWorldbook.map(entry=>entry.uid===Number(uid)?{...entry,enabled:enabled===true}:entry);
       return {name:'演示主世界书',entries:demoWorldbook.map(entry=>({...entry}))};
     },
+    getDialogueLanguage:async()=>demoDialogueLanguage(),
+    setDialogueLanguage:async mode=>{
+      if(!['zh','bilingual'].includes(mode)) throw new Error('正文对话语言模式无效');
+      demoWorldbook=demoWorldbook.map(entry=>entry.uid===4?{...entry,enabled:mode==='zh'}:
+        entry.uid===5?{...entry,enabled:mode==='bilingual'}:entry);
+      return demoDialogueLanguage();
+    },
     putMedia:async(id,blob)=>{demoMedia.set(id,blob);return true;},
     getMedia:async id=>demoMedia.get(id)||null,
     deleteMedia:async id=>{demoMedia.delete(id);return true;},
@@ -4677,10 +4973,10 @@ setTimeout(()=>{ if(S.B) return;
     apiCall:async()=>{ throw new Error('演示模式无独立API'); },
     apiModels:async()=>{ throw new Error('演示模式无独立API'); },
     scanSms:async()=>[],
-    getPhoneRemoteState:async()=>({url:'',source:'embedded',version:'0.30.5',status:'disabled',candidateVersion:'',checkedAt:0,error:''}),
+    getPhoneRemoteState:async()=>({url:'',source:'embedded',version:'0.31.0',status:'disabled',candidateVersion:'',checkedAt:0,error:'',checkMode:'page'}),
     setPhoneRemoteManifest:async()=>{ throw new Error('演示模式不支持远程更新'); },
-    checkPhoneRemote:async()=>({url:'',source:'embedded',version:'0.30.5',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:''}),
-    reloadPhone:async()=>({url:'',source:'embedded',version:'0.30.5',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:''}),
+    checkPhoneRemote:async()=>({url:'',source:'embedded',version:'0.31.0',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
+    reloadPhone:async()=>({url:'',source:'embedded',version:'0.31.0',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
     onUpdate:()=>{}, setOrbBadge:()=>{}, notify:()=>{},
     diag:()=>({th:false,mvu:false,ejs:false,worldbook:true}),
     /* 演示桥：只停在内存，让设置页的入口/复位开关也能看到效果 */
