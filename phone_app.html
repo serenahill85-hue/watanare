@@ -882,7 +882,7 @@
 <script>
 "use strict";
 /* =========================================================================
- * 恋人不行 · 悬浮手机 App 本体  v0.31.0
+ * 恋人不行 · 悬浮手机 App 本体  v0.31.1
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -1374,6 +1374,34 @@ const WN = window.WN = {};
 WN.pickAva = pickAva; WN.resetAva = resetAva;
 const SWIPE={active:null,open:null};
 const SWIPE_W=76;
+let focusedThreadScrollRevision=0;
+function focusedThreadScroller(){
+  const input=document.activeElement && document.activeElement.closest
+    ? document.activeElement.closest('[data-wn-thread-input]') : null;
+  if(!input || input.disabled) return null;
+  const screen=input.closest('.scr');
+  if(!screen || !screen.classList.contains('on')) return null;
+  const token=input.dataset.wnThreadInput||'';
+  return $id('bubs-'+token);
+}
+function settleFocusedThread(){
+  const box=focusedThreadScroller();
+  if(!box) return false;
+  box.scrollTop=box.scrollHeight;
+  return true;
+}
+function scheduleFocusedThreadSettle(){
+  const revision=++focusedThreadScrollRevision;
+  const run=()=>{ if(revision===focusedThreadScrollRevision) settleFocusedThread(); };
+  requestAnimationFrame(()=>{ run(); requestAnimationFrame(run); });
+  [70,180,360,560].forEach(delay=>setTimeout(run,delay));
+}
+window.WNViewportChanged=scheduleFocusedThreadSettle;
+window.addEventListener('resize',scheduleFocusedThreadSettle,{passive:true});
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',scheduleFocusedThreadSettle,{passive:true});
+  window.visualViewport.addEventListener('scroll',scheduleFocusedThreadSettle,{passive:true});
+}
 function setSwipeOpen(row,on){
   if(!row) return;
   if(on && SWIPE.open && SWIPE.open!==row) SWIPE.open.classList.remove('open');
@@ -1488,6 +1516,7 @@ document.addEventListener('keydown',e=>{
 function noteReplyIntentFromEvent(e,kind){
   const el=e.target && e.target.closest && e.target.closest('[data-wn-thread-input]'); if(!el) return;
   const key=keyFromToken(el.dataset.wnThreadInput); if(key!==undefined) noteReplyIntent(key,kind);
+  if(kind==='focusin') scheduleFocusedThreadSettle();
 }
 ['focusin','focusout','pointerdown','beforeinput','input','paste','compositionstart','compositionupdate','compositionend']
   .forEach(type=>document.addEventListener(type,e=>noteReplyIntentFromEvent(e,type)));
@@ -4253,7 +4282,7 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">恋人不行·乱入卡 手机 v0.31.0</div>
+<div class="empty" style="padding:14px">恋人不行·乱入卡 手机 v0.31.1</div>
     </div></div>`;
   });
   paintDialogueLanguageControls();
@@ -4974,10 +5003,10 @@ setTimeout(()=>{ if(S.B) return;
     apiCall:async()=>{ throw new Error('演示模式无独立API'); },
     apiModels:async()=>{ throw new Error('演示模式无独立API'); },
     scanSms:async()=>[],
-    getPhoneRemoteState:async()=>({url:'',source:'embedded',version:'0.31.0',status:'disabled',candidateVersion:'',checkedAt:0,error:'',checkMode:'page'}),
+    getPhoneRemoteState:async()=>({url:'',source:'embedded',version:'0.31.1',status:'disabled',candidateVersion:'',checkedAt:0,error:'',checkMode:'page'}),
     setPhoneRemoteManifest:async()=>{ throw new Error('演示模式不支持远程更新'); },
-    checkPhoneRemote:async()=>({url:'',source:'embedded',version:'0.31.0',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
-    reloadPhone:async()=>({url:'',source:'embedded',version:'0.31.0',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
+    checkPhoneRemote:async()=>({url:'',source:'embedded',version:'0.31.1',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
+    reloadPhone:async()=>({url:'',source:'embedded',version:'0.31.1',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
     onUpdate:()=>{}, setOrbBadge:()=>{}, notify:()=>{},
     diag:()=>({th:false,mvu:false,ejs:false,worldbook:true}),
     /* 演示桥：只停在内存，让设置页的入口/复位开关也能看到效果 */
