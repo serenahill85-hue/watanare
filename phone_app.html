@@ -111,6 +111,8 @@
     display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex:none;overflow:hidden}
   .ava img{width:100%;height:100%;object-fit:cover;display:block}
   .ava-xl{width:72px;height:72px;font-size:26px}
+  .avatar-setting-preview{width:44px;height:44px;border-radius:50%;flex:none;display:block}
+  .avatar-setting-preview .ava{box-shadow:var(--shadow);outline:1px solid var(--hair)}
   .li .mid{flex:1;min-width:0}
   .li .nm{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;row-gap:2px}
   .li .sub{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
@@ -876,13 +878,14 @@
   <div class="row"><button type="button" onclick="WN.closePromiseSheet()">取消</button><button class="go" id="pact-save" type="submit">保存约定</button></div>
 </form></div>
 <input type="file" id="wallpick" accept="image/*" style="display:none">
+<input type="file" id="uavapick" accept="image/*" style="display:none">
 <input type="file" id="chatpick" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
 <input type="file" id="momentpick" accept="image/jpeg,image/png,image/webp,image/gif" multiple style="display:none">
 
 <script>
 "use strict";
 /* =========================================================================
- * 恋人不行 · 悬浮手机 App 本体  v0.31.1
+ * 恋人不行 · 悬浮手机 App 本体  v0.31.3
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -953,7 +956,7 @@ function fixedSchoolBoard(value){
 /* ---------- 全局状态 ---------- */
 const S = {
   B:null, demo:false,
-  stat:{}, store:null, ava:{}, modelList:null,
+  stat:{}, store:null, ava:{}, userAvatar:'', modelList:null,
   cfg:{ theme:'dark', showMono:true, autoMsg:false, digest:true, memoOn:true, presetRef:false, api:{on:false,base:'',key:'',model:'',temp:0.8} },
   stack:['scr-home'], seq:0, busyThreads:new Set(), pendingAuto:null, editMode:false,
   replyTimers:new Map(), mediaUrls:new Map(), imageTarget:null, quoteDraft:null,
@@ -1056,41 +1059,74 @@ function avaHtml(name, xl){
     return `<span class="${cls}"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(u)}" alt=""></span>`;
   return `<span class="${cls}">${esc(String(name||'?')[0])}</span>`;
 }
-/* user 头像（本机存储，用于名片与动态） */
+/* user 头像（本机存储，用于名片、动态与正文对话层） */
 const UAVA_KEY='wn:uava';
+const UAVA_MAX_CHARS=360000;
+function validUserAva(value){
+  const u=String(value||'');
+  return u.length>0 && u.length<=UAVA_MAX_CHARS
+    && /^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/i.test(u) ? u : '';
+}
+function localUserAva(){
+  try{ return validUserAva(localStorage.getItem(UAVA_KEY)||''); }catch(_){ return ''; }
+}
+function currentUserAva(){ return validUserAva(S.userAvatar)||localUserAva(); }
 function userAvaHtml(cls){
-  let u=''; try{ u=localStorage.getItem(UAVA_KEY)||''; }catch(_){}
+  const u=currentUserAva();
   const ch=esc(String((S.stat.user||{}).称呼||'我')[0]);
-  if(u && /^data:image\//.test(u))
-    return `<span class="${cls}"><img src="${u}" alt=""></span>`;
+  if(u) return `<span class="${cls}"><img src="${esc(u)}" alt=""></span>`;
   return `<span class="${cls}">${ch}</span>`;
 }
+async function syncUserAva(){
+  let u='';
+  try{ if(S.B&&typeof S.B.getUserAvatar==='function') u=validUserAva(await S.B.getUserAvatar()); }catch(_){ }
+  if(!u) u=localUserAva();
+  S.userAvatar=u;
+  if(u){ try{ localStorage.setItem(UAVA_KEY,u); }catch(_){ } }
+  return u;
+}
+function refreshAvatarSurface(){
+  const cur=S.stack[S.stack.length-1];
+  if(cur==='scr-contacts') renderContacts(false);
+  else if(cur==='scr-settings') renderSettings(false);
+  paintLime();
+}
 function pickAva(){
-  const inp=$id('wallpick');
-  inp.onchange=()=>{
+  const inp=$id('uavapick');
+  if(!inp){ toast('当前手机不支持头像上传'); return; }
+  inp.onchange=async()=>{
     const f=inp.files && inp.files[0]; inp.value=''; if(!f) return;
-    const img=new Image();
-    img.onload=()=>{
-      const s=Math.min(img.width,img.height), t=Math.min(s,256)||256;
-      const cv=document.createElement('canvas'); cv.width=cv.height=t;
-      const cx=cv.getContext('2d'); cx.imageSmoothingQuality='high';
-      cx.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,t,t);
-      let url=''; try{ url=cv.toDataURL('image/webp',.9); }catch(_){ }
-      if(!/^data:image\/webp/.test(url)){ try{ url=cv.toDataURL('image/jpeg',.9); }catch(_){ } }
-      try{ localStorage.setItem(UAVA_KEY,url); toast('头像已更换'); }
-      catch(e){ toast('图片太大，存不下——换张小的'); }
-      const cur=S.stack[S.stack.length-1];
-      if(cur==='scr-contacts'){ WN.back(); renderContacts(); }
-      paintLime();
+    if(!/^image\//i.test(f.type||'')){ toast('请选择图片文件'); return; }
+    if(f.size>12*1024*1024){ toast('图片不能超过 12MB'); return; }
+    const img=new Image(), objectUrl=URL.createObjectURL(f);
+    img.onload=async()=>{
+      try{
+        const s=Math.min(img.width,img.height), t=Math.min(s,320)||320;
+        const cv=document.createElement('canvas'); cv.width=cv.height=t;
+        const cx=cv.getContext('2d'); if(!cx) throw new Error('浏览器无法处理图片');
+        cx.imageSmoothingQuality='high';
+        cx.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,t,t);
+        let url=''; try{ url=cv.toDataURL('image/webp',.88); }catch(_){ }
+        if(!/^data:image\/webp/i.test(url)){ try{ url=cv.toDataURL('image/jpeg',.88); }catch(_){ } }
+        url=validUserAva(url); if(!url) throw new Error('头像格式不受支持');
+        try{ localStorage.setItem(UAVA_KEY,url); }catch(_){ throw new Error('图片太大，浏览器存不下'); }
+        S.userAvatar=url;
+        if(S.B&&typeof S.B.setUserAvatar==='function') await S.B.setUserAvatar(url);
+        toast('头像已更换'); refreshAvatarSurface();
+      }catch(e){ toast(String(e&&e.message||e)); }
+      finally{ try{ URL.revokeObjectURL(objectUrl); }catch(_){ } }
     };
-    img.onerror=()=>toast('读不了这张图');
-    img.src=URL.createObjectURL(f);
+    img.onerror=()=>{ try{ URL.revokeObjectURL(objectUrl); }catch(_){ } toast('读不了这张图'); };
+    img.src=objectUrl;
   };
   inp.click();
 }
-function resetAva(){ try{ localStorage.removeItem(UAVA_KEY); }catch(_){}
-  toast('已恢复默认头像'); const cur=S.stack[S.stack.length-1];
-  if(cur==='scr-contacts'){ WN.back(); renderContacts(); } paintLime(); }
+async function resetAva(){
+  try{ localStorage.removeItem(UAVA_KEY); }catch(_){ }
+  S.userAvatar='';
+  try{ if(S.B&&typeof S.B.setUserAvatar==='function') await S.B.setUserAvatar(''); }catch(_){ }
+  toast('已恢复默认头像'); refreshAvatarSurface();
+}
 /* 动态卡角色头像（34px，发布者非 user 时用） */
 function mavaHtml(name){
   const u = S.ava && S.ava[name];
@@ -4091,7 +4127,7 @@ function renderGuide(navigate=true){
         <p>功能都在主屏 App 里。聊天、动态和设置会自动保留，不需要每次重新配置。</p>
         <div class="guide-quick"><span><b>点开</b>选择 App</span><span><b>修改</b>先点铅笔</span><span><b>返回</b>用底部横条</span></div>
       </section>
-      <div class="guide-tip"><b>推荐：</b>第一次使用先到设置确认正文语言规则，再到酒馆的角色正则里手动选择对应美化；“通讯摘要注入”和“自动记忆整理”建议保持开启。</div>
+      <div class="guide-tip"><b>推荐：</b>第一次使用先到设置确认正文对话语言，再到酒馆的角色正则里手动选择对应美化；“通讯摘要注入”和“自动记忆整理”建议保持开启。</div>
       <div class="guide-list">
         <details class="guide-sec" open><summary>打开、关闭与移动</summary><div class="guide-copy">
           <p>点未展开的小手机即可打开；酒馆魔杖菜单里也有“手机”。拖动它可以换位置，贴到屏幕边缘时最多能藏起一半。</p>
@@ -4118,7 +4154,8 @@ function renderGuide(navigate=true){
           <p><b>手账</b>查看当前篇章、剧情偏移和主线推演。<b>世界书</b>可查看并真实开关当前主世界书条目；关闭条目会影响所有共用这本世界书的聊天，受保护条目只能查看。</p>
         </div></details>
         <details class="guide-sec"><summary>设置怎么选</summary><div class="guide-copy">
-          <p><b>正文语言规则</b>默认中文；切到中日双语后，只会开关当前主世界书中的两条对话格式规则，并从下一次正文回复起生效。固定开场白始终只保留中文。</p>
+          <p><b>我的头像</b>可从设备上传，上传后会同时显示在手机名片、动态和正文中的玩家对话旁；图片只保存在当前浏览器，点“恢复”即可改回名字占位。</p>
+          <p><b>正文对话语言设置</b>默认中文；切到中日双语后，从下一次正文回复起，角色对话会同时生成日文与中文。旁白不受影响，固定开场白始终只保留中文。</p>
           <p><b>对话美化不会跟着手机自动切换。</b>请到酒馆的角色正则里，在“中文·深色 / 中文·浅色 / 中日双语·深色 / 中日双语·浅色”中手动启用一条，其余三条关闭。手机的深浅主题只影响手机界面。</p>
           <p><b>通讯摘要注入</b>建议开启，让正文记得手机里发生过的往来；<b>自动记忆整理</b>也建议开启，长时间聊天时更不容易忘记旧消息。</p>
           <p><b>正文预设参考</b>只让手机参考当前正文预设的通用表达，不会修改预设。<b>自动来信与动态</b>会增加角色主动活动，想要更热闹时再开。</p>
@@ -4179,8 +4216,8 @@ function dialogueLanguageNote(){
   if(dl.loading) return '正在读取当前主世界书…';
   if(dl.error) return dl.error;
   if(!dl.loaded) return '读取当前主世界书后显示';
-  if(!dl.valid) return '两条世界书格式规则状态异常，选择一种即可修复';
-  return dl.mode==='bilingual'?'当前：中日双语世界书规则':'当前：中文世界书规则';
+  if(!dl.valid) return '正文对话格式状态异常，选择一种即可修复';
+  return dl.mode==='bilingual'?'当前：中日双语对话':'当前：中文对话';
 }
 function paintDialogueLanguageControls(){
   const dl=S.dialogueLang, note=$id('dialogue-lang-note');
@@ -4217,8 +4254,8 @@ function renderSettings(navigate=true){
     el.innerHTML=apphead('设置','')+`<div class="body"><div class="set">
       <div class="srow"><span class="t">手机深浅主题<small>当前：${c.theme==='light'?'浅色':'深色'}，不影响对话正则</small></span>
         <button class="sw ${c.theme==='light'?'':'on'}" onclick="WN.set('theme','${c.theme==='light'?'dark':'light'}')"></button></div>
-      <div class="srow"><span class="t">正文语言规则<small id="dialogue-lang-note">${esc(dialogueLanguageNote())}；美化正则请手动选择</small></span>
-        <span class="lang-seg" role="group" aria-label="正文世界书语言规则">
+      <div class="srow"><span class="t">正文对话语言设置<small id="dialogue-lang-note">${esc(dialogueLanguageNote())}；美化正则请手动选择</small></span>
+        <span class="lang-seg" role="group" aria-label="正文对话语言设置">
           <button type="button" data-dialogue-lang="zh" onclick="WN.setDialogueLanguage('zh')">中文</button>
           <button type="button" data-dialogue-lang="bilingual" onclick="WN.setDialogueLanguage('bilingual')">中日双语</button>
         </span></div>
@@ -4259,8 +4296,9 @@ function renderSettings(navigate=true){
       <div class="srow"><span class="t">手机壁纸<small>主屏背景，仅存本机</small></span>
         <button style="background:var(--card);box-shadow:var(--shadow);border-radius:10px;padding:7px 14px;font-size:12px;color:var(--ink2)" onclick="pickWall()">更换</button>
         <button style="background:var(--card);box-shadow:var(--shadow);border-radius:10px;padding:7px 14px;font-size:12px;color:var(--muted)" onclick="try{localStorage.removeItem('wn:wall')}catch(_){};applyWall();toast('已恢复默认')">恢复</button></div>
-      <div class="srow"><span class="t">我的头像<small>用于名片与动态，仅存本机</small></span>
-        <button style="background:var(--card);box-shadow:var(--shadow);border-radius:10px;padding:7px 14px;font-size:12px;color:var(--ink2)" onclick="WN.pickAva()">更换</button>
+      <div class="srow"><span class="t">我的头像<small>用于名片、动态和正文对话；只保存在本机</small></span>
+        <button class="avatar-setting-preview" onclick="WN.pickAva()" title="点击上传玩家头像" aria-label="上传玩家头像">${userAvaHtml('ava')}</button>
+        <button class="set-action" onclick="WN.pickAva()">上传</button>
         <button style="background:var(--card);box-shadow:var(--shadow);border-radius:10px;padding:7px 14px;font-size:12px;color:var(--muted)" onclick="WN.resetAva()">恢复</button></div>
       <div class="srow"><span class="t">相册资源<small id="album-source-note">${esc(albumSourceText())}</small></span>
         <button id="album-source-btn" type="button" aria-busy="${ALBUM_INFO.loading?'true':'false'}" ${ALBUM_INFO.loading?'disabled':''}
@@ -4282,7 +4320,7 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">恋人不行·乱入卡 手机 v0.31.1</div>
+<div class="empty" style="padding:14px">恋人不行·乱入卡 手机 v0.31.3</div>
     </div></div>`;
   });
   paintDialogueLanguageControls();
@@ -4302,7 +4340,7 @@ WN.setDialogueLanguage=async mode=>{
         if(entry) entry.enabled=changed.enabled;
       }
     }
-    toast(mode==='bilingual'?'已启用中日双语世界书规则；美化正则请手动切换':'已启用中文世界书规则；美化正则请手动切换');
+    toast(mode==='bilingual'?'已切换为中日双语正文对话；美化正则请手动切换':'已切换为中文正文对话；美化正则请手动切换');
   }catch(e){
     S.dialogueLang.busy=false; S.dialogueLang.error='切换失败：'+String(e&&e.message||e||'写入错误').slice(0,100);
     toast(S.dialogueLang.error);
@@ -4840,6 +4878,7 @@ WN.refreshCurrentView=function(){
 async function boot(bridge){
   S.B=bridge; S.demo=!!bridge.demo;
   loadCfg(); saveCfg();
+  await syncUserAva();
   await syncRemotePhoneState();
   await refreshStat(); await loadStore();
   recoverPendingReplies();
@@ -5003,10 +5042,10 @@ setTimeout(()=>{ if(S.B) return;
     apiCall:async()=>{ throw new Error('演示模式无独立API'); },
     apiModels:async()=>{ throw new Error('演示模式无独立API'); },
     scanSms:async()=>[],
-    getPhoneRemoteState:async()=>({url:'',source:'embedded',version:'0.31.1',status:'disabled',candidateVersion:'',checkedAt:0,error:'',checkMode:'page'}),
+    getPhoneRemoteState:async()=>({url:'',source:'embedded',version:'0.31.3',status:'disabled',candidateVersion:'',checkedAt:0,error:'',checkMode:'page'}),
     setPhoneRemoteManifest:async()=>{ throw new Error('演示模式不支持远程更新'); },
-    checkPhoneRemote:async()=>({url:'',source:'embedded',version:'0.31.1',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
-    reloadPhone:async()=>({url:'',source:'embedded',version:'0.31.1',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
+    checkPhoneRemote:async()=>({url:'',source:'embedded',version:'0.31.3',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
+    reloadPhone:async()=>({url:'',source:'embedded',version:'0.31.3',status:'disabled',candidateVersion:'',checkedAt:Date.now(),error:'',checkMode:'page'}),
     onUpdate:()=>{}, setOrbBadge:()=>{}, notify:()=>{},
     diag:()=>({th:false,mvu:false,ejs:false,worldbook:true}),
     /* 演示桥：只停在内存，让设置页的入口/复位开关也能看到效果 */
