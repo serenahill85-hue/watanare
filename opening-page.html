@@ -961,8 +961,8 @@
       text-align: left;
     }
     .cover-copy .action-row {
-      width: 100%;
-      margin-left: 0;
+      width: calc(100% - 25px);
+      margin-left: 25px;
       margin-top: 34px;
       justify-content: flex-start;
     }
@@ -1303,6 +1303,30 @@
       background: transparent;
       box-shadow: none;
     }
+    .book-footer #finishBtn {
+      min-width: 168px;
+      min-height: 44px;
+      padding: 8px 22px 8px 26px;
+      color: #fff;
+      border: 0;
+      border-left: 4px solid rgba(255,255,255,.9);
+      background: linear-gradient(90deg, rgba(151,86,101,.98), rgba(199,132,145,.9) 76%, rgba(211,154,164,.7));
+      box-shadow: 0 8px 22px rgba(104,59,70,.24), inset 0 1px rgba(255,255,255,.22);
+      font-weight: 700;
+      letter-spacing: .14em;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 13px) 100%, 0 100%);
+    }
+    .book-footer #finishBtn:hover {
+      color: #fff;
+      background: linear-gradient(90deg, rgba(166,94,110,1), rgba(215,145,157,.96) 76%, rgba(222,165,174,.76));
+      box-shadow: 0 10px 26px rgba(104,59,70,.3), inset 0 1px rgba(255,255,255,.25);
+      transform: translateY(-1px);
+    }
+    .book-footer #finishBtn:focus-visible {
+      color: #fff;
+      background: linear-gradient(90deg, rgba(166,94,110,1), rgba(215,145,157,.96) 76%, rgba(222,165,174,.76));
+      box-shadow: 0 0 0 3px rgba(255,255,255,.72), 0 0 0 6px rgba(183,123,135,.28), 0 10px 26px rgba(104,59,70,.26);
+    }
     .book-footer .back { text-align: left; }
     .book-footer .back::before { content: "‹"; margin-right: 9px; font-size: 21px; vertical-align: -1px; }
     .book-footer .next { text-align: right; }
@@ -1361,7 +1385,7 @@
       }
       .cover-copy h1 { font-size: clamp(48px, 16vw, 70px); }
       .cover-copy > p { max-width: 100%; font-size: 16px; text-align: left; }
-      .cover-copy .action-row { width: 100%; margin-left: 0; margin-top: 27px; }
+      .cover-copy .action-row { width: calc(100% - 25px); margin-left: 25px; margin-top: 27px; }
       .work-item { grid-template-columns: 132px minmax(0, 1fr); min-height: 94px; }
       .work-image { height: 94px; }
       .work-caption { padding: 12px 22px 12px 15px; }
