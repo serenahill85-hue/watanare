@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>恋人不行 · 开场设定预览</title>
+  <title>恋人不行 × 孤独摇滚 · 开场设定预览</title>
   <style>
     :root {
       color-scheme: light;
@@ -1166,6 +1166,16 @@
       background: linear-gradient(90deg, rgba(153,91,105,.97), rgba(190,126,139,.91) 70%, rgba(218,166,174,.68));
       box-shadow: 0 10px 28px rgba(104,59,70,.22);
     }
+    .mode-row:disabled,
+    .mode-row:disabled:hover {
+      cursor: not-allowed;
+      color: rgba(89,73,78,.58);
+      border-left-color: rgba(158,143,147,.34);
+      background: rgba(247,243,243,.62);
+      box-shadow: none;
+      transform: none;
+    }
+    .mode-row:disabled .mode-mark { border-color: rgba(135,119,124,.42); }
     .mode-mark {
       width: 11px;
       height: 11px;
@@ -1433,20 +1443,124 @@
       .opening-row { grid-template-columns: 42px minmax(0, 1fr); }
       .summary-row { grid-template-columns: 88px minmax(0, 1fr); }
     }
+
+    /* v1.0 双作品选择层：两部作品可单开，也可同时启用。 */
+    .dual-cover {
+      position: relative;
+      isolation: isolate;
+      background: #211d1d;
+    }
+    .dual-cover .cover-panel {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: opacity .35s ease, clip-path .45s cubic-bezier(.2,.75,.2,1), transform .45s ease;
+    }
+    .dual-cover .cover-panel img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .dual-cover[data-mode="watanare"] .cover-panel.watanare,
+    .dual-cover[data-mode="bocchi"] .cover-panel.bocchi {
+      opacity: 1;
+      clip-path: inset(0);
+    }
+    .dual-cover[data-mode="both"] .cover-panel { opacity: 1; }
+    .dual-cover[data-mode="both"] .cover-panel.watanare {
+      clip-path: polygon(0 0, 64% 0, 48% 100%, 0 100%);
+      transform: translateX(-1.5%);
+    }
+    .dual-cover[data-mode="both"] .cover-panel.bocchi {
+      clip-path: polygon(64% 0, 100% 0, 100% 100%, 48% 100%);
+      transform: translateX(1.5%);
+    }
+    .cover-cross {
+      position: absolute;
+      z-index: 4;
+      left: 50%;
+      top: 50%;
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      color: #fffaf6;
+      border: 1px solid rgba(255,255,255,.7);
+      background: rgba(37,29,31,.64);
+      box-shadow: 0 10px 28px rgba(34,25,27,.28);
+      font: 400 29px/1 Georgia, serif;
+      transform: translate(-50%,-50%) rotate(-4deg);
+      opacity: 0;
+      transition: opacity .25s ease, transform .35s ease;
+    }
+    .dual-cover[data-mode="both"] .cover-cross {
+      opacity: 1;
+      transform: translate(-50%,-50%) rotate(0);
+    }
+    .work-item {
+      width: 100%;
+      padding: 0;
+      color: inherit;
+      border: 0;
+      border-left: 4px solid #9b8e90;
+      cursor: pointer;
+      text-align: left;
+      opacity: .7;
+      transition: opacity .2s ease, transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .work-item:hover { opacity: .9; transform: translateX(3px); }
+    .work-item.selected {
+      opacity: 1;
+      border-left-color: var(--vn-rose);
+      box-shadow: 0 12px 28px rgba(89,55,63,.15);
+    }
+    .work-item[data-work="bocchi"].selected { border-left-color: #d4a43e; }
+    .work-item .work-image { filter: saturate(.35); transition: filter .25s ease, opacity .25s ease; }
+    .work-item.selected .work-image { filter: saturate(.92); opacity: 1; }
+    .work-state { color: #8b7a7e; font-weight: 600; }
+    .work-item.selected .work-state { color: var(--vn-rose); }
+    .work-item[data-work="bocchi"].selected .work-state { color: #9c7626; }
+    .work-progress[hidden] { display: none !important; }
+    .opening-empty {
+      padding: 34px 24px;
+      color: #8d7c80;
+      border-left: 3px solid rgba(169,99,114,.45);
+      background: rgba(255,250,248,.72);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .cover-copy h1.dual-title { font-size: clamp(43px, 6.3vw, 76px); line-height: 1.02; }
+    @media (max-width: 700px) {
+      .cover-cross { width: 40px; height: 40px; font-size: 25px; }
+      .cover-copy h1.dual-title { font-size: clamp(39px, 12vw, 58px); }
+      .work-item { min-height: 96px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .dual-cover .cover-panel, .cover-cross, .work-item { transition: none; }
+    }
   </style>
 </head>
 <body>
-    <main class="shell" data-opening-protocol="1" aria-label="恋人不行开场设定">
+    <main class="shell" data-opening-protocol="2" data-bocchi-archive="4v18" aria-label="恋人不行与孤独摇滚开场设定">
     <section class="book" data-current-page="0">
       <div class="stage">
         <section class="page cover-page active" data-page="0" aria-labelledby="coverTitle">
           <div class="cover-layout">
-            <div class="cover-image">
-              <img src="https://birdimage.kdns.fr/PicGo/%E6%81%8B%E4%BA%BA%E4%B8%8D%E8%A1%8C%E9%BB%98%E8%AE%A4%E5%B1%95%E5%BC%80%E5%BA%95%E5%9B%BE.jpg" alt="恋人不行封面">
+            <div class="cover-image dual-cover" id="dualCover" data-mode="watanare">
+              <figure class="cover-panel watanare active" id="coverWatanare">
+                <img src="https://birdimage.kdns.fr/PicGo/%E6%81%8B%E4%BA%BA%E4%B8%8D%E8%A1%8C%E9%BB%98%E8%AE%A4%E5%B1%95%E5%BC%80%E5%BA%95%E5%9B%BE.jpg" alt="恋人不行封面">
+              </figure>
+              <figure class="cover-panel bocchi" id="coverBocchi">
+                <img src="https://birdimage.kdns.fr/PicGo/%E5%AD%A4%E7%8B%AC%E6%91%87%E6%BB%9A%E6%8A%98%E5%8F%A0%E5%BA%95%E5%9B%BE.png" alt="孤独摇滚封面">
+              </figure>
+              <span class="cover-cross" aria-hidden="true">×</span>
             </div>
             <div class="cover-copy">
               <h1 id="coverTitle">恋人不行</h1>
-              <p>选择玩家档案和故事切入点，然后进入正式开场。</p>
+              <p id="coverDescription">选择要启用的作品，再设定玩家档案和故事切入点。</p>
               <div class="action-row">
                 <button class="btn primary" type="button" data-action="next">开始</button>
               </div>
@@ -1455,16 +1569,16 @@
         </section>
 
         <section class="page" data-page="1" aria-labelledby="workTitle">
-          <h2 id="workTitle">作品与发布</h2>
+          <h2 id="workTitle">作品选择</h2>
           <div class="work-grid">
-            <article class="work-item">
+            <button class="work-item selected" type="button" data-work="watanare" aria-pressed="true">
               <div class="work-image"><img src="https://birdimage.kdns.fr/PicGo/%E6%81%8B%E4%BA%BA%E4%B8%8D%E8%A1%8C%E9%BB%98%E8%AE%A4%E5%B1%95%E5%BC%80%E5%BA%95%E5%9B%BE.jpg" alt="恋人不行封面"></div>
-              <div class="work-caption"><strong>恋人不行</strong><span>当前可用</span></div>
-            </article>
-            <article class="work-item pending">
+              <div class="work-caption"><strong>恋人不行</strong><span class="work-state">已启用</span></div>
+            </button>
+            <button class="work-item" type="button" data-work="bocchi" aria-pressed="false">
               <div class="work-image"><img src="https://birdimage.kdns.fr/PicGo/%E5%AD%A4%E7%8B%AC%E6%91%87%E6%BB%9A%E6%8A%98%E5%8F%A0%E5%BA%95%E5%9B%BE.png" alt="孤独摇滚封面"></div>
-              <div class="work-caption"><strong>孤独摇滚</strong><span>下一版本加入</span></div>
-            </article>
+              <div class="work-caption"><strong>孤独摇滚</strong><span class="work-state">点击启用</span></div>
+            </button>
           </div>
           <div class="release">
             <p>作者：pigeon</p>
@@ -1482,7 +1596,7 @@
             </div>
             <div class="field full profile-copy-field">
               <label for="playerIdentity">身份设定</label>
-              <textarea id="playerIdentity" placeholder="例如：芦谷高中的转学生"></textarea>
+              <textarea id="playerIdentity" placeholder="例如：东京圈高校生、乐手、活动工作人员，或其他自定义身份"></textarea>
             </div>
             <div class="field full profile-copy-field">
               <label for="playerAppearance">第一印象 / 外在特征</label>
@@ -1505,11 +1619,11 @@
           <div class="choice-list">
             <button class="mode-row selected" type="button" data-mode="preset">
               <span class="mode-mark" aria-hidden="true"></span>
-              <span><strong>预设开场</strong>从卡内已有的七个正式开场中选择。</span>
+              <span><strong>预设开场</strong><span data-preset-description>显示与当前作品启用方式匹配的正式开场。</span></span>
             </button>
             <button class="mode-row" type="button" data-mode="free">
               <span class="mode-mark" aria-hidden="true"></span>
-              <span><strong>自由开场</strong>选择原作卷数和事件，再填写自己的剧情切入设定。</span>
+              <span><strong>自由开场</strong>分别选择已启用作品的进度与事件，再填写剧情切入设定。</span>
             </button>
           </div>
         </section>
@@ -1522,13 +1636,21 @@
         <section class="page" data-page="5" aria-labelledby="freeTitle">
           <h2 id="freeTitle">自由开场</h2>
           <div class="free-grid">
-            <div class="field">
-              <label for="volumeSelect">卷数</label>
+            <div class="field work-progress" data-work-panel="watanare">
+              <label for="volumeSelect">恋人不行进度</label>
               <select id="volumeSelect"></select>
             </div>
-            <div class="field">
-              <label for="eventSelect">事件</label>
+            <div class="field work-progress" data-work-panel="watanare">
+              <label for="eventSelect">恋人不行事件</label>
               <select id="eventSelect"></select>
+            </div>
+            <div class="field work-progress" data-work-panel="bocchi" hidden>
+              <label for="bocchiStageSelect">孤独摇滚篇章</label>
+              <select id="bocchiStageSelect"></select>
+            </div>
+            <div class="field work-progress" data-work-panel="bocchi" hidden>
+              <label for="bocchiEventSelect">孤独摇滚事件</label>
+              <select id="bocchiEventSelect"></select>
             </div>
             <div class="field full">
               <label for="cutInText">切入剧情设定</label>
@@ -1541,6 +1663,7 @@
           <h2 id="confirmTitle">确认开场</h2>
           <dl class="summary">
             <div class="summary-row"><dt>玩家</dt><dd id="summaryPlayer">—</dd></div>
+            <div class="summary-row"><dt>启用作品</dt><dd id="summaryWorks">—</dd></div>
             <div class="summary-row"><dt>开场方式</dt><dd id="summaryMode">—</dd></div>
             <div class="summary-row"><dt>开场内容</dt><dd id="summaryOpening">—</dd></div>
           </dl>
@@ -1570,16 +1693,16 @@
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
       const openings = [
-        { title: '顶楼初遇', summary: '午休时误闯顶楼，撞见玲奈子与真唯的秘密。' },
-        { title: '真唯婚约会面', summary: '以王冢家安排的婚约对象身份与真唯初次会面。' },
-        { title: '纱月家庭会面', summary: '双方家庭初次会面，纱月被迫面对新的准继亲关系。' },
-        { title: '紫阳花车站重逢', summary: '紫阳花离家出走时，在车站与童年旧友重逢。' },
-        { title: '玲奈子网友修机', summary: '小五损坏后，长期网友关系即将走进现实。' },
-        { title: '香穗夏CM初遇', summary: '在夏CM会场帮助香穗处理损坏的Cosplay道具。' },
-        { title: '兄妹来日履约', summary: '与露西一同抵达日本，以真唯婚约者身份赴约。' }
+        { id:'watanare_rooftop', works:['watanare'], swipe:0, title: '顶楼初遇', summary: '午休时误闯顶楼，撞见玲奈子与真唯的秘密。' },
+        { id:'watanare_mai_engagement', works:['watanare'], swipe:1, title: '真唯婚约会面', summary: '以王冢家安排的婚约对象身份与真唯初次会面。' },
+        { id:'watanare_sayuki_family', works:['watanare'], swipe:2, title: '纱月家庭会面', summary: '双方家庭初次会面，纱月被迫面对新的准继亲关系。' },
+        { id:'watanare_ajisai_station', works:['watanare'], swipe:3, title: '紫阳花车站重逢', summary: '紫阳花离家出走时，在车站与童年旧友重逢。' },
+        { id:'watanare_renako_online', works:['watanare'], swipe:4, title: '玲奈子网友修机', summary: '小五损坏后，长期网友关系即将走进现实。' },
+        { id:'watanare_kaho_comiket', works:['watanare'], swipe:5, title: '香穗夏CM初遇', summary: '在夏CM会场帮助香穗处理损坏的Cosplay道具。' },
+        { id:'watanare_lucy_arrival', works:['watanare'], swipe:6, title: '兄妹来日履约', summary: '与露西一同抵达日本，以真唯婚约者身份赴约。' }
       ];
 
-      const volumes = [
+      const watanareVolumes = [
         {
           value: '第一卷·真唯卷-六月恋友竞赛',
           label: '第一卷：真唯卷－六月恋友竞赛',
@@ -1622,12 +1745,43 @@
         }
       ];
 
+      const bocchiStages = [
+        {
+          "value": "第一卷《孤独少女的初次合奏》",
+          "label": "第一卷：孤独少女的初次合奏",
+          "events": ["立志学吉他", "纸箱内的首次登台", "首届乐队会议", "打工第一天", "喜多郁代归队"]
+        },
+        {
+          "value": "第二卷《吉他、孤独与蓝色星球》",
+          "label": "第二卷：吉他、孤独与蓝色星球",
+          "events": ["乐队风范会议", "原创歌词的完成", "试演取得资格", "五张票的指标"]
+        },
+        {
+          "value": "第三卷《名为\"孤独\"的摇滚》",
+          "label": "第三卷：名为\"孤独\"的摇滚",
+          "events": ["演出T恤的设计", "台风日的演出", "庆功会与真正的梦想", "江之岛的夏日回忆"]
+        },
+        {
+          "value": "第四卷《绝不会忘记的文化祭》",
+          "label": "第四卷：绝不会忘记的文化祭",
+          "events": ["秀华祭报名波折", "新宿FOLT之夜", "秀华祭第一天", "秀华祭舞台演出", "属于自己的吉他"]
+        },
+        {
+          "value": "原作阶段后自由发展",
+          "label": "后续：原作阶段后自由发展",
+          "events": ["新的现场演出", "乐队日常", "自由剧情"]
+        }
+      ];
+
       const state = {
         page: 0,
         mode: 'preset',
-        opening: 0,
-        volume: volumes[0].value,
-        event: volumes[0].events[0],
+        works: { watanare: true, bocchi: false },
+        openingId: openings[0].id,
+        watanareVolume: watanareVolumes[0].value,
+        watanareEvent: watanareVolumes[0].events[0],
+        bocchiStage: bocchiStages[0].value,
+        bocchiEvent: bocchiStages[0].events[0],
         cutIn: ''
       };
 
@@ -1642,18 +1796,102 @@
         toast.timer = setTimeout(() => node.classList.remove('show'), 2500);
       }
 
-      function currentVolume() {
-        return volumes.find((item) => item.value === state.volume) || volumes[0];
+      function enabledWorkKeys() {
+        return ['watanare', 'bocchi'].filter((key) => state.works[key]);
+      }
+
+      function workMode() {
+        const enabled = enabledWorkKeys();
+        return enabled.length === 2 ? 'both' : enabled[0];
+      }
+
+      function workLabel() {
+        const labels = [];
+        if (state.works.watanare) labels.push('恋人不行');
+        if (state.works.bocchi) labels.push('孤独摇滚');
+        return labels.join('、');
+      }
+
+      function sameWorks(opening) {
+        const expected = [...opening.works].sort().join('|');
+        return expected === enabledWorkKeys().sort().join('|');
+      }
+
+      function availableOpenings() {
+        return openings.filter(sameWorks);
+      }
+
+      function selectedOpening() {
+        const available = availableOpenings();
+        return available.find((opening) => opening.id === state.openingId) || available[0] || null;
+      }
+
+      function currentWatanareVolume() {
+        return watanareVolumes.find((item) => item.value === state.watanareVolume) || watanareVolumes[0];
+      }
+
+      function currentBocchiStage() {
+        return bocchiStages.find((item) => item.value === state.bocchiStage) || bocchiStages[0];
+      }
+
+      function syncWorkSelection() {
+        const mode = workMode();
+        document.querySelectorAll('[data-work]').forEach((node) => {
+          const enabled = Boolean(state.works[node.dataset.work]);
+          node.classList.toggle('selected', enabled);
+          node.setAttribute('aria-pressed', String(enabled));
+          const label = node.querySelector('.work-state');
+          if (label) label.textContent = enabled ? '已启用' : '点击启用';
+        });
+        document.querySelectorAll('[data-work-panel]').forEach((node) => {
+          node.hidden = !state.works[node.dataset.workPanel];
+        });
+        $('dualCover').dataset.mode = mode;
+        $('coverTitle').textContent = mode === 'both'
+          ? '恋人不行 × 孤独摇滚'
+          : mode === 'bocchi' ? '孤独摇滚' : '恋人不行';
+        $('coverTitle').classList.toggle('dual-title', mode === 'both');
+
+        const available = availableOpenings();
+        const presetAvailable = available.length > 0;
+        const presetMode = document.querySelector('.mode-row[data-mode="preset"]');
+        if (presetMode) {
+          presetMode.disabled = !presetAvailable;
+          presetMode.setAttribute('aria-disabled', String(!presetAvailable));
+          const description = presetMode.querySelector('[data-preset-description]');
+          if (description) {
+            description.textContent = presetAvailable
+              ? '显示与当前作品启用方式匹配的正式开场。'
+              : '当前作品组合使用自由开场。';
+          }
+        }
+        if (!presetAvailable && state.mode === 'preset') state.mode = 'free';
+        document.querySelectorAll('.mode-row[data-mode]').forEach((node) => {
+          node.classList.toggle('selected', node.dataset.mode === state.mode);
+        });
+        if (!available.some((opening) => opening.id === state.openingId)) {
+          state.openingId = available[0]?.id || '';
+        }
+        renderOpenings();
       }
 
       function renderOpenings() {
         const host = $('openingList');
         host.textContent = '';
-        openings.forEach((opening, index) => {
+        const available = availableOpenings();
+        if (!available.length) {
+          const empty = document.createElement('div');
+          empty.className = 'opening-empty';
+          empty.textContent = `“${workLabel()}”当前还没有可直接切换的预设开场，请返回选择自由开场。`;
+          host.append(empty);
+          return;
+        }
+        available.forEach((opening, index) => {
           const button = document.createElement('button');
           button.type = 'button';
-          button.className = `opening-row${state.opening === index ? ' selected' : ''}`;
-          button.dataset.opening = String(index);
+          button.className = `opening-row${state.openingId === opening.id ? ' selected' : ''}`;
+          button.dataset.opening = opening.id;
+          button.dataset.swipe = String(opening.swipe);
 
           const number = document.createElement('span');
           number.className = 'opening-number';
@@ -1670,29 +1908,56 @@
         });
       }
 
-      function renderVolumes() {
+      function renderWatanareVolumes() {
         const select = $('volumeSelect');
         select.textContent = '';
-        volumes.forEach((volume) => {
+        watanareVolumes.forEach((volume) => {
           const option = document.createElement('option');
           option.value = volume.value;
           option.textContent = volume.label;
-          option.selected = volume.value === state.volume;
+          option.selected = volume.value === state.watanareVolume;
           select.append(option);
         });
-        renderEvents();
+        renderWatanareEvents();
       }
 
-      function renderEvents() {
+      function renderWatanareEvents() {
         const select = $('eventSelect');
-        const volume = currentVolume();
-        if (!volume.events.includes(state.event)) state.event = volume.events[0];
+        const volume = currentWatanareVolume();
+        if (!volume.events.includes(state.watanareEvent)) state.watanareEvent = volume.events[0];
         select.textContent = '';
         volume.events.forEach((eventName) => {
           const option = document.createElement('option');
           option.value = eventName;
           option.textContent = eventName;
-          option.selected = eventName === state.event;
+          option.selected = eventName === state.watanareEvent;
+          select.append(option);
+        });
+      }
+
+      function renderBocchiStages() {
+        const select = $('bocchiStageSelect');
+        select.textContent = '';
+        bocchiStages.forEach((stage) => {
+          const option = document.createElement('option');
+          option.value = stage.value;
+          option.textContent = stage.label;
+          option.selected = stage.value === state.bocchiStage;
+          select.append(option);
+        });
+        renderBocchiEvents();
+      }
+
+      function renderBocchiEvents() {
+        const select = $('bocchiEventSelect');
+        const stage = currentBocchiStage();
+        if (!stage.events.includes(state.bocchiEvent)) state.bocchiEvent = stage.events[0];
+        select.textContent = '';
+        stage.events.forEach((eventName) => {
+          const option = document.createElement('option');
+          option.value = eventName;
+          option.textContent = eventName;
+          option.selected = eventName === state.bocchiEvent;
           select.append(option);
         });
       }
@@ -1711,15 +1976,30 @@
 
       function buildOpening() {
         const detail = state.cutIn.trim() || '（未填写）';
-        return `【开局设定】\n作品：恋人不行\n篇章：${state.volume}\n事件切入：${state.event}\n切入剧情设定：${detail}`;
+        const lines = ['【开局设定】', `启用作品：${workLabel()}`];
+        if (state.works.watanare) {
+          lines.push(`恋人不行进度：${state.watanareVolume}`);
+          lines.push(`恋人不行事件：${state.watanareEvent}`);
+        }
+        if (state.works.bocchi) {
+          lines.push(`孤独摇滚进度：${state.bocchiStage}`);
+          lines.push(`孤独摇滚事件：${state.bocchiEvent}`);
+        }
+        lines.push(`切入剧情设定：${detail}`);
+        return lines.join('\n');
       }
 
       function syncSummary() {
+        const opening = selectedOpening();
         $('summaryPlayer').textContent = playerName();
+        $('summaryWorks').textContent = workLabel();
         $('summaryMode').textContent = state.mode === 'preset' ? '预设开场' : '自由开场';
         $('summaryOpening').textContent = state.mode === 'preset'
-          ? openings[state.opening].title
-          : `${currentVolume().label}｜${state.event}`;
+          ? opening?.title || '暂无匹配的预设开场'
+          : [
+              state.works.watanare ? `${currentWatanareVolume().label}｜${state.watanareEvent}` : '',
+              state.works.bocchi ? `${currentBocchiStage().label}｜${state.bocchiEvent}` : ''
+            ].filter(Boolean).join('\n');
         $('profilePreview').textContent = buildProfile();
         $('openingPreviewBlock').hidden = state.mode !== 'free';
         $('openingPreview').textContent = buildOpening();
@@ -1762,37 +2042,74 @@
       document.addEventListener('click', (event) => {
         const action = event.target.closest('[data-action]');
         if (action) {
-          if (action.dataset.action === 'next') showPage(nextPage(state.page), 1);
+          if (action.dataset.action === 'next') {
+            if (state.page === 4 && state.mode === 'preset' && !selectedOpening()) {
+              toast('当前作品组合暂无预设开场，请返回选择自由开场。');
+              return;
+            }
+            showPage(nextPage(state.page), 1);
+          }
           if (action.dataset.action === 'back') showPage(previousPage(state.page), -1);
-          if (action.dataset.action === 'finish') toast('当前为界面预览，尚未写入角色卡。');
+          if (action.dataset.action === 'finish') {
+            if (state.mode === 'preset' && !selectedOpening()) {
+              toast('当前作品组合暂无预设开场，请改用自由开场。');
+              return;
+            }
+            toast('当前为界面预览，尚未写入角色卡。');
+          }
           return;
         }
 
-        const mode = event.target.closest('[data-mode]');
+        const work = event.target.closest('[data-work]');
+        if (work) {
+          const key = work.dataset.work;
+          if (state.works[key] && enabledWorkKeys().length === 1) {
+            toast('至少保留一部作品。');
+            return;
+          }
+          state.works[key] = !state.works[key];
+          syncWorkSelection();
+          syncSummary();
+          return;
+        }
+
+        const mode = event.target.closest('.mode-row[data-mode]');
         if (mode) {
           state.mode = mode.dataset.mode;
-          document.querySelectorAll('[data-mode]').forEach((node) => node.classList.toggle('selected', node.dataset.mode === state.mode));
+          document.querySelectorAll('.mode-row[data-mode]').forEach((node) => node.classList.toggle('selected', node.dataset.mode === state.mode));
           syncSummary();
           return;
         }
 
         const opening = event.target.closest('[data-opening]');
         if (opening) {
-          state.opening = Number(opening.dataset.opening);
+          state.openingId = opening.dataset.opening;
           renderOpenings();
           syncSummary();
         }
       });
 
       $('volumeSelect').addEventListener('change', (event) => {
-        state.volume = event.target.value;
-        state.event = currentVolume().events[0];
-        renderEvents();
+        state.watanareVolume = event.target.value;
+        state.watanareEvent = currentWatanareVolume().events[0];
+        renderWatanareEvents();
         syncSummary();
       });
 
       $('eventSelect').addEventListener('change', (event) => {
-        state.event = event.target.value;
+        state.watanareEvent = event.target.value;
+        syncSummary();
+      });
+
+      $('bocchiStageSelect').addEventListener('change', (event) => {
+        state.bocchiStage = event.target.value;
+        state.bocchiEvent = currentBocchiStage().events[0];
+        renderBocchiEvents();
+        syncSummary();
+      });
+
+      $('bocchiEventSelect').addEventListener('change', (event) => {
+        state.bocchiEvent = event.target.value;
         syncSummary();
       });
 
@@ -1805,8 +2122,9 @@
         $(id).addEventListener('input', syncSummary);
       });
 
-      renderOpenings();
-      renderVolumes();
+      renderWatanareVolumes();
+      renderBocchiStages();
+      syncWorkSelection();
       syncSummary();
       showPage(0);
     })();

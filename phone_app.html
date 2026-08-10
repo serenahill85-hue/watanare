@@ -773,6 +773,9 @@
   .wb-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:10px;background:var(--card2)}
   .wb-seg button{min-height:36px;border-radius:8px;color:var(--muted);font-size:12px}
   .wb-seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+  .wb-work-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .wb-work{min-width:0;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:9px;background:var(--card);box-shadow:inset 0 0 0 1px var(--hair)}
+  .wb-work-copy{flex:1;min-width:0}.wb-work-copy b{display:block;font-size:12.5px}.wb-work-copy span{display:block;margin-top:2px;font-size:10.5px;color:var(--muted)}
   .wb-cat,.wb-entry{display:flex;align-items:center;gap:10px;min-height:58px;padding:8px 14px;
     border-bottom:1px solid var(--hair)}
   .wb-cat .go,.wb-entry .go{flex:1;min-width:0;text-align:left;min-height:44px}
@@ -995,7 +998,7 @@ const S = {
   replyTimers:new Map(), mediaUrls:new Map(), imageTarget:null, quoteDraft:null,
   imagePicker:{mode:'',id:'',items:[],selected:[]}, chatOps:{id:'',seq:0},
   momentDraft:[], momentImageBusy:false, momentPostBusy:false,
-  wb:{name:'',entries:[],loaded:false,loading:false,error:'',query:'',filter:'all',category:''}, wbBusy:new Set(),
+  wb:{name:'',entries:[],loaded:false,loading:false,error:'',query:'',filter:'all',category:''}, wbBusy:new Set(), wbWorkBusy:'',
   dialogueLang:{mode:'',valid:false,loaded:false,loading:false,busy:false,error:'',name:'',entries:[]},
   remote:{url:'',source:'embedded',version:'',status:'disabled',candidateVersion:'',checkedAt:0,error:''},
 };
@@ -4012,7 +4015,7 @@ async function runCampusRefresh(extra,targetTab){
 }
 
 /* ---------- 世界书控制器 ---------- */
-const WB_CATEGORIES=['剧情','角色','叙事与世界规则','变量与系统','手机与配置','其他'];
+const WB_CATEGORIES=['恋人不行','孤独摇滚','通用规则','剧情','角色','叙事与世界规则','变量与系统','手机与配置','其他'];
 const WB_PROTECTED=new Set([
   '[InitVar]','[相册清单]','[手机协议]','[通讯摘要]','变量列表',
   '[mvu_update]变量更新规则','[mvu_update]变量输出格式','[细纲使用说明]',
@@ -4020,6 +4023,9 @@ const WB_PROTECTED=new Set([
 ]);
 function wbCategoryOf(entry){
   const name=String(entry&&entry.name||'');
+  if(name.includes('[BTR]')) return '孤独摇滚';
+  if(name.includes('[MURI]')) return '恋人不行';
+  if(name.includes('[RULE]')) return '通用规则';
   if(/剧情细纲|剧情年表|剧情梗概|卷[一二三四五六七八九十]|细纲使用说明/.test(name)) return '剧情';
   if(/手机协议|通讯摘要|相册清单/.test(name)) return '手机与配置';
   if(/InitVar|变量列表|mvu_update|变量更新|变量输出/.test(name)) return '变量与系统';
@@ -4027,7 +4033,8 @@ function wbCategoryOf(entry){
   if((Array.isArray(entry&&entry.keys)&&entry.keys.length)||/人设|语料|角色经历|角色速览|花取|芮妮|纱月的母亲|高田|羽贺|龟崎|根本|露西|梨地|鬼瓦/.test(name)) return '角色';
   return '其他';
 }
-function wbProtected(entry){ return WB_PROTECTED.has(String(entry&&entry.name||'').trim()); }
+function wbBaseName(entry){return String(entry&&entry.name||'').trim().replace(/^\[mvu_(?:plot|update)\]/,'').replace(/^\[(?:BTR|MURI|RULE)\]/,'');}
+function wbProtected(entry){ return WB_PROTECTED.has(wbBaseName(entry))||WB_PROTECTED.has(String(entry&&entry.name||'').trim()); }
 function wbStrategyLabel(entry){
   return ({constant:'常驻',selective:'关键词',vectorized:'向量'})[entry&&entry.strategy]||'条目';
 }
@@ -4052,7 +4059,9 @@ function wbMatches(entry,category){
 }
 function wbToolsHtml(){
   const wb=S.wb;
+  const workControl=(work,prefix,label)=>{const entries=wb.entries.filter(entry=>entry.name.includes(prefix)),on=entries.filter(entry=>entry.enabled).length,all=entries.length>0&&on===entries.length,partial=on>0&&!all,busy=wb.loading||S.wbWorkBusy===work;return `<div class="wb-work"><span class="wb-work-copy"><b>${label}</b><span>${on} / ${entries.length} 条开启${partial?' · 部分':''}</span></span><button class="wb-switch ${all?'on':''}" ${busy||!entries.length?'disabled':''} onclick="WN.wbWorkToggle('${work}',${all?'false':'true'},this)" role="switch" aria-checked="${all?'true':'false'}" aria-label="${all?'关闭':'开启'}${label}全部世界书"></button></div>`};
   return `<div class="wb-tools"><input class="wb-search" type="search" value="${esc(wb.query)}" placeholder="搜索全部条目" aria-label="搜索全部世界书条目" oninput="WN.wbSearch(this.value)">
+    <div class="wb-work-controls">${workControl('watanare','[MURI]','恋人不行')}${workControl('bocchi','[BTR]','孤独摇滚')}</div>
     <div class="wb-seg" aria-label="条目状态筛选">
       <button class="${wb.filter==='all'?'on':''}" onclick="WN.wbFilter('all')">全部</button>
       <button class="${wb.filter==='enabled'?'on':''}" onclick="WN.wbFilter('enabled')">已开启</button>
@@ -4185,6 +4194,16 @@ WN.wbToggle=async function(uid,enable,opener){
       const current=Number(active.dataset.wnUid); active.remove(); S.stack.pop(); WN.wbEntry(current);
     }else paintWorldbookResults(activeWorldbookCategory());
   }
+};
+WN.wbWorkToggle=async function(work,enable,opener){
+  if(S.wbWorkBusy) return; const label=work==='bocchi'?'孤独摇滚':work==='watanare'?'恋人不行':''; if(!label)return;
+  const want=enable===true;
+  if(!want){const ok=await askConfirm('关闭作品世界书',`将关闭「${label}」的全部世界书条目，所有使用主世界书「${S.wb.name}」的聊天都会受到影响。`,'全部关闭',opener);if(!ok)return;}
+  if(!S.B||typeof S.B.setWorldbookWorkEnabled!=='function'){toast('当前手机外壳不支持作品世界书批量开关');return;}
+  S.wbWorkBusy=work; const active=$id(S.stack[S.stack.length-1]); if(active&&active.dataset.wnView==='wb-home')buildWorldbookSurface(active,'世界书',null);
+  try{const data=normalizeWorldbookState(await S.B.setWorldbookWorkEnabled(work,want));S.wb.name=data.name;S.wb.entries=data.entries;S.wb.loaded=true;S.wb.error='';toast(`${label}世界书已${want?'全部开启':'全部关闭'}`);}
+  catch(e){toast('作品世界书更新失败：'+String(e&&e.message||e||'写入错误'));}
+  finally{S.wbWorkBusy='';const now=$id(S.stack[S.stack.length-1]);if(now&&now.dataset.wnView==='wb-home')buildWorldbookSurface(now,'世界书',null);else paintWorldbookResults(activeWorldbookCategory());}
 };
 
 /* ---------- 说明书 ---------- */
@@ -5096,6 +5115,12 @@ setTimeout(()=>{ if(S.B) return;
     getWorldbookState:async()=>({name:'演示主世界书',entries:demoWorldbook.map(entry=>({...entry}))}),
     setWorldbookEntryEnabled:async(uid,enabled)=>{
       demoWorldbook=demoWorldbook.map(entry=>entry.uid===Number(uid)?{...entry,enabled:enabled===true}:entry);
+      return {name:'演示主世界书',entries:demoWorldbook.map(entry=>({...entry}))};
+    },
+    setWorldbookWorkEnabled:async(work,enabled)=>{
+      const prefix=work==='bocchi'?'[BTR]':work==='watanare'?'[MURI]':'';
+      if(!prefix) throw new Error('作品类型无效');
+      demoWorldbook=demoWorldbook.map(entry=>String(entry.name||'').includes(prefix)?{...entry,enabled:enabled===true}:entry);
       return {name:'演示主世界书',entries:demoWorldbook.map(entry=>({...entry}))};
     },
     getDialogueLanguage:async()=>demoDialogueLanguage(),
