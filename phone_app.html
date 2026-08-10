@@ -638,10 +638,21 @@
   #qsheet .qactions button{flex:1;min-height:42px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:13px;color:var(--ink2)}
   #qsheet .qactions .go{background:var(--fav);color:#fff}
 
-  /* ── 手账：篇章头卡与主线日志轴 ── */
+  /* ── 手账：双作品独立进度 ── */
   .jhead .arc{font:700 17px/1.5 var(--font-ui)}
   .jhead .jmeta{margin-top:5px}
   .jhead .pat2{margin-top:7px;font-size:13px;color:var(--ink2)}
+  .journal-lines{display:grid;gap:10px;margin-top:10px}
+  .journal-line{position:relative;overflow:hidden}
+  .journal-line::after{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--fav);opacity:.82}
+  .journal-line.bocchi::after{background:#d7a83f}
+  .journal-line.is-disabled{opacity:.66;background:color-mix(in srgb,var(--panel) 82%,var(--hair) 18%)}
+  .journal-line.is-disabled::after{background:var(--muted)}
+  .journal-line-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;padding-left:4px}
+  .journal-line-head .work{font:700 14px/1.4 var(--font-ui);color:var(--ink)}
+  .journal-line-head .arc{margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2);text-align:right}
+  .journal-off{font-size:11px;color:var(--muted);letter-spacing:.04em}
+  .journal-disabled-copy{padding:3px 4px 2px;font-size:12px;line-height:1.55;color:var(--muted)}
   .m4b{position:relative;padding-left:14px}
   .m4b::before{content:'';position:absolute;left:3px;top:10px;bottom:10px;width:1.5px;background:var(--hair)}
   .m4b>div{position:relative;padding:5px 0}
@@ -802,7 +813,29 @@
     .wb-search, #vedit input, #vedit select, #vedit textarea,
     #pactsheet input, #pactsheet select, #pactsheet textarea { font-size:16px }
   }
-</style>
+
+/* 地图：与 map-hierarchy-preview.html 共用的 SVG 视觉令牌 */
+.pmap-body{padding:0!important;overflow:hidden;background:var(--screen);position:relative}
+.pmap-viewport{position:relative;width:100%;height:100%;min-height:0;overflow:hidden;touch-action:none;cursor:grab;background:var(--screen)}
+.pmap-viewport.dragging{cursor:grabbing}
+.pmap-world{width:100%;height:100%;transform-origin:0 0;will-change:transform}
+.pmap-world svg{width:100%;height:100%;display:block}
+.pmap-world .map-bg{fill:#17171c}.pmap-world .grid-line{stroke:#302f37;stroke-width:1}
+.pmap-world .route{fill:none;stroke:#77717f;stroke-width:5;stroke-linecap:round;opacity:.72}
+.pmap-world .route.rail{stroke-width:4;stroke-dasharray:10 9}
+.pmap-world .scene-line{fill:none;stroke:#716a79;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;opacity:.34}
+.pmap-world .scene-road{fill:none;stroke:#5e5967;stroke-width:10;stroke-linecap:round;opacity:.24}
+.pmap-world .scene-stage{fill:none;stroke:#b87387;stroke-width:1.5;opacity:.28}
+.pmap-world .scene-label{fill:#8f8993;font-size:7.2px;font-weight:700;letter-spacing:.25px;opacity:.72;paint-order:stroke;stroke:#17171c;stroke-width:2px}
+.pmap-world .zone{stroke-width:1.3}.pmap-world .zone.wata{fill:rgba(220,123,116,.055);stroke:rgba(220,123,116,.28)}.pmap-world .zone.bocchi{fill:rgba(232,187,73,.045);stroke:rgba(232,187,73,.27)}
+.pmap-world .zone-title{font-size:11px;font-weight:800;letter-spacing:1px}
+.pmap-world .node{cursor:pointer}.pmap-world .node .ring{fill:#17171c;stroke-width:2.2}.pmap-world .node:hover .ring{filter:brightness(1.25)}
+.pmap-world .node.wata .ring,.pmap-world .node.wata .glyph{stroke:#df817a}.pmap-world .node.bocchi .ring,.pmap-world .node.bocchi .glyph{stroke:#e9bc4f}.pmap-world .node.public .ring,.pmap-world .node.public .glyph{stroke:#d7bc67}
+.pmap-world .node.school .ring,.pmap-world .node.school .glyph{stroke:#64a8df}.pmap-world .node.station .ring,.pmap-world .node.station .glyph{stroke:#8c86e8}.pmap-world .node.live .ring,.pmap-world .node.live .glyph{stroke:#e25776}.pmap-world .node.shop .ring,.pmap-world .node.shop .glyph{stroke:#e6904f}.pmap-world .node.donut .ring,.pmap-world .node.donut .glyph{stroke:#e97d9b}.pmap-world .node.music .ring,.pmap-world .node.music .glyph{stroke:#d5b950}.pmap-world .node.home .ring,.pmap-world .node.home .glyph{stroke:#a984d7}.pmap-world .node.street .ring,.pmap-world .node.street .glyph{stroke:#6db8a7}.pmap-world .node.cafe .ring,.pmap-world .node.cafe .glyph{stroke:#d29b6f}.pmap-world .node.park .ring,.pmap-world .node.park .glyph{stroke:#70b978}.pmap-world .node.room .ring,.pmap-world .node.room .glyph{stroke:#8f9ca5}.pmap-world .node.stage .ring,.pmap-world .node.stage .glyph{stroke:#e26767}.pmap-world .node.bar .ring,.pmap-world .node.bar .glyph{stroke:#dc8ad0}.pmap-world .node.sound .ring,.pmap-world .node.sound .glyph{stroke:#54b5c7}.pmap-world .node.current .ring{stroke:#79cfb9!important;fill:#173029}.pmap-world .node.current .glyph{stroke:#79cfb9!important}.pmap-world .glyph{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.pmap-world .node-name{fill:#f2f0ea;font-size:9.5px;font-weight:800;text-anchor:middle;paint-order:stroke;stroke:#17171c;stroke-width:3px}.pmap-world .node-sub{fill:#9ea8a2;font-size:6.5px;font-weight:700;text-anchor:middle;letter-spacing:.6px}.pmap-world .node.current .node-name,.pmap-world .node.current .node-sub{fill:#a9ead9}
+.pmap-world .avatar{pointer-events:none}.pmap-world .avatar circle{stroke:#fff;stroke-width:1.2}.pmap-world .avatar text{fill:#fff;font-size:7px;font-weight:800;text-anchor:middle}
+.pmap-tools{position:absolute;z-index:4;left:12px;right:12px;top:9px;display:flex;align-items:center;gap:7px;pointer-events:none}.pmap-tools>*{pointer-events:auto}.pmap-crumb{min-width:0;max-width:52%;height:34px;display:flex;align-items:center;padding:0 10px;background:color-mix(in srgb,var(--surface) 90%,transparent);border:1px solid var(--hair);color:var(--ink2);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pmap-toolbtn{width:34px;height:34px;border:1px solid var(--hair);background:color-mix(in srgb,var(--surface) 90%,transparent);color:var(--ink2);font-size:16px}.pmap-toolgroup{margin-left:auto;display:flex}.pmap-toolgroup .pmap-toolbtn+ .pmap-toolbtn{border-left:0}.pmap-legend,.pmap-tip{position:absolute;z-index:4;bottom:10px;padding:6px 8px;background:color-mix(in srgb,var(--surface) 88%,transparent);border:1px solid var(--hair);color:var(--muted);font-size:9px}.pmap-legend{left:10px}.pmap-tip{right:10px;max-width:48%;text-align:right}.pmap-detail{position:absolute;z-index:6;left:50%;bottom:42px;transform:translate(-50%,10px);width:min(300px,calc(100% - 26px));padding:9px 11px;background:color-mix(in srgb,var(--surface) 96%,transparent);border:1px solid var(--hair);opacity:0;pointer-events:none;transition:.15s}.pmap-detail.on{opacity:1;transform:translate(-50%,0)}.pmap-detail b{display:block;color:var(--ink);font-size:12px;margin-bottom:2px}.pmap-detail span{color:var(--muted);font-size:9px}
+:root[data-wn-theme="light"] .pmap-world .map-bg{fill:#f2f1ed}:root[data-wn-theme="light"] .pmap-world .grid-line{stroke:#ddd9d1}:root[data-wn-theme="light"] .pmap-world .scene-label{fill:#746d76;stroke:#f2f1ed}:root[data-wn-theme="light"] .pmap-world .node .ring{fill:#f2f1ed}:root[data-wn-theme="light"] .pmap-world .node-name{fill:#292b31;stroke:#f2f1ed}:root[data-wn-theme="light"] .pmap-world .node-sub{fill:#655f69}:root[data-wn-theme="light"] .pmap-world .node.current .ring{fill:#dbe9e9;stroke:#3f8182}:root[data-wn-theme="light"] .pmap-world .node.current .glyph{stroke:#3f8182}</style>
 </head>
 <body>
 <div id="sys">
@@ -1878,12 +1911,36 @@ function unreadMoments(){ if(!S.store) return 0;
   return Math.max(0, momentSignal()-Math.floor(num(S.store.momRead))); }
 function unreadLimeAll(){ return unreadLime()+unreadMoments(); }
 
-/* ---------- 主屏 ---------- */
+
+/* ---------- 地图 ---------- */
+const PHONE_MAPS={"overview":{"name":"东京西部生活圈","zones":true,"nodes":[["ashitani","芦谷高中","wata","school",64,220,"校园社交与班级关系的核心舞台"],["ashitani-residential","芦谷市住宅区","wata","home",115,105,"芦谷市住宅区，位于生活圈标题下方的住宅区域"],["ashitani-town","芦谷市街区","wata","street",76,292,"学生放学后活动的文教街区"],["queen","皇后甜甜圈","wata","donut",116,348,"纱月保密兼职的甜甜圈店"],["aomori","青森中学","wata","school",31,352,"遥奈与朋友们的国中生活圈"],["meidaimae","明大前","public","station",169,205,"京王线与井之头线的换乘节点"],["shimokitazawa","下北泽","public","street",267,143,"乐队、旧衣店与小型店铺聚集的街区"],["starry","STARRY","bocchi","live",328,106,"结束乐队排练、演出与打工的据点"],["shimokita-school","下北泽高中","bocchi","school",356,220,"虹夏与凉就读的高中"],["shuka","秀华高中","bocchi","school",361,58,"一里与喜多就读的高中"],["shinjuku","新宿","public","station",355,300,"购物、聚会与现场演出的城市节点"],["kanazawa","金泽八景","bocchi","home",52,425,"后藤家与一里长距离通勤的起点"],["enoshima","江之岛","bocchi","park",170,432,"结束乐队休息日外出的海边区域"],["ochanomizu","御茶水乐器街","bocchi","music",286,404,"购买、试弹与维修乐器的商业街"]]},"shimokitazawa":{"name":"下北泽","nodes":[["starry","STARRY","bocchi","live",105,150,"结束乐队的排练、演出与打工据点"],["shimokita-live-street","Livehouse街区","public","music",242,82,"小型演出场地与海报聚集的街段"],["shimokita-cafe","咖啡店","public","cafe",325,140,"演出前后碰面、休息和谈话的店铺"],["shimokita-vintage","旧衣店街","public","shop",327,292,"乐队成员挑选服装与闲逛的街区"],["shimokita-alley","窄巷与街头","public","street",215,330,"张贴传单、拍照和临时碰面的街头空间"],["shimokita-park","车站附近公园","public","park",75,300,"虹夏邀请背着吉他的一里的相遇型场景"],["shimokita-station","车站与站前","public","station",65,92,"放学集合、散场分开与等人的位置"],["kita-home","喜多家","bocchi","home",85,405,"喜多郁代居住在下北泽周边"],["yamada-home","山田家","bocchi","home",365,390,"山田凉居住在下北泽周边"]]},"starry":{"name":"下北泽 / STARRY","nodes":[["starry-entrance","地下入口","bocchi","street",48,92,"门牌、营业提示与下楼入口"],["starry-reception","票务接待","bocchi","shop",130,126,"核票、售票和饮料券交付区域"],["starry-bar","饮料吧台","bocchi","bar",214,126,"成员打工、接待观众和交付饮料的位置"],["starry-audience","观众区","bocchi","room",195,245,"站立观演、候场和散场停留的主要空间"],["starry-sound","PA音控位","bocchi","sound",82,245,"位于观众区后方的现场音响与灯光控制位置"],["starry-stage","舞台","bocchi","stage",305,245,"正式演出与临场配合的核心区域"],["starry-backstage","后台/乐屋","bocchi","room",326,345,"与舞台相邻的候场、换装和成员私下交流空间"],["starry-studio","录音/排练室","bocchi","sound",92,365,"隔音的合奏、排练与录音空间"],["starry-office","店长工作区","bocchi","room",205,365,"星歌处理排班、演出与店务的位置"],["idjichi-home","伊地知家","bocchi","home",105,55,"与STARRY同一栋楼上方的伊地知家"]]},"ashitani":{"name":"芦谷高中","nodes":[["gate","校门","wata","school",48,355,"放学等人和前往车站的出入口"],["main-building","教学楼入口","wata","school",120,275,"连接鞋柜、走廊与主要教室的入口"],["a-class","一年A班","wata","room",90,135,"Queentet日常与班级事件的核心教室"],["b-class","一年B班","wata","room",245,135,"五女神所在班级及班级对抗相关空间"],["corridor","走廊与楼梯","wata","room",180,215,"课间偶遇、拦人和追赶的过渡空间"],["rooftop","顶楼","wata","room",335,90,"开场初遇、私下谈话与关系试探的高处空间"],["gym","体育馆与活动场","wata","stage",315,330,"球技大赛、集体活动和大型校园事件场地"],["shoe-lockers","鞋柜与玄关","wata","room",48,220,"换鞋、偶遇和课前短暂停留的入口空间"],["staff-room","职员室","wata","room",250,215,"教师办公、请假与校内事务处理区域"],["health-room","保健室","wata","room",365,215,"身体不适、照顾与私下谈话的安静空间"]]},"ashitani-town":{"name":"芦谷市街区","nodes":[["ashitani-station","车站前","wata","station",55,100,"通学集合、等人和临时改道的交通节点"],["commute-road","通学路","wata","street",105,225,"校园到车站之间的日常步行路线"],["ashitani-arcade","商店街","wata","shop",210,145,"学生闲逛、购物和偶遇的主要街区"],["fashion-shop","时尚店","wata","shop",330,120,"真唯与香穗等人的时尚活动场景"],["fastfood","快餐店","wata","cafe",315,300,"放学后短暂停留与小团体聊天的位置"],["ashitani-park","公园","wata","park",150,350,"等待、冷静和私下谈话的开放空间"]]},"queen":{"name":"皇后甜甜圈","nodes":[["queen-door","店门口","wata","shop",55,95,"熟人偶遇、等人和纱月进出工作的地方"],["queen-display","甜甜圈展示柜","wata","shop",155,145,"点单、挑选和熟人故意逗弄纱月的区域"],["queen-counter","点单柜台","wata","bar",275,145,"纱月以店员模式接客、结账和交付甜甜圈的位置"],["queen-seats","店内座位","wata","cafe",105,300,"放学休息、轻量事件和关系试探的位置"],["queen-kitchen","后厨","wata","room",295,285,"制作、备货、换班与员工交流的非公开区域"],["queen-staff","员工更衣/休息区","wata","room",300,380,"纱月更换制服和短暂休息的员工空间"]]},"aomori":{"name":"青森中学","nodes":[["aomori-gate","校门","wata","school",65,110,"接送、等人和放学集合的位置"],["aomori-class","教室","wata","room",195,75,"遥奈、星来与凑的国中日常空间"],["aomori-corridor","走廊与楼梯","wata","room",322,130,"课间偶遇和学生流动空间"],["badminton-gym","羽毛球馆","wata","stage",305,300,"遥奈训练、比赛和社团事件的核心场地"],["club-storage","社团器材间","wata","room",165,345,"收放球拍、球筒和社团杂物的位置"],["aomori-route","放学路","wata","street",55,295,"三人组返家、绕路与临时外出的路线"],["aomori-shoe","鞋柜","wata","room",120,180,"课前集合、换鞋和社团准备的入口空间"],["aomori-library","图书室","wata","room",195,250,"自习、查资料和放学后短暂停留的安静空间"]]},"meidaimae":{"name":"明大前","nodes":[["platform-keio","京王线站台","public","station",60,120,"连接芦谷生活圈与新宿方向的站台"],["platform-inokashira","井之头线站台","public","station",315,120,"前往下北泽方向的换乘站台"],["concourse","换乘通道","public","street",192,205,"赶车、错过电车和雨天人流交汇的空间"],["gate","检票口","public","station",85,330,"集合、等人和临时改变路线的位置"],["street","站前街道","public","street",300,330,"短暂停留、便利店与餐饮店分布的街区"]]},"shimokita-school":{"name":"下北泽高中","nodes":[["shimokita-class","教室","bocchi","room",75,115,"虹夏与凉的校园日常与课间场景"],["shimokita-corridor","走廊与楼梯","bocchi","room",310,115,"同学往来和放学准备的过渡空间"],["shimokita-gate","校门","bocchi","school",195,265,"虹夏与凉放学后前往STARRY的集合起点"],["shimokita-route","车站方向放学路","bocchi","street",70,350,"通往下北泽街区与STARRY的步行路线"],["student-shop","学生常去商店","bocchi","shop",315,350,"放学后购买零食或短暂停留的店铺"],["shimokita-music","音乐室","bocchi","music",195,170,"课后乐器练习与讨论演奏的专用教室"],["shimokita-library","图书室","bocchi","room",195,350,"安静自习、查资料和偶遇的校内空间"]]},"shuka":{"name":"秀华高中","nodes":[["shuka-gate","校门","bocchi","school",50,355,"入校、放学与前往车站的校园出入口"],["main-building","教学楼入口","bocchi","school",125,285,"连接鞋柜、走廊与主要教室的入口区域"],["shuka-class","一年级教室","bocchi","room",100,135,"一里长期独处、喜多与同学活动的教室"],["shuka-corridor","走廊与楼梯","bocchi","room",220,170,"避开人群、课间移动与寻找成员的空间"],["broadcast-room","广播室","bocchi","sound",320,105,"午休点歌和校园广播相关区域"],["festival-class","文化祭班级区","bocchi","shop",310,260,"班级布置、鬼屋与文化祭活动区域"],["festival-gym","体育馆舞台","bocchi","stage",345,375,"结束乐队文化祭演出的正式舞台"],["shuka-shoe","鞋柜与玄关","bocchi","room",48,220,"入校、换鞋与课前偶遇的入口区域"],["shuka-music","音乐室","bocchi","music",265,315,"文化祭前排练和乐器搬运的专用教室"],["shuka-rooftop","顶楼","bocchi","park",365,165,"避开人群、独处和情绪缓冲的高处空间"]]},"shinjuku":{"name":"新宿","nodes":[["shinjuku-station","新宿站·集合口","public","station",70,220,"大型外出、多人约定和迷路时的集合节点"],["shopping","百货与时尚店","public","shop",185,105,"购物、工作和正式外出场景"],["restaurant","餐厅","public","cafe",330,110,"聚会、家庭会面和较正式约会的位置"],["karaoke","卡拉OK","public","music",335,275,"朋友聚会和轻量活动空间"],["night-street","夜间街区","public","street",205,330,"演出散场、音乐圈交际与城市感更强的街道"],["folt","新宿 FOLT","bocchi","live",80,385,"前辈乐队与地下音乐圈现场的livehouse"]]},"kanazawa":{"name":"横滨金泽八景附近","nodes":[["kanazawa-station","金泽八景站","bocchi","station",62,96,"一里长距离通学与前往下北泽的交通起点"],["goto-home","后藤家","bocchi","home",315,120,"后藤一家日常、家庭对话和成员来访的住宅"],["nearby-park","附近公园","bocchi","park",285,285,"独自练习、等待和缓冲情绪的户外空间"],["bay-road","海湾路与街头练习点","bocchi","street",120,375,"广井菊里与一里路演相关的开放街道"]]},"enoshima":{"name":"江之岛","nodes":[["eno-station","江之岛站","bocchi","station",45,90,"集合与返程的交通起点"],["aquarium","新江之岛水族馆周边","bocchi","park",55,285,"位于片濑海岸一侧的海边休闲区域"],["benten-bridge","弁天桥","bocchi","street",135,135,"从片濑一侧步行进入江之岛的跨海桥"],["nakamise","弁财天仲见世通","bocchi","shop",225,185,"小吃、土产与密集人流构成的上岛商店街"],["shrine-slope","神社与坡道","bocchi","street",310,245,"沿坡道与台阶上行的神社参道区域"],["sea-candle","展望灯塔周边","bocchi","park",315,350,"高处展望、休息和远眺海面的区域"],["chigogafuchi","稚儿之渊/海边","bocchi","park",175,410,"靠近海面的岩岸、看海与谈心区域"]]},"ochanomizu":{"name":"御茶水乐器街","nodes":[["ochano-station","御茶之水站·圣桥口","bocchi","station",48,78,"从JR御茶之水站圣桥口进入乐器街的起点"],["meidaidori","明大通","bocchi","street",118,155,"乐器店集中分布的主要街道"],["surugadai-slope","骏河台坡","bocchi","street",205,255,"沿坡两侧分布老牌乐器店的街段"],["shimokura","下仓乐器","bocchi","music",305,100,"1937年创立的老牌乐器店，以管弦乐器和二手乐器著称"],["ishibashi","石桥乐器店","bocchi","music",330,225,"以电吉他、贝斯及现代乐器为主的御茶水分店"],["disk-union","disk union","bocchi","shop",280,360,"御茶之水站前的中古唱片店，经营黑胶与二手CD"],["kanda-books","神田古书店街方向","public","shop",100,375,"与乐器街相邻，可沿骏河台坡继续前往的旧书街"]]},"ashitani-residential":{"name":"芦谷市住宅区","nodes":[["koto-home","琴家","wata","home",85,170,"琴纱月家庭住宅"],["kaho-home","小柳家","wata","home",180,145,"香穗家庭住宅"],["sena-home","濑名家","wata","home",195,280,"紫阳花家庭住宅"],["nashi-home","梨地家","wata","home",95,330,"梨地家庭住宅"],["amagi-home","甘织家","wata","home",335,115,"甘织家，位于住宅区另一侧，与其他家庭距离较远"]]}}
+const ICONS={school:'<path class="glyph" d="M-10 7V-5H10V7M-13 7H13M-6-5V-10H6V-5M0-10V7"/>',station:'<path class="glyph" d="M-10-8H10V6H-10ZM-13 9H13M-6 6L-9 9M6 6L9 9M-6-3H6"/>',live:'<path class="glyph" d="M-10 8V-8H10V8M-5 2V-3M0 5V-6M5 1V-1"/>',shop:'<path class="glyph" d="M-10-3H10L8-9H-8ZM-8-3V9H8V-3M-3 9V2H3V9"/>',donut:'<circle class="glyph" r="7"/>',music:'<path class="glyph" d="M-4-8V6C-4 11-11 9-10 4C-9 1-5 1 2 0V-9M-4-6L7-9V4C7 9 0 8 1 3C2 0 5 1 7 0"/>',home:'<path class="glyph" d="M-11 0L0-10L11 0M-8-2V9H8V-2M-2 9V2H3V9"/>',street:'<path class="glyph" d="M-11 7L-5-7M11 7L5-7M0-8V-4M0 0V4M0 8V10"/>',cafe:'<path class="glyph" d="M-9-5H6V2C6 8-9 8-9 2ZM6-3H10V2H6M-11 9H8"/>',park:'<path class="glyph" d="M0-10L-8 1H-3L-9 8H9L3 1H8ZM0 8V12"/>',room:'<rect class="glyph" x="-10" y="-8" width="20" height="16"/><path class="glyph" d="M-5-2H5M-5 3H2"/>',stage:'<path class="glyph" d="M-11 8V-5H11V8M-11-2C-5 3 5 3 11-2M-5-7V-10M5-7V-10"/>',bar:'<path class="glyph" d="M-10-8H10L3 0V9H8M3 9H-5M-3 0L-10-8"/>',sound:'<path class="glyph" d="M-10 5H-6V-3H-10ZM-2 9H2V-8H-2ZM6 3H10V-1H6Z"/>'};
+function sceneLayer(id){
+if(id==='overview')return '';
+if(id==='starry')return '<g class="scene"><path class="scene-line" d="M35 95H230V175H385M35 235H385M35 330H385M110 175V410M265 235V410"/><text class="scene-label" x="250" y="100">入口 / 接待</text><text class="scene-label" x="45" y="228">观众区 / 音控</text><text class="scene-label" x="278" y="228">舞台</text><text class="scene-label" x="278" y="323">后台</text></g>';
+if(['ashitani','shuka','shimokita-school','aomori'].includes(id))return '<g class="scene"><path class="scene-line" d="M28 190H402M28 360H402M205 58V360"/><text class="scene-label" x="38" y="182">教学楼</text><text class="scene-label" x="38" y="352">教室 / 公共区域</text><text class="scene-label" x="220" y="352">专用教室 / 社团区域</text></g>';
+if(id==='shimokitazawa')return '<g class="scene"><path class="scene-road" d="M38 110C130 96 248 112 395 92M38 285C150 258 285 274 395 308"/><path class="scene-line" d="M155 60V390M285 60V390"/><text class="scene-label" x="46" y="102">站前</text><text class="scene-label" x="170" y="102">Livehouse街</text><text class="scene-label" x="300" y="102">店铺街</text></g>';
+if(id==='ochanomizu')return '<g class="scene"><path class="scene-road" d="M68 55C92 130 125 215 205 278S310 360 388 420"/><path class="scene-line" d="M105 88L365 88M135 170L390 170M178 260L395 260M238 350L395 350"/><text class="scene-label" x="78" y="68">圣桥口</text><text class="scene-label" x="118" y="152">明大通</text><text class="scene-label" x="188" y="244">骏河台坡</text><text class="scene-label" x="260" y="334">神田方向</text></g>';
+if(id==='queen')return '<g class="scene"><path class="scene-line" d="M35 175H395M220 175V420M35 345H220"/><text class="scene-label" x="45" y="167">入口 / 展示 / 点单</text><text class="scene-label" x="45" y="337">顾客座位区</text><text class="scene-label" x="235" y="337">后厨与员工区</text></g>';
+if(id==='shinjuku')return '<g class="scene"><path class="scene-road" d="M65 220C145 190 225 190 365 205M70 390C165 340 245 315 385 285"/><path class="scene-line" d="M180 75V335M300 75V315"/><text class="scene-label" x="45" y="205">新宿站周边</text><text class="scene-label" x="195" y="90">商业区</text><text class="scene-label" x="88" y="370">Livehouse方向</text></g>';
+if(id==='ashitani-town')return '<g class="scene"><path class="scene-road" d="M45 100C125 120 205 135 370 120M78 215C145 240 240 265 350 305"/><path class="scene-line" d="M190 95V360"/><text class="scene-label" x="45" y="88">车站前</text><text class="scene-label" x="205" y="105">商店街</text><text class="scene-label" x="95" y="335">公园与放学路</text></g>';
+if(id==='enoshima')return '<g class="scene"><path class="scene-road" d="M45 90C95 105 135 125 180 155S270 205 315 250S310 340 190 410"/><path class="scene-line" d="M55 280C95 230 110 180 135 135"/><text class="scene-label" x="48" y="78">片濑侧</text><text class="scene-label" x="150" y="143">上岛路线</text><text class="scene-label" x="250" y="232">神社与高处</text><text class="scene-label" x="190" y="395">岩岸方向</text></g>';if(id==='kanazawa')return '<g class="scene"><path class="scene-road" d="M45 115C125 130 220 135 355 118M55 385C150 360 255 350 390 370"/><path class="scene-line" d="M95 125C125 205 125 290 118 360M325 135C315 185 305 225 290 265"/><text class="scene-label" x="46" y="142">车站与住宅区</text><text class="scene-label" x="240" y="254">社区公园</text><text class="scene-label" x="48" y="348">海湾方向</text></g>';if(id==='meidaimae')return '<g class="scene"><path class="scene-line" d="M35 145H395M35 270H395M205 145V270"/><text class="scene-label" x="45" y="137">京王线</text><text class="scene-label" x="45" y="262">井之头线</text></g>';
+return '';
+}
+function routeLayer(id){if(id==='overview')return '<path class="route" d="M31 352C93 315 132 258 169 205S230 164 267 143S308 113 328 106"/><path class="route rail" d="M52 425C95 350 135 265 169 205S265 190 355 300"/><path class="route rail" d="M267 143C280 227 296 324 286 404"/><path class="route" d="M115 105C132 135 152 170 169 205"/><path class="route" d="M64 220C98 215 134 208 169 205"/><path class="route rail" d="M52 425C92 438 132 438 170 432"/><path class="route" d="M267 143C300 164 330 190 356 220"/>';return ''}
+let mapCurrent='overview',mapScale=1,mapPan={x:0,y:0},mapDrag=null,mapDetailTimer=null;
+function mapRoleAt(id){const roles=obj(S.stat&&S.stat.角色)?S.stat.角色:{},node=(PHONE_MAPS[mapCurrent]&&PHONE_MAPS[mapCurrent].nodes||[]).find(n=>n[0]===id),label=String(node&&node[1]||''),norm=v=>String(v||'').trim().toLowerCase();return Object.entries(roles).filter(([name,c])=>{if(!c||!c.在场)return false;const loc=norm(c.具体地点),place=norm(c.地点),motion=norm(c.动向),targets=[norm(id),norm(label)].filter(Boolean);return targets.some(target=>loc===target||place===target||motion.includes(target));}).map(([name,c])=>({name,initial:String(name||'?')[0],color:(S.ava&&S.ava[name])?'#b86d86':'#647f9e'}));}
+function mapApplyTransform(){const w=$id('pmap-world');if(w)w.style.transform='translate('+mapPan.x+'px,'+mapPan.y+'px) scale('+mapScale+')';}
+function mapZoomBy(d){mapScale=Math.max(.75,Math.min(2.4,mapScale+d));mapApplyTransform();}
+function mapHideDetail(){const d=$id('pmap-detail');d&&d.classList.remove('on');}
+function mapOpenNode(id){if(mapCurrent==='overview'&&PHONE_MAPS[id]){mapCurrent=id;mapScale=1;mapPan={x:0,y:0};mapHideDetail();mapRender();return;}const m=PHONE_MAPS[mapCurrent],n=(m.nodes||[]).find(x=>x[0]===id);if(!n)return;const rs=mapRoleAt(id),d=$id('pmap-detail');if(!d)return;d.innerHTML='<b>'+esc(n[1])+'</b><span>'+esc(n[6]||'可在此发生相应剧情')+(rs.length?' · '+rs.map(r=>esc(r.name)).join('、')+'当前位于这里':'')+'</span>';d.classList.add('on');clearTimeout(mapDetailTimer);mapDetailTimer=setTimeout(mapHideDetail,3200);}
+function mapRender(){const m=PHONE_MAPS[mapCurrent]||PHONE_MAPS.overview,nodes=m.nodes||[],el=ensureScr('scr-map',x=>x);const zones=m.zones?'<path class="zone wata" d="M18 70L224 70L236 300L150 370L45 400L18 340Z"/><text class="zone-title" x="45" y="170" fill="#a75f59">恋人不行生活圈</text><path class="zone bocchi" d="M210 38L410 48L414 410L250 430L190 180Z"/><text class="zone-title" x="250" y="82" fill="#aa8738">孤独摇滚生活圈</text>':'';let avatarOverlay='';const marks=nodes.map(n=>{const [id,name,t,type,x,y]=n,rs=mapRoleAt(id),isCurrent=rs.length>0;let av=rs.slice(0,3).map((r,i)=>{const col=i%2,row=Math.floor(i/2);return '<g class="avatar" transform="translate('+(x+12+col*11)+' '+(y-12+row*11)+')"><circle r="5.3" fill="'+r.color+'"/><text y="1.9">'+esc(r.initial)+'</text></g>';}).join('');if(rs.length>3)av+='<g class="avatar" transform="translate('+(x+23)+' '+(y-1)+')"><circle r="5.3" fill="#59645f"/><text y="1.9">+'+(rs.length-3)+'</text></g>';avatarOverlay+=av;return '<g class="node '+t+' '+type+(isCurrent?' current':'')+'" data-map-id="'+esc(id)+'" transform="translate('+x+' '+y+')"><circle class="ring" r="12"/>'+(ICONS[type]||ICONS.room)+'<text class="node-name" x="0" y="28">'+esc(name)+'</text>'+(isCurrent?'<text class="node-sub" x="0" y="38">'+rs.length+' 人在此</text>':'')+'</g>';}).join('');el.innerHTML=apphead(m.name,'地图','<button type="button" onclick="WN.mapBack()">‹ 返回</button>')+'<div class="body pmap-body"><div class="pmap-viewport" id="pmap-viewport"><div class="pmap-world" id="pmap-world"><svg viewBox="0 0 430 500" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="pmap-clean-grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" class="grid-line"/></pattern></defs><rect class="map-bg" width="430" height="500"/><rect width="430" height="500" fill="url(#pmap-clean-grid)"/>'+zones+routeLayer(mapCurrent)+sceneLayer(mapCurrent)+marks+'<g class="avatars-layer">'+avatarOverlay+'</g></svg></div><div class="pmap-tools"><span class="pmap-crumb">'+esc(m.name)+'</span><span class="pmap-toolgroup"><button class="pmap-toolbtn" id="pmap-minus" type="button" aria-label="缩小">−</button><button class="pmap-toolbtn" id="pmap-plus" type="button" aria-label="放大">＋</button><button class="pmap-toolbtn" id="pmap-reset" type="button" aria-label="重置视图">↺</button></span></div><div class="pmap-legend">地点 · 点击进入 / 查看</div><div class="pmap-tip">'+(mapCurrent==='overview'?'拖动地图 · 点击地点进入':'拖动地图 · 点击场所查看')+'</div><div class="pmap-detail" id="pmap-detail"></div></div></div>';const viewport=$id('pmap-viewport'),world=$id('pmap-world');world.querySelectorAll('.node').forEach(n=>n.addEventListener('click',e=>{e.stopPropagation();mapOpenNode(n.dataset.mapId)}));$id('pmap-plus').onclick=()=>mapZoomBy(.2);$id('pmap-minus').onclick=()=>mapZoomBy(-.2);$id('pmap-reset').onclick=()=>{mapScale=1;mapPan={x:0,y:0};mapApplyTransform()};viewport.addEventListener('pointerdown',e=>{if(e.target.closest('.node'))return;mapDrag={x:e.clientX,y:e.clientY,px:mapPan.x,py:mapPan.y};viewport.setPointerCapture(e.pointerId);viewport.classList.add('dragging');mapHideDetail()});viewport.addEventListener('pointermove',e=>{if(!mapDrag)return;mapPan.x=mapDrag.px+e.clientX-mapDrag.x;mapPan.y=mapDrag.py+e.clientY-mapDrag.y;mapApplyTransform()});viewport.addEventListener('pointerup',()=>{mapDrag=null;viewport.classList.remove('dragging')});viewport.addEventListener('pointercancel',()=>{mapDrag=null;viewport.classList.remove('dragging')});viewport.addEventListener('wheel',e=>{e.preventDefault();mapZoomBy(e.deltaY<0?.15:-.15)},{passive:false});WN.go('scr-map');mapApplyTransform();}
+WN.mapBack=()=>{if(mapCurrent!=='overview'){mapCurrent='overview';mapScale=1;mapPan={x:0,y:0};mapHideDetail();mapRender()}else WN.back()};/* ---------- 主屏 ---------- */
 const APPS = [
   {id:'contacts', nm:'通讯录', ic:'<circle cx="12" cy="8" r="3.4"/><path d="M5 19c1.4-3.2 4-4.8 7-4.8s5.6 1.6 7 4.8"/>'},
   {id:'lime', nm:'LIME', ic:'<path d="M4 6h16v10H9l-5 4z"/>', badge:unreadLimeAll},
   {id:'album', nm:'相册', ic:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M5 17l4.5-4.5 3 3L17 11l2.5 2.5"/>'},
-  {id:'journal', nm:'手账', ic:'<path d="M4 18l5-5 3.5 3.5L20 9"/><path d="M15 9h5v5"/>'},
+  {id:'map', nm:'地图', ic:'<path d="M4 5l6-2 5 2 5-2v16l-5 2-5-2-6 2z"/><path d="M10 3v16M15 5v16"/>'},  {id:'journal', nm:'手账', ic:'<path d="M4 18l5-5 3.5 3.5L20 9"/><path d="M15 9h5v5"/>'},
   {id:'schedule', nm:'日程', ic:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 14h3M8 17h6"/>'},
   {id:'campus', nm:'广场', ic:'<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17-2.6-2.4-2.6-14.6 0-17z"/>', badge:unreadCampus},
   {id:'worldbook', nm:'世界书', ic:'<path d="M4 5.5c2.7-1 5.3-.5 8 1.5v12c-2.7-2-5.3-2.5-8-1.5z"/><path d="M20 5.5c-2.7-1-5.3-.5-8 1.5v12c2.7-2 5.3-2.5 8-1.5z"/>'},
@@ -1911,7 +1968,7 @@ function renderHome(){
   renderSys();
 }
 WN.open = function(app){
-  const fn = { contacts:renderContacts, lime:renderLime, album:renderAlbum,
+  const fn = { contacts:renderContacts, lime:renderLime, album:renderAlbum, map:mapRender,
     journal:renderJournal, schedule:renderSchedule, campus:renderCampus, settings:renderSettings,
     worldbook:renderWorldbook, help:renderGuide }[app];
   fn && fn();
@@ -1963,7 +2020,8 @@ WN.contact = function(name,navigate=true){
       <div class="hero">
         ${avaHtml(name,true)}
         <span class="hnm">${c.在场?'<span class="dot"></span>':''}${esc(name)}</span>
-        <span class="chips"><span class="chip wn-edit" ${editData(['角色',name,'在场'],'是否在场','bool')}>${c.在场?'在场':'不在场'}</span>
+        <span class="chips"><span class="chip wn-edit" ${editData(['角色',name,'来源作品'],'来源作品','text',{choices:['恋人不行','孤独摇滚','原创'],clearable:false})}>${esc(c.来源作品||'原创')}</span>
+          <span class="chip wn-edit" ${editData(['角色',name,'在场'],'是否在场','bool')}>${c.在场?'在场':'不在场'}</span>
           <span class="chip acc wn-edit" ${editData(['角色',name,'关系'],'关系','text',{maxLen:80})}>${esc(c.关系||'—')}</span>
           <span class="chip wn-edit" ${editData(['角色',name,'称呼'],'称呼','text',{maxLen:60})}>称你「${esc(c.称呼||'—')}」</span>
           <span class="chip wn-edit" ${editData(['角色',name,'联系方式'],'联系方式','bool')}>${c.联系方式?'已交换 LIME':'未交换联系方式'}</span></span>
@@ -3717,22 +3775,33 @@ async function syncScheduleReminders(){
 
 /* ---------- 手账 ---------- */
 function renderJournal(navigate=true){
-  const p=S.stat.剧情||{}, m=p.主线||{};
-  const shiftCls={'无':'b-good','轻微':'b-warn','显著':'b-warn','分歧':'b-crit'}[p.偏移]||'b-good';
+  const p=S.stat.剧情||{}, lines=p.作品线||{}, enabledWorks=(S.stat.世界&&S.stat.世界.启用作品)||{};
+  const lineCard=(key,label,tone)=>{
+    const m=lines[key]||{};
+    if(enabledWorks[key]!==true) return `<div class="card1 journal-line ${tone} is-disabled">
+      <div class="journal-line-head"><span class="work">${esc(label)}</span><span class="journal-off">未启用</span></div>
+      <div class="journal-disabled-copy">本次开局没有启用这部作品，剧情线不会自动推进。</div></div>`;
+    const shiftCls={'无':'b-good','轻微':'b-warn','显著':'b-warn','分歧':'b-crit'}[m.偏移]||'b-good';
+    return `<div class="card1 journal-line ${tone}">
+      <div class="journal-line-head"><span class="work">${esc(label)}</span>
+        <span class="arc wn-edit" ${editData(['剧情','作品线',key,'篇章'],label+' · 篇章','text',{maxLen:80,clearable:false})}>${esc(m.篇章||'—')}</span></div>
+      <div class="jmeta"><span class="badge wn-edit ${shiftCls}" ${editData(['剧情','作品线',key,'偏移'],label+' · 偏移','text',{choices:['无','轻微','显著','分歧'],clearLabel:'恢复默认',clearHint:'该作品线偏移将恢复为“无”，字段本身不会删除。'})}><i></i>偏移·${esc(m.偏移||'无')}</span></div>
+      <div class="m4b">
+        <div class="cur wn-edit" ${editData(['剧情','作品线',key,'当前节点'],label+' · 当前节点','text',{long:true,maxLen:200})}><em>当前节点</em><span>${esc(m.当前节点||'—')}</span></div>
+        <div class="wn-edit" ${editData(['剧情','作品线',key,'原著走向'],label+' · 原著走向','text',{long:true,maxLen:300})}><em>原著走向</em><span>${esc(m.原著走向||'—')}</span></div>
+        <div class="wn-edit" ${editData(['剧情','作品线',key,'现实变化'],label+' · 现实变化','text',{long:true,maxLen:300})}><em>现实变化</em><span>${esc(m.现实变化||'—')}</span></div>
+        <div class="wn-edit" ${editData(['剧情','作品线',key,'推演走向'],label+' · 推演走向','text',{long:true,maxLen:500})}><em>推演走向</em><span>${esc(m.推演走向||'—')}</span></div>
+      </div></div>`;
+  };
   ensureScr('scr-journal', el=>{
     el.innerHTML=apphead('手账','')+`<div class="body">
       <div class="card1 jhead">
-        <div class="arc wn-edit" ${editData(['剧情','篇章'],'篇章','text',{maxLen:80,clearable:false})}>${esc(p.篇章||'—')}</div>
-        <div class="jmeta"><span class="badge wn-edit ${shiftCls}" ${editData(['剧情','偏移'],'偏移','text',{choices:['无','轻微','显著','分歧'],clearLabel:'恢复默认',clearHint:'剧情偏移将恢复为“无”，字段本身不会删除。'})}><i></i>偏移·${esc(p.偏移||'无')}</span></div>
         <div class="pat2 wn-edit" ${editData(['剧情','格局'],'格局','text',{long:true,maxLen:500})}>${esc(p.格局||'—')}</div>
       </div>
-      <div class="card1"><div class="ct">主线推演</div>
-        <div class="m4b">
-          <div class="cur wn-edit" ${editData(['剧情','主线','当前节点'],'当前节点','text',{long:true,maxLen:200})}><em>当前节点</em><span>${esc(m.当前节点||'—')}</span></div>
-          <div class="wn-edit" ${editData(['剧情','主线','原著走向'],'原著走向','text',{long:true,maxLen:300})}><em>原著走向</em><span>${esc(m.原著走向||'—')}</span></div>
-          <div class="wn-edit" ${editData(['剧情','主线','现实变化'],'现实变化','text',{long:true,maxLen:300})}><em>现实变化</em><span>${esc(m.现实变化||'—')}</span></div>
-          <div class="wn-edit" ${editData(['剧情','主线','推演走向'],'推演走向','text',{long:true,maxLen:500})}><em>推演走向</em><span>${esc(m.推演走向||'—')}</span></div>
-        </div></div></div>`;
+      <div class="journal-lines">
+        ${lineCard('恋人不行','恋人不行','watanare')}
+        ${lineCard('孤独摇滚','孤独摇滚','bocchi')}
+      </div></div>`;
   });
   if(navigate) WN.go('scr-journal');
 }
@@ -4151,7 +4220,7 @@ function renderGuide(navigate=true){
         </div></details>
         <details class="guide-sec"><summary>广场、手账与世界书</summary><div class="guide-copy">
           <p>广场分为论坛和媒体两个标签。下拉页面会直接刷新当前标签；右上角和页面底部的刷新按钮可以先填写这次想看的话题。</p>
-          <p><b>手账</b>查看当前篇章、剧情偏移和主线推演。<b>世界书</b>可查看并真实开关当前主世界书条目；关闭条目会影响所有共用这本世界书的聊天，受保护条目只能查看。</p>
+          <p><b>手账</b>分别查看《恋人不行》和《孤独摇滚》的篇章、偏移与后续推演。<b>世界书</b>可查看并真实开关当前主世界书条目；关闭条目会影响所有共用这本世界书的聊天，受保护条目只能查看。</p>
         </div></details>
         <details class="guide-sec"><summary>设置怎么选</summary><div class="guide-copy">
           <p><b>我的头像</b>可从设备上传，上传后会同时显示在手机名片、动态和正文中的玩家对话旁；图片只保存在当前浏览器，点“恢复”即可改回名字占位。</p>
@@ -4932,19 +5001,21 @@ window.WNBoot = boot;
 /* ---------- 演示模式（无桥接时） ---------- */
 setTimeout(()=>{ if(S.B) return;
   const demoStat = {
-    世界:{日期:'2024年12月24日',星期:'星期二',时间:'深夜 23:47',地点:'真唯的公寓·客厅',天气:'小雪',
+    世界:{日期:'2024年12月24日',星期:'星期二',时间:'深夜 23:47',地点:'真唯的公寓·客厅',天气:'小雪',启用作品:{恋人不行:true,孤独摇滚:false},
       约定:{ '圣诞订婚期限':{内容:'在仪式开始前阻止假订婚，守住三人的关系',相关者:'纱月×玲奈子×真唯',期限:'12月25日',状态:'进行中'},
              '平安夜作战会议':{内容:'全员集合排作战步骤',相关者:'全员×深野雪',期限:'无',状态:'达成'} }},
     user:{称呼:'深野雪',身份:'一年A组转学生',服装:'便服·长大衣',状态:'指尖还带着夜风的凉',风评:'和五重奏走得很近的十二月转学生'},
     角色:{
-      真唯:{在场:true,动向:'给每个人倒热可可',服装:'白色高领毛衣',心情:'平静得反常',身体状态:'指尖被夜风吹得发凉，攥着暖手宝',内心独白:'再往前一步的资格，要在明天之后……再去向你争取。',情感倾向:159,信任程度:159,亲密程度:118,性吸引力:0,关系:'挚友（约定）',称呼:'雪',联系方式:true,羁绊:'12/1 初遇于教室；12/12 深夜琴房长谈；12/20 单独委托'},
-      玲奈子:{在场:true,动向:'在白板前排作战步骤',服装:'米色针织衫',心情:'紧张得胃疼但装没事',内心独白:'明明是我的战斗，为什么这家伙比我还拼命啊……',情感倾向:142,信任程度:142,亲密程度:76,性吸引力:0,关系:'挚友',称呼:'小雪',联系方式:true,羁绊:'12/1 初遇；12/9 天台分食便当；12/18 陪她冒雨追纱月'},
-      紫阳花:{在场:true,动向:'分发自己烤的饼干',服装:'奶白色围巾还没摘',心情:'担心大家却不说',内心独白:'这种时候还能笑出来的人，好狡猾。',情感倾向:96,信任程度:96,亲密程度:54,性吸引力:0,关系:'朋友',称呼:'深野同学',联系方式:true,羁绊:'12/2 初遇；12/17 同去挑圣诞礼物'},
-      纱月:{在场:false,动向:'独自在家整理母亲的旧照片',服装:'家居服',心情:'表面平静',身体状态:'轻微着凉，嗓音比平时低',内心独白:'',情感倾向:88,信任程度:88,亲密程度:40,性吸引力:0,关系:'好友',称呼:'你',联系方式:true,羁绊:'12/3 图书馆冲突；12/15 停电夜和解'},
-      香穗:{在场:false,动向:'回家取应援横幅',服装:'',心情:'',内心独白:'',情感倾向:73,信任程度:73,亲密程度:35,性吸引力:0,关系:'朋友',称呼:'小雪同学',联系方式:true,羁绊:'12/2 初遇；12/14 秋叶原带路'},
-      遥奈:{在场:false,动向:'被姐姐勒令在家待命',服装:'',心情:'',内心独白:'',情感倾向:52,信任程度:52,亲密程度:20,性吸引力:0,关系:'姐姐的朋友',称呼:'小雪姐',联系方式:false,羁绊:'12/10 甘织家蹭饭'} },
-    剧情:{篇章:'第八卷后·订婚决战倒计时',格局:'玲真纱三人交往公开；假订婚仪式明日举行',偏移:'轻微',
-      主线:{当前节点:'决战前夜作战会议（原著无此夜）',原著走向:'玲奈子只身赴 12/25 会场谈判',现实变化:'你促成全员共同备战；琉音已接下谈判请求',推演走向:'会场对决或提前至仪式开始前；花取可能先动手'}}
+      真唯:{来源作品:'恋人不行',在场:true,动向:'给每个人倒热可可',服装:'白色高领毛衣',心情:'平静得反常',身体状态:'指尖被夜风吹得发凉，攥着暖手宝',内心独白:'再往前一步的资格，要在明天之后……再去向你争取。',情感倾向:159,信任程度:159,亲密程度:118,性吸引力:0,关系:'挚友（约定）',称呼:'雪',联系方式:true,羁绊:'12/1 初遇于教室；12/12 深夜琴房长谈；12/20 单独委托'},
+      玲奈子:{来源作品:'恋人不行',在场:true,动向:'在白板前排作战步骤',服装:'米色针织衫',心情:'紧张得胃疼但装没事',内心独白:'明明是我的战斗，为什么这家伙比我还拼命啊……',情感倾向:142,信任程度:142,亲密程度:76,性吸引力:0,关系:'挚友',称呼:'小雪',联系方式:true,羁绊:'12/1 初遇；12/9 天台分食便当；12/18 陪她冒雨追纱月'},
+      紫阳花:{来源作品:'恋人不行',在场:true,动向:'分发自己烤的饼干',服装:'奶白色围巾还没摘',心情:'担心大家却不说',内心独白:'这种时候还能笑出来的人，好狡猾。',情感倾向:96,信任程度:96,亲密程度:54,性吸引力:0,关系:'朋友',称呼:'深野同学',联系方式:true,羁绊:'12/2 初遇；12/17 同去挑圣诞礼物'},
+      纱月:{来源作品:'恋人不行',在场:false,动向:'独自在家整理母亲的旧照片',服装:'家居服',心情:'表面平静',身体状态:'轻微着凉，嗓音比平时低',内心独白:'',情感倾向:88,信任程度:88,亲密程度:40,性吸引力:0,关系:'好友',称呼:'你',联系方式:true,羁绊:'12/3 图书馆冲突；12/15 停电夜和解'},
+      香穗:{来源作品:'恋人不行',在场:false,动向:'回家取应援横幅',服装:'',心情:'',内心独白:'',情感倾向:73,信任程度:73,亲密程度:35,性吸引力:0,关系:'朋友',称呼:'小雪同学',联系方式:true,羁绊:'12/2 初遇；12/14 秋叶原带路'},
+      遥奈:{来源作品:'恋人不行',在场:false,动向:'被姐姐勒令在家待命',服装:'',心情:'',内心独白:'',情感倾向:52,信任程度:52,亲密程度:20,性吸引力:0,关系:'姐姐的朋友',称呼:'小雪姐',联系方式:false,羁绊:'12/10 甘织家蹭饭'} },
+    剧情:{格局:'玲真纱三人交往公开；假订婚仪式明日举行',作品线:{
+      恋人不行:{篇章:'第八卷后·订婚决战倒计时',偏移:'轻微',当前节点:'决战前夜作战会议（原著无此夜）',原著走向:'玲奈子只身赴 12/25 会场谈判',现实变化:'你促成全员共同备战；琉音已接下谈判请求',推演走向:'会场对决或提前至仪式开始前；花取可能先动手'},
+      孤独摇滚:{篇章:'',偏移:'',当前节点:'',原著走向:'',现实变化:'',推演走向:''}
+    }}
   };
   let demoStore = emptyStore(); let _seq=0;
   demoStore.seq=4;
@@ -4986,8 +5057,8 @@ setTimeout(()=>{ if(S.B) return;
     clearStatPath:async path=>{ let cur=demoStat;
       for(let i=0;i<path.length-1;i++){ if(!obj(cur)||!own(cur,path[i])) throw new Error('变量路径不存在'); cur=cur[path[i]]; }
       const leaf=path[path.length-1]; if(!obj(cur)||!own(cur,leaf)) throw new Error('变量路径不存在');
-      if(path.length===2&&path[0]==='剧情'&&path[1]==='篇章') throw new Error('篇章不能清空，请直接修改为正确卷数');
-      if(path.length===2&&path[0]==='剧情'&&path[1]==='偏移') cur[leaf]='无';
+      if(path.length===4&&path[0]==='剧情'&&path[1]==='作品线'&&path[3]==='篇章') throw new Error('作品线篇章不能清空，请直接修改为正确阶段');
+      if(path.length===4&&path[0]==='剧情'&&path[1]==='作品线'&&path[3]==='偏移') cur[leaf]='无';
       else if(path.length===4&&path[0]==='世界'&&path[1]==='约定'&&path[3]==='状态') cur[leaf]='悬置';
       else if(typeof cur[leaf]==='boolean') cur[leaf]=false;
       else if(typeof cur[leaf]==='number') cur[leaf]=0;
@@ -5058,3 +5129,9 @@ setTimeout(()=>{ if(S.B) return;
 </script>
 </body>
 </html>
+
+
+
+
+
+
