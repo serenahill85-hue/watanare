@@ -819,7 +819,7 @@
 
 /* 地图：与 map-hierarchy-preview.html 共用的 SVG 视觉令牌 */
 .pmap-body{padding:0!important;overflow:hidden;background:var(--screen);position:relative}
-.pmap-viewport{position:relative;width:100%;height:100%;min-height:0;overflow:hidden;touch-action:none;cursor:grab;background:var(--screen)}
+.pmap-viewport{position:relative;width:100%;height:100%;min-height:0;overflow:hidden;touch-action:none;overscroll-behavior:contain;cursor:grab;background:var(--screen)}
 .pmap-viewport.dragging{cursor:grabbing}
 .pmap-world{width:100%;height:100%;transform-origin:0 0;will-change:transform}
 .pmap-world svg{width:100%;height:100%;display:block}
@@ -1931,13 +1931,104 @@ if(id==='enoshima')return '<g class="scene"><path class="scene-road" d="M45 90C9
 return '';
 }
 function routeLayer(id){if(id==='overview')return '<path class="route" d="M31 352C93 315 132 258 169 205S230 164 267 143S308 113 328 106"/><path class="route rail" d="M52 425C95 350 135 265 169 205S265 190 355 300"/><path class="route rail" d="M267 143C280 227 296 324 286 404"/><path class="route" d="M115 105C132 135 152 170 169 205"/><path class="route" d="M64 220C98 215 134 208 169 205"/><path class="route rail" d="M52 425C92 438 132 438 170 432"/><path class="route" d="M267 143C300 164 330 190 356 220"/>';return ''}
-let mapCurrent='overview',mapScale=1,mapPan={x:0,y:0},mapDrag=null,mapDetailTimer=null;
-function mapRoleAt(id){const roles=obj(S.stat&&S.stat.角色)?S.stat.角色:{},node=(PHONE_MAPS[mapCurrent]&&PHONE_MAPS[mapCurrent].nodes||[]).find(n=>n[0]===id),label=String(node&&node[1]||''),norm=v=>String(v||'').trim().toLowerCase();return Object.entries(roles).filter(([name,c])=>{if(!c||!c.在场)return false;const loc=norm(c.具体地点),place=norm(c.地点),motion=norm(c.动向),targets=[norm(id),norm(label)].filter(Boolean);return targets.some(target=>loc===target||place===target||motion.includes(target));}).map(([name,c])=>({name,initial:String(name||'?')[0],color:(S.ava&&S.ava[name])?'#b86d86':'#647f9e'}));}
+const MAP_SCALE_MIN=.75,MAP_SCALE_MAX=2.4,MAP_GESTURE_SLOP=6;
+let mapCurrent='overview',mapScale=1,mapPan={x:0,y:0},mapDetailTimer=null,mapGesture={mode:'idle'},mapSuppressClickUntil=0;
+const mapPointers=new Map();
+function mapParentLabel(id){const n=(PHONE_MAPS.overview.nodes||[]).find(node=>node[0]===id);return String(n&&n[1]||'').trim();}
+function mapRoleAt(id){
+  const roles=obj(S.stat&&S.stat.角色)?S.stat.角色:{};
+  const node=(PHONE_MAPS[mapCurrent]&&PHONE_MAPS[mapCurrent].nodes||[]).find(n=>n[0]===id);
+  const label=String(node&&node[1]||'').trim(),parent=mapParentLabel(mapCurrent);
+  const labelIsPrimary=(PHONE_MAPS.overview.nodes||[]).some(n=>String(n&&n[1]||'').trim()===label);
+  return Object.entries(roles).filter(([,c])=>{
+    if(!c)return false;
+    const place=String(c.地点||'').trim(),detail=String(c.具体地点||'').trim();
+    if(!place||!label)return false;
+    if(mapCurrent==='overview')return place===label;
+    return (place===parent&&detail===label)||(labelIsPrimary&&place===label);
+  }).map(([name,c])=>({name,initial:String(name||'?')[0],inScene:c.在场===true,color:(S.ava&&S.ava[name])?'#b86d86':'#647f9e'}));
+}
 function mapApplyTransform(){const w=$id('pmap-world');if(w)w.style.transform='translate('+mapPan.x+'px,'+mapPan.y+'px) scale('+mapScale+')';}
-function mapZoomBy(d){mapScale=Math.max(.75,Math.min(2.4,mapScale+d));mapApplyTransform();}
+function mapClampScale(value){return Math.max(MAP_SCALE_MIN,Math.min(MAP_SCALE_MAX,value));}
+function mapViewportPoint(viewport,clientX,clientY){const rect=viewport.getBoundingClientRect();return{x:clientX-rect.left,y:clientY-rect.top};}
+function mapSetScale(next,viewport,clientX,clientY){
+  const scale=mapClampScale(next);if(scale===mapScale)return;
+  const rect=viewport.getBoundingClientRect(),cx=clientX==null?rect.left+rect.width/2:clientX,cy=clientY==null?rect.top+rect.height/2:clientY;
+  const p=mapViewportPoint(viewport,cx,cy),wx=(p.x-mapPan.x)/mapScale,wy=(p.y-mapPan.y)/mapScale;
+  mapScale=scale;mapPan={x:p.x-wx*scale,y:p.y-wy*scale};mapApplyTransform();
+}
+function mapZoomBy(delta,viewport,clientX,clientY){mapSetScale(mapScale+delta,viewport,clientX,clientY);}
+function mapMidpoint(a,b){return{x:(a.x+b.x)/2,y:(a.y+b.y)/2};}
+function mapDistance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function mapSuppressNodeClick(){mapSuppressClickUntil=Date.now()+380;}
+function mapCapture(viewport,pointerId){try{viewport.setPointerCapture(pointerId)}catch(_){}}
+function mapBeginPinch(viewport){
+  const pair=[...mapPointers.entries()].slice(0,2);if(pair.length<2)return;
+  pair.forEach(([pointerId])=>mapCapture(viewport,pointerId));
+  const a=pair[0][1],b=pair[1][1],mid=mapMidpoint(a,b),p=mapViewportPoint(viewport,mid.x,mid.y);
+  mapGesture={mode:'pinch',ids:[pair[0][0],pair[1][0]],distance:Math.max(1,mapDistance(a,b)),scale:mapScale,anchor:{x:(p.x-mapPan.x)/mapScale,y:(p.y-mapPan.y)/mapScale}};
+  viewport.classList.add('dragging');mapSuppressNodeClick();
+}
+function mapMovePinch(viewport){
+  if(mapGesture.mode!=='pinch')mapBeginPinch(viewport);
+  const a=mapPointers.get(mapGesture.ids&&mapGesture.ids[0]),b=mapPointers.get(mapGesture.ids&&mapGesture.ids[1]);if(!a||!b){mapBeginPinch(viewport);return;}
+  const mid=mapMidpoint(a,b),p=mapViewportPoint(viewport,mid.x,mid.y),scale=mapClampScale(mapGesture.scale*mapDistance(a,b)/mapGesture.distance);
+  mapScale=scale;mapPan={x:p.x-mapGesture.anchor.x*scale,y:p.y-mapGesture.anchor.y*scale};mapApplyTransform();
+}
+function mapFinishPointer(viewport,pointerId,cancelled=false){
+  if(!mapPointers.has(pointerId))return;
+  const moved=mapGesture.mode==='pan'||mapGesture.mode==='pinch'||cancelled;mapPointers.delete(pointerId);if(moved)mapSuppressNodeClick();
+  if(mapPointers.size>=2){mapBeginPinch(viewport);return;}
+  if(mapPointers.size===1){const [id,p]=[...mapPointers.entries()][0];mapGesture={mode:'pending',pointerId:id,x:p.x,y:p.y,px:mapPan.x,py:mapPan.y};}
+  else mapGesture={mode:'idle'};
+  viewport.classList.remove('dragging');
+}
 function mapHideDetail(){const d=$id('pmap-detail');d&&d.classList.remove('on');}
 function mapOpenNode(id){if(mapCurrent==='overview'&&PHONE_MAPS[id]){mapCurrent=id;mapScale=1;mapPan={x:0,y:0};mapHideDetail();mapRender();return;}const m=PHONE_MAPS[mapCurrent],n=(m.nodes||[]).find(x=>x[0]===id);if(!n)return;const rs=mapRoleAt(id),d=$id('pmap-detail');if(!d)return;d.innerHTML='<b>'+esc(n[1])+'</b><span>'+esc(n[6]||'可在此发生相应剧情')+(rs.length?' · '+rs.map(r=>esc(r.name)).join('、')+'当前位于这里':'')+'</span>';d.classList.add('on');clearTimeout(mapDetailTimer);mapDetailTimer=setTimeout(mapHideDetail,3200);}
-function mapRender(){const m=PHONE_MAPS[mapCurrent]||PHONE_MAPS.overview,nodes=m.nodes||[],el=ensureScr('scr-map',x=>x);const zones=m.zones?'<path class="zone wata" d="M18 70L224 70L236 300L150 370L45 400L18 340Z"/><text class="zone-title" x="45" y="170" fill="#a75f59">恋人不行生活圈</text><path class="zone bocchi" d="M210 38L410 48L414 410L250 430L190 180Z"/><text class="zone-title" x="250" y="82" fill="#aa8738">孤独摇滚生活圈</text>':'';let avatarOverlay='';const marks=nodes.map(n=>{const [id,name,t,type,x,y]=n,rs=mapRoleAt(id),isCurrent=rs.length>0;let av=rs.slice(0,3).map((r,i)=>{const col=i%2,row=Math.floor(i/2);return '<g class="avatar" transform="translate('+(x+12+col*11)+' '+(y-12+row*11)+')"><circle r="5.3" fill="'+r.color+'"/><text y="1.9">'+esc(r.initial)+'</text></g>';}).join('');if(rs.length>3)av+='<g class="avatar" transform="translate('+(x+23)+' '+(y-1)+')"><circle r="5.3" fill="#59645f"/><text y="1.9">+'+(rs.length-3)+'</text></g>';avatarOverlay+=av;return '<g class="node '+t+' '+type+(isCurrent?' current':'')+'" data-map-id="'+esc(id)+'" transform="translate('+x+' '+y+')"><circle class="ring" r="12"/>'+(ICONS[type]||ICONS.room)+'<text class="node-name" x="0" y="28">'+esc(name)+'</text>'+(isCurrent?'<text class="node-sub" x="0" y="38">'+rs.length+' 人在此</text>':'')+'</g>';}).join('');el.innerHTML=apphead(m.name,'地图','<button type="button" onclick="WN.mapBack()">‹ 返回</button>')+'<div class="body pmap-body"><div class="pmap-viewport" id="pmap-viewport"><div class="pmap-world" id="pmap-world"><svg viewBox="0 0 430 500" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="pmap-clean-grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" class="grid-line"/></pattern></defs><rect class="map-bg" width="430" height="500"/><rect width="430" height="500" fill="url(#pmap-clean-grid)"/>'+zones+routeLayer(mapCurrent)+sceneLayer(mapCurrent)+marks+'<g class="avatars-layer">'+avatarOverlay+'</g></svg></div><div class="pmap-tools"><span class="pmap-crumb">'+esc(m.name)+'</span><span class="pmap-toolgroup"><button class="pmap-toolbtn" id="pmap-minus" type="button" aria-label="缩小">−</button><button class="pmap-toolbtn" id="pmap-plus" type="button" aria-label="放大">＋</button><button class="pmap-toolbtn" id="pmap-reset" type="button" aria-label="重置视图">↺</button></span></div><div class="pmap-legend">地点 · 点击进入 / 查看</div><div class="pmap-tip">'+(mapCurrent==='overview'?'拖动地图 · 点击地点进入':'拖动地图 · 点击场所查看')+'</div><div class="pmap-detail" id="pmap-detail"></div></div></div>';const viewport=$id('pmap-viewport'),world=$id('pmap-world');world.querySelectorAll('.node').forEach(n=>n.addEventListener('click',e=>{e.stopPropagation();mapOpenNode(n.dataset.mapId)}));$id('pmap-plus').onclick=()=>mapZoomBy(.2);$id('pmap-minus').onclick=()=>mapZoomBy(-.2);$id('pmap-reset').onclick=()=>{mapScale=1;mapPan={x:0,y:0};mapApplyTransform()};viewport.addEventListener('pointerdown',e=>{if(e.target.closest('.node'))return;mapDrag={x:e.clientX,y:e.clientY,px:mapPan.x,py:mapPan.y};viewport.setPointerCapture(e.pointerId);viewport.classList.add('dragging');mapHideDetail()});viewport.addEventListener('pointermove',e=>{if(!mapDrag)return;mapPan.x=mapDrag.px+e.clientX-mapDrag.x;mapPan.y=mapDrag.py+e.clientY-mapDrag.y;mapApplyTransform()});viewport.addEventListener('pointerup',()=>{mapDrag=null;viewport.classList.remove('dragging')});viewport.addEventListener('pointercancel',()=>{mapDrag=null;viewport.classList.remove('dragging')});viewport.addEventListener('wheel',e=>{e.preventDefault();mapZoomBy(e.deltaY<0?.15:-.15)},{passive:false});WN.go('scr-map');mapApplyTransform();}
+function mapRender(){
+  mapPointers.clear();mapGesture={mode:'idle'};
+  const m=PHONE_MAPS[mapCurrent]||PHONE_MAPS.overview,nodes=m.nodes||[],el=ensureScr('scr-map',x=>x);
+  const zones=m.zones?'<path class="zone wata" d="M18 70L224 70L236 300L150 370L45 400L18 340Z"/><text class="zone-title" x="45" y="170" fill="#a75f59">恋人不行生活圈</text><path class="zone bocchi" d="M210 38L410 48L414 410L250 430L190 180Z"/><text class="zone-title" x="250" y="82" fill="#aa8738">孤独摇滚生活圈</text>':'';
+  let avatarOverlay='';
+  const marks=nodes.map(n=>{
+    const [id,name,t,type,x,y]=n,rs=mapRoleAt(id),isCurrent=rs.length>0;
+    let av=rs.slice(0,3).map((r,i)=>{const col=i%2,row=Math.floor(i/2);return '<g class="avatar" data-in-scene="'+String(r.inScene)+'" transform="translate('+(x+12+col*11)+' '+(y-12+row*11)+')"><circle r="5.3" fill="'+r.color+'"/><text y="1.9">'+esc(r.initial)+'</text></g>';}).join('');
+    if(rs.length>3)av+='<g class="avatar" transform="translate('+(x+23)+' '+(y-1)+')"><circle r="5.3" fill="#59645f"/><text y="1.9">+'+(rs.length-3)+'</text></g>';
+    avatarOverlay+=av;
+    return '<g class="node '+t+' '+type+(isCurrent?' current':'')+'" data-map-id="'+esc(id)+'" transform="translate('+x+' '+y+')"><circle class="ring" r="12"/>'+(ICONS[type]||ICONS.room)+'<text class="node-name" x="0" y="28">'+esc(name)+'</text>'+(isCurrent?'<text class="node-sub" x="0" y="38">'+rs.length+' 人在此</text>':'')+'</g>';
+  }).join('');
+  const tip='单指拖动 · 双指缩放 · '+(mapCurrent==='overview'?'点击地点进入':'点击场所查看');
+  el.innerHTML=apphead(m.name,'地图','<button type="button" onclick="WN.mapBack()">‹ 返回</button>')+'<div class="body pmap-body"><div class="pmap-viewport" id="pmap-viewport"><div class="pmap-world" id="pmap-world"><svg viewBox="0 0 430 500" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="pmap-clean-grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" class="grid-line"/></pattern></defs><rect class="map-bg" width="430" height="500"/><rect width="430" height="500" fill="url(#pmap-clean-grid)"/>'+zones+routeLayer(mapCurrent)+sceneLayer(mapCurrent)+marks+'<g class="avatars-layer">'+avatarOverlay+'</g></svg></div><div class="pmap-tools"><span class="pmap-crumb">'+esc(m.name)+'</span><span class="pmap-toolgroup"><button class="pmap-toolbtn" id="pmap-minus" type="button" aria-label="缩小">−</button><button class="pmap-toolbtn" id="pmap-plus" type="button" aria-label="放大">＋</button><button class="pmap-toolbtn" id="pmap-reset" type="button" aria-label="重置视图">↺</button></span></div><div class="pmap-legend">地点 · 点击进入 / 查看</div><div class="pmap-tip">'+tip+'</div><div class="pmap-detail" id="pmap-detail"></div></div></div>';
+  const viewport=$id('pmap-viewport'),world=$id('pmap-world');
+  world.querySelectorAll('.node').forEach(n=>n.addEventListener('click',e=>{if(Date.now()<mapSuppressClickUntil){e.preventDefault();e.stopPropagation();return;}e.stopPropagation();mapOpenNode(n.dataset.mapId)}));
+  $id('pmap-plus').onclick=()=>mapZoomBy(.2,viewport);
+  $id('pmap-minus').onclick=()=>mapZoomBy(-.2,viewport);
+  $id('pmap-reset').onclick=()=>{mapScale=1;mapPan={x:0,y:0};mapApplyTransform()};
+  viewport.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    mapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(mapPointers.size===1)mapGesture={mode:'pending',pointerId:e.pointerId,x:e.clientX,y:e.clientY,px:mapPan.x,py:mapPan.y};
+    else mapBeginPinch(viewport);
+    mapHideDetail();
+  });
+  viewport.addEventListener('pointermove',e=>{
+    if(!mapPointers.has(e.pointerId))return;
+    mapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(mapPointers.size>=2){e.preventDefault();mapMovePinch(viewport);return;}
+    if(mapGesture.pointerId!==e.pointerId)return;
+    const dx=e.clientX-mapGesture.x,dy=e.clientY-mapGesture.y;
+    if(mapGesture.mode==='pending'){
+      if(Math.hypot(dx,dy)<MAP_GESTURE_SLOP)return;
+      mapGesture.mode='pan';mapCapture(viewport,e.pointerId);viewport.classList.add('dragging');mapSuppressNodeClick();
+    }
+    if(mapGesture.mode==='pan'){e.preventDefault();mapPan={x:mapGesture.px+dx,y:mapGesture.py+dy};mapApplyTransform();}
+  },{passive:false});
+  viewport.addEventListener('pointerup',e=>mapFinishPointer(viewport,e.pointerId));
+  viewport.addEventListener('pointercancel',e=>mapFinishPointer(viewport,e.pointerId,true));
+  viewport.addEventListener('lostpointercapture',e=>mapFinishPointer(viewport,e.pointerId,true));
+  viewport.addEventListener('wheel',e=>{e.preventDefault();mapZoomBy(e.deltaY<0?.15:-.15,viewport,e.clientX,e.clientY)},{passive:false});
+  WN.go('scr-map');mapApplyTransform();
+}
 WN.mapBack=()=>{if(mapCurrent!=='overview'){mapCurrent='overview';mapScale=1;mapPan={x:0,y:0};mapHideDetail();mapRender()}else WN.back()};/* ---------- 主屏 ---------- */
 const APPS = [
   {id:'contacts', nm:'通讯录', ic:'<circle cx="12" cy="8" r="3.4"/><path d="M5 19c1.4-3.2 4-4.8 7-4.8s5.6 1.6 7 4.8"/>'},
@@ -4018,8 +4109,8 @@ async function runCampusRefresh(extra,targetTab){
 const WB_CATEGORIES=['恋人不行','孤独摇滚','通用规则','剧情','角色','叙事与世界规则','变量与系统','手机与配置','其他'];
 const WB_PROTECTED=new Set([
   '[InitVar]','[相册清单]','[手机协议]','[通讯摘要]','变量列表',
-  '[mvu_update]变量更新规则','[mvu_update]变量输出格式','[细纲使用说明]',
-  '[mvu_plot]对话输出格式·中文（二选一）','[mvu_plot]对话输出格式·中日双语（二选一）',
+  '变量更新规则','变量输出格式','[细纲使用说明]',
+  '对话输出格式·中文','对话输出格式·中日双语',
 ]);
 function wbCategoryOf(entry){
   const name=String(entry&&entry.name||'');

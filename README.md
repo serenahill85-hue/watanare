@@ -1,6 +1,6 @@
 # watanare
 
-《恋人不行》角色卡的远程静态界面仓库。
+《恋人不行×孤独摇滚》角色卡的远程静态界面仓库。
 
 - `phone-manifest.json` / `phone_app.html`：小手机界面。
 - `opening-manifest.json` / `opening-page.html`：开场设定页。
