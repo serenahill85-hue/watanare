@@ -158,6 +158,13 @@
 
   /* ── 通讯录详情 ── */
   .hero{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 14px 12px}
+  .role-avatar-button{width:72px;height:72px;border-radius:50%;position:relative;display:block;flex:none}
+  .role-avatar-button>.ava{pointer-events:none}
+  .role-avatar-edit-dot{position:absolute;right:-2px;bottom:-2px;width:25px;height:25px;border-radius:50%;
+    display:grid;place-items:center;background:color-mix(in srgb,var(--surface) 88%,var(--fav));color:var(--ink2);
+    box-shadow:0 3px 10px rgba(0,0,0,.26),inset 0 0 0 1px var(--ring);font-size:12px;font-weight:750}
+  .role-avatar-button[data-custom-avatar="true"] .role-avatar-edit-dot{background:var(--fav);color:#fff}
+  .role-avatar-button:focus-visible{outline:2px solid var(--fav);outline-offset:4px}
   .hero .hnm{font-size:18px;font-weight:700;display:flex;align-items:center;gap:7px}
   .chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
   .card1{border-radius:16px;margin:6px 14px 10px;background:var(--card);box-shadow:var(--shadow);padding:13px 14px}
@@ -418,6 +425,58 @@
   #pactsheet .row button{flex:1;min-height:42px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:13px}
   #pactsheet .row .go{background:var(--fav);color:#fff}
   #pactsheet .row button[disabled]{opacity:.5}
+  /* ── 角色头像操作层 ── */
+  #roleavasheet{position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;align-items:flex-end;z-index:74}
+  #roleavasheet.on{display:flex}
+  #roleavasheet .pane{width:100%;max-height:min(86%,430px);overflow-y:auto;background:var(--surface);
+    border-radius:20px 20px 0 0;box-shadow:0 -10px 36px rgba(0,0,0,.34);padding:15px 14px 18px}
+  #roleavasheet .rh{display:flex;align-items:center;gap:8px}
+  #roleavasheet .rh b{font-size:15px;flex:1;min-width:0}
+  #roleavasheet .rh button{width:44px;height:44px;border-radius:50%;font-size:19px;color:var(--muted)}
+  .roleava-summary{display:flex;align-items:center;gap:13px;margin:7px 2px 13px;padding:12px 13px;border-radius:15px;
+    background:var(--card);box-shadow:var(--shadow)}
+  .roleava-summary .copy{flex:1;min-width:0}
+  .roleava-summary .copy b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .roleava-summary .copy small{display:block;margin-top:3px;color:var(--muted);font-size:11px;line-height:1.45}
+  .roleava-actions{display:grid;gap:8px}
+  .roleava-actions button{min-height:46px;border-radius:13px;background:var(--card);box-shadow:var(--shadow);
+    color:var(--ink2);font-size:13px;font-weight:650;text-align:left;padding:0 14px}
+  .roleava-actions button span{display:block;color:var(--muted);font-size:10.5px;font-weight:450;margin-top:2px}
+  .roleava-actions .upload{background:color-mix(in srgb,var(--fav) 13%,var(--card));color:var(--ink)}
+  .roleava-actions .restore{color:var(--crit)}
+  .roleava-actions button[disabled]{opacity:.42;cursor:default}
+  /* ── 玩家头像裁切 ── */
+  #avasheet{position:fixed;inset:0;padding:12px;background:rgba(0,0,0,.66);display:none;
+    align-items:center;justify-content:center;z-index:78}
+  #avasheet.on{display:flex}
+  #avasheet .pane{width:min(100%,390px);max-height:calc(100% - 8px);overflow-y:auto;background:var(--surface);
+    border-radius:20px;box-shadow:0 14px 44px rgba(0,0,0,.42);padding:14px}
+  #avasheet .ah{display:flex;align-items:center;gap:8px}
+  #avasheet .ah b{font-size:15px;flex:1;min-width:0}
+  #avasheet .ah button{width:44px;height:44px;border-radius:50%;font-size:19px;color:var(--muted)}
+  .ava-crop-wrap{width:min(100%,320px);aspect-ratio:1;margin:8px auto 0;position:relative;overflow:hidden;
+    border-radius:16px;background:#0b0b0b;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);touch-action:none}
+  #ava-crop-canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+  #ava-crop-canvas.dragging{cursor:grabbing}
+  .ava-crop-guide{position:absolute;inset:0;pointer-events:none;border:1px solid rgba(255,255,255,.74);
+    border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.3)}
+  .ava-crop-guide::before,.ava-crop-guide::after{content:'';position:absolute;background:rgba(255,255,255,.28)}
+  .ava-crop-guide::before{left:33.333%;right:33.333%;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.28);border-right:1px solid rgba(255,255,255,.28);background:none}
+  .ava-crop-guide::after{top:33.333%;bottom:33.333%;left:0;right:0;border-top:1px solid rgba(255,255,255,.28);border-bottom:1px solid rgba(255,255,255,.28);background:none}
+  .ava-crop-controls{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;align-items:center;margin-top:11px}
+  .ava-crop-controls button{height:44px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:18px}
+  #ava-crop-zoom{width:100%;accent-color:var(--fav)}
+  .ava-crop-note{margin-top:7px;color:var(--muted);font-size:11px;line-height:1.55;text-align:center}
+  .ava-crop-error{min-height:18px;margin-top:4px;color:var(--crit);font-size:11.5px;text-align:center}
+  .ava-crop-actions{display:flex;gap:8px;margin-top:7px}
+  .ava-crop-actions button{flex:1;min-height:44px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:13px}
+  .ava-crop-actions .go{background:var(--fav);color:#fff}
+  .ava-crop-actions button[disabled]{opacity:.5;cursor:default}
+  @media(max-height:600px){
+    #avasheet{align-items:flex-end;padding:0}
+    #avasheet .pane{width:100%;max-height:100%;border-radius:18px 18px 0 0;padding-top:10px}
+    .ava-crop-wrap{width:min(64vh,280px)}
+  }
   .var-danger{display:none;min-height:34px;padding:0 11px;border-radius:10px;color:var(--crit);
     background:color-mix(in srgb,var(--crit) 8%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--crit) 34%,var(--hair));
     font-size:11.5px;font-weight:650;white-space:nowrap}
@@ -781,6 +840,10 @@
   .wb-cat .nm,.wb-entry .nm{font-weight:650;font-size:13.5px;display:block;overflow-wrap:anywhere}
   .wb-cat .sub,.wb-entry .sub{font-size:11px;color:var(--muted);display:block;margin-top:3px}
   .wb-count{font-size:11px;color:var(--muted);white-space:nowrap}
+  .wb-group{padding:2px 0 12px}
+  .wb-group-h{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:12px 14px 5px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.02em}
+  .wb-group-h .num{font-weight:600;white-space:nowrap}
   .wb-switch{width:42px;height:24px;border-radius:13px;background:var(--press);position:relative;flex:none;
     box-shadow:inset 0 0 0 1px var(--hair)}
   .wb-switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;
@@ -912,15 +975,39 @@
   <div class="err" id="pact-error" role="alert"></div>
   <div class="row"><button type="button" onclick="WN.closePromiseSheet()">取消</button><button class="go" id="pact-save" type="submit">保存约定</button></div>
 </form></div>
+<div id="roleavasheet" aria-hidden="true"><div class="pane" role="dialog" aria-modal="true" aria-labelledby="roleava-title">
+  <div class="rh"><b id="roleava-title">角色头像</b><button type="button" aria-label="关闭角色头像设置" onclick="WN.closeRoleAvaMenu()">×</button></div>
+  <div class="roleava-summary"><div id="roleava-preview"></div><div class="copy"><b id="roleava-name">角色</b><small id="roleava-note">头像覆盖只保存在本机，不影响相册或世界书。</small></div></div>
+  <div class="roleava-actions">
+    <button class="upload" id="roleava-upload" type="button" onclick="WN.pickRoleAvaFromMenu()">上传并裁切<span>自由拖动与缩放，输出保持正方形、最大 320×320</span></button>
+    <button class="restore" id="roleava-restore" type="button" onclick="WN.resetRoleAvaFromMenu()">恢复默认头像<span>移除本机覆盖，重新使用资源清单头像或姓名占位</span></button>
+  </div>
+</div></div>
+<div id="avasheet" aria-hidden="true"><div class="pane" role="dialog" aria-modal="true" aria-labelledby="ava-crop-title">
+  <div class="ah"><b id="ava-crop-title">裁切玩家头像</b><button type="button" aria-label="取消裁切" onclick="WN.closeAvaCrop()">×</button></div>
+  <div class="ava-crop-wrap" id="ava-crop-wrap">
+    <canvas id="ava-crop-canvas" width="320" height="320" tabindex="0" aria-label="头像裁切预览；拖动图片调整位置，或使用方向键微调"></canvas>
+    <div class="ava-crop-guide" aria-hidden="true"></div>
+  </div>
+  <div class="ava-crop-controls">
+    <button type="button" aria-label="缩小头像" onclick="WN.stepAvaZoom(-1)">−</button>
+    <input id="ava-crop-zoom" type="range" min="1" max="4" step="0.01" value="1" aria-label="头像缩放" oninput="WN.setAvaZoom(this.value)">
+    <button type="button" aria-label="放大头像" onclick="WN.stepAvaZoom(1)">＋</button>
+  </div>
+  <div class="ava-crop-note">拖动调整位置；滚轮、滑杆或双指可缩放。输出始终为正方形，最大 320×320。</div>
+  <div class="ava-crop-error" id="ava-crop-error" role="alert" aria-live="polite"></div>
+  <div class="ava-crop-actions"><button type="button" onclick="WN.resetAvaCrop()">重新居中</button><button type="button" onclick="WN.closeAvaCrop()">取消</button><button class="go" id="ava-crop-save" type="button" onclick="WN.saveAvaCrop()">使用头像</button></div>
+</div></div>
 <input type="file" id="wallpick" accept="image/*" style="display:none">
 <input type="file" id="uavapick" accept="image/*" style="display:none">
+<input type="file" id="roleavapick" accept="image/*" style="display:none">
 <input type="file" id="chatpick" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
 <input type="file" id="momentpick" accept="image/jpeg,image/png,image/webp,image/gif" multiple style="display:none">
 
 <script>
 "use strict";
 /* =========================================================================
- * 东京生活区 · 悬浮手机 App 本体  v0.31.4
+ * 东京生活区 · 悬浮手机 App 本体  v0.31.6
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -998,7 +1085,7 @@ const S = {
   stat:{}, store:null, ava:{}, avaAlias:{}, userAvatar:'', modelList:null,
   cfg:{ theme:'dark', showMono:true, autoMsg:false, digest:true, memoOn:true, presetRef:false, api:{on:false,base:'',key:'',model:'',temp:0.8} },
   stack:['scr-home'], seq:0, busyThreads:new Set(), pendingAuto:null, editMode:false,
-  replyTimers:new Map(), mediaUrls:new Map(), imageTarget:null, quoteDraft:null,
+  replyTimers:new Map(), mediaUrls:new Map(), roleAvatarUrls:new Map(), roleAvatarLoaded:new Set(), roleAvatarCatalogLoaded:false, imageTarget:null, quoteDraft:null,
   imagePicker:{mode:'',id:'',items:[],selected:[]}, chatOps:{id:'',seq:0},
   momentDraft:[], momentImageBusy:false, momentPostBusy:false,
   wb:{name:'',entries:[],loaded:false,loading:false,error:'',query:'',filter:'all',category:''}, wbBusy:new Set(), wbWorkBusy:'',
@@ -1129,20 +1216,64 @@ function avatarKey(name){
   for(const candidate of roleNameCandidates(name)) if(obj(S.ava)&&own(S.ava,candidate)) return candidate;
   return '';
 }
+function roleAvatarVariableKey(name){ return roleVariableKey(name)||String(name||'').trim(); }
+function localRoleAvatarUrl(name){
+  const key=roleAvatarVariableKey(name);
+  return key&&S.roleAvatarUrls.has(key)?String(S.roleAvatarUrls.get(key)||''):'';
+}
+function avatarDisplayUrl(value){
+  const u=String(value||''); return /^(?:https:|blob:)/.test(u)?u:'';
+}
 function avatarUrl(name){
+  const local=avatarDisplayUrl(localRoleAvatarUrl(name)); if(local) return local;
   const key=avatarKey(name), u=key&&S.ava?String(S.ava[key]||''):'';
   return /^https:\/\//.test(u)?u:'';
 }
 function avaHtml(name, xl){
-  const u = avatarUrl(name);
+  const u = avatarDisplayUrl(avatarUrl(name));
   const cls = 'ava'+(xl?' ava-xl':'');
-  if(u && /^https:\/\//.test(u))
-    return `<span class="${cls}"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(u)}" alt=""></span>`;
+  if(u) return `<span class="${cls}"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(u)}" alt=""></span>`;
   return `<span class="${cls}">${esc(String(name||'?')[0])}</span>`;
+}
+function replaceRoleAvatarUrl(roleKey,blob){
+  const key=String(roleKey||'').trim(); if(!key) return '';
+  const previous=S.roleAvatarUrls.get(key);
+  if(previous){ try{ URL.revokeObjectURL(previous); }catch(_){} S.roleAvatarUrls.delete(key); }
+  if(!blob||typeof blob.arrayBuffer!=='function') return '';
+  const url=URL.createObjectURL(blob); S.roleAvatarUrls.set(key,url); return url;
+}
+async function syncRoleAvatars(names){
+  if(!S.B||typeof S.B.getRoleAvatar!=='function') return;
+  if(!S.roleAvatarCatalogLoaded&&typeof S.B.listRoleAvatars==='function'){
+    try{
+      const stored=await S.B.listRoleAvatars();
+      for(const row of (Array.isArray(stored)?stored:[])){
+        const key=String(row&&row.key||'').trim(),blob=row&&row.blob;
+        if(key&&blob){ replaceRoleAvatarUrl(key,blob); S.roleAvatarLoaded.add(key); }
+      }
+      S.roleAvatarCatalogLoaded=true; return;
+    }catch(_){ }
+  }
+  if(S.roleAvatarCatalogLoaded) return;
+  const keys=[...new Set((Array.isArray(names)?names:charList().map(([name])=>name))
+    .map(roleAvatarVariableKey).filter(Boolean))];
+  await Promise.all(keys.map(async key=>{
+    if(S.roleAvatarLoaded.has(key)) return;
+    S.roleAvatarLoaded.add(key);
+    try{ const blob=await S.B.getRoleAvatar(key); if(blob) replaceRoleAvatarUrl(key,blob); }
+    catch(_){ S.roleAvatarLoaded.delete(key); }
+  }));
 }
 /* user 头像（本机存储，用于名片、动态与正文对话层） */
 const UAVA_KEY='wn:uava';
 const UAVA_MAX_CHARS=360000;
+const UAVA_MAX_FILE=12*1024*1024;
+const UAVA_OUTPUT_MAX=320;
+const AVA_CROP={
+  img:null,objectUrl:'',opener:null,busy:false,kind:'user',roleKey:'',
+  zoom:1,minZoom:1,maxZoom:4,baseScale:1,scale:1,x:0,y:0,
+  pointers:new Map(),dragLast:null,pinch:null,
+};
 function validUserAva(value){
   const u=String(value||'');
   return u.length>0 && u.length<=UAVA_MAX_CHARS
@@ -1167,41 +1298,181 @@ async function syncUserAva(){
   return u;
 }
 function refreshAvatarSurface(){
-  const cur=S.stack[S.stack.length-1];
-  if(cur==='scr-contacts') renderContacts(false);
-  else if(cur==='scr-settings') renderSettings(false);
-  paintLime();
+  if(typeof WN.refreshCurrentView==='function') void WN.refreshCurrentView();
+  else{
+    const cur=S.stack[S.stack.length-1];
+    if(cur==='scr-contacts') renderContacts(false);
+    else if(cur==='scr-settings') renderSettings(false);
+    if($id('lime-body')) paintLime();
+  }
+}
+function avaCropCanvas(){ return $id('ava-crop-canvas'); }
+function avaCropPoint(clientX,clientY){
+  const cv=avaCropCanvas(),r=cv.getBoundingClientRect();
+  return {x:(Number(clientX)-r.left)*cv.width/Math.max(1,r.width),y:(Number(clientY)-r.top)*cv.height/Math.max(1,r.height)};
+}
+function constrainAvaCrop(){
+  const st=AVA_CROP,img=st.img; if(!img) return;
+  const w=img.naturalWidth*st.scale,h=img.naturalHeight*st.scale,size=UAVA_OUTPUT_MAX;
+  st.x=clamp(st.x,size-w,0); st.y=clamp(st.y,size-h,0);
+}
+function paintAvaCrop(){
+  const st=AVA_CROP,cv=avaCropCanvas(),cx=cv&&cv.getContext('2d'); if(!st.img||!cx) return;
+  constrainAvaCrop(); cx.clearRect(0,0,cv.width,cv.height); cx.imageSmoothingEnabled=true; cx.imageSmoothingQuality='high';
+  cx.drawImage(st.img,st.x,st.y,st.img.naturalWidth*st.scale,st.img.naturalHeight*st.scale);
+  const slider=$id('ava-crop-zoom'); if(slider) slider.value=String(st.zoom);
+}
+function applyAvaZoom(value,anchor){
+  const st=AVA_CROP,img=st.img; if(!img) return;
+  const next=clamp(Number(value)||1,st.minZoom,st.maxZoom),oldScale=st.scale||st.baseScale;
+  const point=anchor||{x:UAVA_OUTPUT_MAX/2,y:UAVA_OUTPUT_MAX/2};
+  const imageX=(point.x-st.x)/oldScale,imageY=(point.y-st.y)/oldScale;
+  st.zoom=next; st.scale=st.baseScale*next;
+  st.x=point.x-imageX*st.scale; st.y=point.y-imageY*st.scale;
+  paintAvaCrop();
+}
+function resetAvaCropView(){
+  const st=AVA_CROP,img=st.img; if(!img) return;
+  st.zoom=1; st.baseScale=UAVA_OUTPUT_MAX/Math.min(img.naturalWidth,img.naturalHeight); st.scale=st.baseScale;
+  st.x=(UAVA_OUTPUT_MAX-img.naturalWidth*st.scale)/2; st.y=(UAVA_OUTPUT_MAX-img.naturalHeight*st.scale)/2;
+  st.pointers.clear(); st.dragLast=null; st.pinch=null; paintAvaCrop();
+}
+function releaseAvaCropSource(){
+  const st=AVA_CROP;
+  if(st.objectUrl){ try{ URL.revokeObjectURL(st.objectUrl); }catch(_){} }
+  st.img=null; st.objectUrl=''; st.kind='user'; st.roleKey=''; st.pointers.clear(); st.dragLast=null; st.pinch=null;
+}
+function closeAvaCrop(restore=true){
+  if(AVA_CROP.busy) return;
+  const opener=AVA_CROP.opener; AVA_CROP.opener=null; releaseAvaCropSource();
+  const sheet=$id('avasheet'); sheet.classList.remove('on'); sheet.setAttribute('aria-hidden','true');
+  $id('ava-crop-error').textContent='';
+  if(restore&&opener&&opener.isConnected){ try{ opener.focus(); }catch(_){} }
+}
+function openAvaCrop(img,objectUrl,opener,options={}){
+  releaseAvaCropSource();
+  const kind=options.kind==='role'?'role':'user',roleKey=kind==='role'?String(options.roleKey||'').trim():'';
+  AVA_CROP.img=img; AVA_CROP.objectUrl=objectUrl; AVA_CROP.opener=opener||document.activeElement; AVA_CROP.busy=false;
+  AVA_CROP.kind=kind; AVA_CROP.roleKey=roleKey;
+  $id('ava-crop-title').textContent=kind==='role'?`裁切 ${roleKey} 的头像`:'裁切玩家头像';
+  $id('ava-crop-error').textContent=''; $id('ava-crop-save').disabled=false;
+  const sheet=$id('avasheet'); sheet.classList.add('on'); sheet.setAttribute('aria-hidden','false');
+  resetAvaCropView(); requestAnimationFrame(()=>{ paintAvaCrop(); $id('ava-crop-zoom').focus(); });
+}
+function encodeAvaCrop(){
+  const st=AVA_CROP,img=st.img; if(!img) throw new Error('没有可以裁切的图片');
+  const edge=Math.max(1,Math.min(UAVA_OUTPUT_MAX,Math.floor(Math.min(img.naturalWidth,img.naturalHeight))));
+  const out=document.createElement('canvas'); out.width=out.height=edge;
+  const cx=out.getContext('2d'); if(!cx) throw new Error('浏览器无法处理图片');
+  const sourceSize=UAVA_OUTPUT_MAX/st.scale,sourceX=-st.x/st.scale,sourceY=-st.y/st.scale;
+  cx.imageSmoothingEnabled=true; cx.imageSmoothingQuality='high';
+  cx.drawImage(img,sourceX,sourceY,sourceSize,sourceSize,0,0,edge,edge);
+  for(const type of ['image/webp','image/jpeg']){
+    for(const quality of [.9,.82,.74,.66,.58,.5]){
+      let url=''; try{ url=out.toDataURL(type,quality); }catch(_){}
+      if(url.startsWith(`data:${type}`) && validUserAva(url)) return url;
+    }
+  }
+  throw new Error('裁切后的头像仍然太大，请换一张图片');
+}
+function avatarDataUrlBlob(value){
+  const url=validUserAva(value); if(!url) throw new Error('裁切后的头像数据无效');
+  const comma=url.indexOf(','),meta=url.slice(5,comma),binary=atob(url.slice(comma+1));
+  const bytes=new Uint8Array(binary.length); for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  return new Blob([bytes],{type:meta.split(';')[0]||'image/webp'});
+}
+async function saveAvaCrop(){
+  if(AVA_CROP.busy) return;
+  const save=$id('ava-crop-save'),error=$id('ava-crop-error'); AVA_CROP.busy=true; save.disabled=true; error.textContent='';
+  let previous=''; try{ previous=localStorage.getItem(UAVA_KEY)||''; }catch(_){}
+  try{
+    const url=encodeAvaCrop();
+    if(AVA_CROP.kind==='role'){
+      const roleKey=String(AVA_CROP.roleKey||'').trim();
+      if(!roleKey||!characterOf(roleKey)) throw new Error('角色变量已经不存在');
+      if(!S.B||typeof S.B.setRoleAvatar!=='function') throw new Error('当前手机外壳不支持角色头像');
+      const blob=avatarDataUrlBlob(url),edge=Math.max(1,Math.min(UAVA_OUTPUT_MAX,Math.floor(Math.min(AVA_CROP.img.naturalWidth,AVA_CROP.img.naturalHeight))));
+      await S.B.setRoleAvatar(roleKey,blob,{width:edge,height:edge,mime:blob.type});
+      replaceRoleAvatarUrl(roleKey,blob); S.roleAvatarLoaded.add(roleKey);
+      AVA_CROP.busy=false; closeAvaCrop(false); toast(`${roleKey}的头像已更换`); refreshAvatarSurface();
+    }else{
+      try{ localStorage.setItem(UAVA_KEY,url); }catch(_){ throw new Error('图片太大，浏览器存不下'); }
+      if(S.B&&typeof S.B.setUserAvatar==='function') await S.B.setUserAvatar(url);
+      S.userAvatar=url; AVA_CROP.busy=false; closeAvaCrop(false); toast('头像已更换'); refreshAvatarSurface();
+    }
+  }catch(e){
+    if(AVA_CROP.kind!=='role') try{ if(previous) localStorage.setItem(UAVA_KEY,previous); else localStorage.removeItem(UAVA_KEY); }catch(_){}
+    AVA_CROP.busy=false; save.disabled=false; error.textContent=String(e&&e.message||e||'头像保存失败').slice(0,120);
+  }
 }
 function pickAva(){
   const inp=$id('uavapick');
   if(!inp){ toast('当前手机不支持头像上传'); return; }
+  const opener=document.activeElement;
   inp.onchange=async()=>{
     const f=inp.files && inp.files[0]; inp.value=''; if(!f) return;
     if(!/^image\//i.test(f.type||'')){ toast('请选择图片文件'); return; }
-    if(f.size>12*1024*1024){ toast('图片不能超过 12MB'); return; }
+    if(f.size>UAVA_MAX_FILE){ toast('图片不能超过 12MB'); return; }
     const img=new Image(), objectUrl=URL.createObjectURL(f);
-    img.onload=async()=>{
-      try{
-        const s=Math.min(img.width,img.height), t=Math.min(s,320)||320;
-        const cv=document.createElement('canvas'); cv.width=cv.height=t;
-        const cx=cv.getContext('2d'); if(!cx) throw new Error('浏览器无法处理图片');
-        cx.imageSmoothingQuality='high';
-        cx.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,t,t);
-        let url=''; try{ url=cv.toDataURL('image/webp',.88); }catch(_){ }
-        if(!/^data:image\/webp/i.test(url)){ try{ url=cv.toDataURL('image/jpeg',.88); }catch(_){ } }
-        url=validUserAva(url); if(!url) throw new Error('头像格式不受支持');
-        try{ localStorage.setItem(UAVA_KEY,url); }catch(_){ throw new Error('图片太大，浏览器存不下'); }
-        S.userAvatar=url;
-        if(S.B&&typeof S.B.setUserAvatar==='function') await S.B.setUserAvatar(url);
-        toast('头像已更换'); refreshAvatarSurface();
-      }catch(e){ toast(String(e&&e.message||e)); }
-      finally{ try{ URL.revokeObjectURL(objectUrl); }catch(_){ } }
-    };
+    img.onload=()=>{ if(!img.naturalWidth||!img.naturalHeight){ try{ URL.revokeObjectURL(objectUrl); }catch(_){} toast('图片尺寸无效'); return; } openAvaCrop(img,objectUrl,opener,{kind:'user'}); };
     img.onerror=()=>{ try{ URL.revokeObjectURL(objectUrl); }catch(_){ } toast('读不了这张图'); };
     img.src=objectUrl;
   };
   inp.click();
 }
+const ROLE_AVA_MENU={roleKey:'',opener:null,busy:false};
+function paintRoleAvaMenu(){
+  const key=ROLE_AVA_MENU.roleKey,custom=!!localRoleAvatarUrl(key);
+  $id('roleava-name').textContent=key||'角色';
+  $id('roleava-note').textContent=custom?'当前使用本机自定义头像；只影响本机显示。':'当前使用资源清单头像或姓名占位。';
+  $id('roleava-preview').innerHTML=key?avaHtml(key,true):'';
+  $id('roleava-restore').disabled=!custom||ROLE_AVA_MENU.busy;
+  $id('roleava-upload').disabled=ROLE_AVA_MENU.busy;
+}
+WN.openRoleAvaMenu=function(name,opener){
+  const key=roleAvatarVariableKey(name); if(!key||!characterOf(key)) return;
+  ROLE_AVA_MENU.roleKey=key; ROLE_AVA_MENU.opener=opener||document.activeElement; ROLE_AVA_MENU.busy=false;
+  $id('roleava-title').textContent=`${key} · 头像`;
+  paintRoleAvaMenu();
+  const sheet=$id('roleavasheet'); sheet.classList.add('on'); sheet.setAttribute('aria-hidden','false');
+  requestAnimationFrame(()=>$id('roleava-upload').focus());
+};
+WN.closeRoleAvaMenu=function(restore=true){
+  if(ROLE_AVA_MENU.busy) return;
+  const opener=ROLE_AVA_MENU.opener;
+  $id('roleavasheet').classList.remove('on'); $id('roleavasheet').setAttribute('aria-hidden','true');
+  ROLE_AVA_MENU.roleKey=''; ROLE_AVA_MENU.opener=null;
+  if(restore&&opener&&opener.isConnected){ try{ opener.focus(); }catch(_){} }
+};
+function pickRoleAva(name,opener){
+  const key=roleAvatarVariableKey(name),inp=$id('roleavapick');
+  if(!key||!characterOf(key)){ toast('角色变量已经不存在'); return; }
+  if(!inp){ toast('当前手机不支持角色头像上传'); return; }
+  inp.onchange=()=>{
+    const f=inp.files&&inp.files[0]; inp.value=''; if(!f) return;
+    if(!/^image\//i.test(f.type||'')){ toast('请选择图片文件'); return; }
+    if(f.size>UAVA_MAX_FILE){ toast('图片不能超过 12MB'); return; }
+    const img=new Image(),objectUrl=URL.createObjectURL(f);
+    img.onload=()=>{ if(!img.naturalWidth||!img.naturalHeight){ try{URL.revokeObjectURL(objectUrl);}catch(_){} toast('图片尺寸无效'); return; }
+      openAvaCrop(img,objectUrl,opener,{kind:'role',roleKey:key}); };
+    img.onerror=()=>{ try{URL.revokeObjectURL(objectUrl);}catch(_){} toast('读不了这张图'); };
+    img.src=objectUrl;
+  };
+  inp.click();
+}
+WN.pickRoleAvaFromMenu=function(){
+  const key=ROLE_AVA_MENU.roleKey,opener=ROLE_AVA_MENU.opener||document.activeElement;
+  WN.closeRoleAvaMenu(false); pickRoleAva(key,opener);
+};
+WN.resetRoleAvaFromMenu=async function(){
+  const key=ROLE_AVA_MENU.roleKey; if(!key||ROLE_AVA_MENU.busy||!localRoleAvatarUrl(key)) return;
+  ROLE_AVA_MENU.busy=true; paintRoleAvaMenu();
+  try{
+    if(!S.B||typeof S.B.deleteRoleAvatar!=='function') throw new Error('当前手机外壳不支持恢复角色头像');
+    await S.B.deleteRoleAvatar(key); replaceRoleAvatarUrl(key,null); S.roleAvatarLoaded.add(key);
+    ROLE_AVA_MENU.busy=false; paintRoleAvaMenu(); toast(`${key}已恢复默认头像`); refreshAvatarSurface();
+  }catch(e){ ROLE_AVA_MENU.busy=false; paintRoleAvaMenu(); toast('恢复失败：'+String(e&&e.message||e)); }
+};
 async function resetAva(){
   try{ localStorage.removeItem(UAVA_KEY); }catch(_){ }
   S.userAvatar='';
@@ -1210,15 +1481,15 @@ async function resetAva(){
 }
 /* 动态卡角色头像（34px，发布者非 user 时用） */
 function mavaHtml(name){
-  const u = avatarUrl(name);
-  if(u && /^https:\/\//.test(u))
+  const u = avatarDisplayUrl(avatarUrl(name));
+  if(u)
     return `<span class="mavx"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(u)}" alt=""></span>`;
   return `<span class="mavx">${esc(String(name||'?')[0])}</span>`;
 }
 /* 气泡侧小头像（30px） */
 function bavaHtml(name){
-  const u = avatarUrl(name);
-  if(u && /^https:\/\//.test(u))
+  const u = avatarDisplayUrl(avatarUrl(name));
+  if(u)
     return `<span class="bava"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(u)}" alt=""></span>`;
   return `<span class="bava">${esc(String(name||'?')[0])}</span>`;
 }
@@ -1497,7 +1768,64 @@ async function mutStore(fn){ fn(S.store); await S.B.setPhoneStore(S.store); }
 
 /* ---------- 路由 ---------- */
 const WN = window.WN = {};
-WN.pickAva = pickAva; WN.resetAva = resetAva;
+WN.pickAva=pickAva; WN.resetAva=resetAva; WN.closeAvaCrop=closeAvaCrop; WN.saveAvaCrop=saveAvaCrop;
+WN.setAvaZoom=value=>applyAvaZoom(value);
+WN.stepAvaZoom=direction=>applyAvaZoom(AVA_CROP.zoom+(Number(direction)<0?-.1:.1));
+WN.resetAvaCrop=resetAvaCropView;
+{
+  const cv=avaCropCanvas();
+  const pinchStart=()=>{
+    if(AVA_CROP.pointers.size<2){ AVA_CROP.pinch=null; return; }
+    const points=Array.from(AVA_CROP.pointers.values()).slice(0,2);
+    const center={x:(points[0].x+points[1].x)/2,y:(points[0].y+points[1].y)/2};
+    const distance=Math.max(1,Math.hypot(points[1].x-points[0].x,points[1].y-points[0].y));
+    AVA_CROP.pinch={distance,zoom:AVA_CROP.zoom,imageX:(center.x-AVA_CROP.x)/AVA_CROP.scale,imageY:(center.y-AVA_CROP.y)/AVA_CROP.scale};
+  };
+  cv.addEventListener('pointerdown',e=>{
+    if(!AVA_CROP.img||AVA_CROP.busy) return;
+    e.preventDefault(); const point=avaCropPoint(e.clientX,e.clientY); AVA_CROP.pointers.set(e.pointerId,point);
+    try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+    if(AVA_CROP.pointers.size===1){ AVA_CROP.dragLast=point; AVA_CROP.pinch=null; cv.classList.add('dragging'); }
+    else{ AVA_CROP.dragLast=null; pinchStart(); }
+  },{passive:false});
+  cv.addEventListener('pointermove',e=>{
+    if(!AVA_CROP.pointers.has(e.pointerId)||!AVA_CROP.img||AVA_CROP.busy) return;
+    e.preventDefault(); const point=avaCropPoint(e.clientX,e.clientY); AVA_CROP.pointers.set(e.pointerId,point);
+    if(AVA_CROP.pointers.size>=2){
+      if(!AVA_CROP.pinch) pinchStart();
+      const points=Array.from(AVA_CROP.pointers.values()).slice(0,2),pinch=AVA_CROP.pinch;
+      if(!pinch) return;
+      const center={x:(points[0].x+points[1].x)/2,y:(points[0].y+points[1].y)/2};
+      const distance=Math.max(1,Math.hypot(points[1].x-points[0].x,points[1].y-points[0].y));
+      AVA_CROP.zoom=clamp(pinch.zoom*distance/pinch.distance,AVA_CROP.minZoom,AVA_CROP.maxZoom);
+      AVA_CROP.scale=AVA_CROP.baseScale*AVA_CROP.zoom;
+      AVA_CROP.x=center.x-pinch.imageX*AVA_CROP.scale; AVA_CROP.y=center.y-pinch.imageY*AVA_CROP.scale; paintAvaCrop();
+    }else if(AVA_CROP.dragLast){
+      AVA_CROP.x+=point.x-AVA_CROP.dragLast.x; AVA_CROP.y+=point.y-AVA_CROP.dragLast.y; AVA_CROP.dragLast=point; paintAvaCrop();
+    }
+  },{passive:false});
+  const release=e=>{
+    if(!AVA_CROP.pointers.has(e.pointerId)) return;
+    AVA_CROP.pointers.delete(e.pointerId); try{ cv.releasePointerCapture(e.pointerId); }catch(_){}
+    if(AVA_CROP.pointers.size>=2) pinchStart();
+    else if(AVA_CROP.pointers.size===1){ AVA_CROP.pinch=null; AVA_CROP.dragLast=Array.from(AVA_CROP.pointers.values())[0]; }
+    else{ AVA_CROP.pinch=null; AVA_CROP.dragLast=null; cv.classList.remove('dragging'); }
+  };
+  cv.addEventListener('pointerup',release); cv.addEventListener('pointercancel',release);
+  cv.addEventListener('wheel',e=>{
+    if(!AVA_CROP.img||AVA_CROP.busy) return;
+    e.preventDefault(); applyAvaZoom(AVA_CROP.zoom*(e.deltaY<0?1.08:.92),avaCropPoint(e.clientX,e.clientY));
+  },{passive:false});
+  cv.addEventListener('keydown',e=>{
+    if(!AVA_CROP.img||AVA_CROP.busy||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) return;
+    e.preventDefault(); const step=e.shiftKey?12:4;
+    if(e.key==='ArrowLeft') AVA_CROP.x-=step;
+    else if(e.key==='ArrowRight') AVA_CROP.x+=step;
+    else if(e.key==='ArrowUp') AVA_CROP.y-=step;
+    else AVA_CROP.y+=step;
+    paintAvaCrop();
+  });
+}
 const SWIPE={active:null,open:null};
 const SWIPE_W=76;
 let focusedThreadScrollRevision=0;
@@ -1604,11 +1932,18 @@ document.addEventListener('click',e=>{
   else if(action==='note-close') WN.closeNote(key);
   else if(action==='memo-save') WN.memoContactSave(key);
   else if(action==='memo-delete') WN.memoContactDelete(key,el);
+  else if(action==='role-avatar') WN.openRoleAvaMenu(key,el);
   else if(action==='stat-rename-role') WN.renameRole(key,el);
   else if(action==='stat-remove-role') WN.removeRole(key,el);
   else if(action==='stat-remove-pact') WN.removePromise(key,el);
 });
 document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && $id('avasheet').classList.contains('on')){
+    e.preventDefault(); WN.closeAvaCrop(); return;
+  }
+  if(e.key==='Escape' && $id('roleavasheet').classList.contains('on')){
+    e.preventDefault(); WN.closeRoleAvaMenu(); return;
+  }
   if(e.key==='Escape' && $id('qsheet').classList.contains('on')){
     e.preventDefault(); WN.closeChatOps(); return;
   }
@@ -1737,13 +2072,21 @@ WN.saveEdit=async function(e){
     try{
       const next=await S.B.renameStatRole(oldName,newName);
       if(obj(next)) S.stat=next; else await refreshStat();
-      let storeFailed=false;
+      let storeFailed=false,avatarFailed=false;
       try{ await mutStore(st=>migrateRolePhoneData(st,oldName,newName)); }
       catch(storeError){ storeFailed=true; console.warn('[WN] role phone-data rename',storeError); }
+      try{
+        if(S.B&&typeof S.B.renameRoleAvatar==='function') await S.B.renameRoleAvatar(oldName,newName);
+        const oldUrl=S.roleAvatarUrls.get(oldName);
+        if(oldUrl){ S.roleAvatarUrls.delete(oldName); S.roleAvatarUrls.set(newName,oldUrl); }
+        S.roleAvatarLoaded.delete(oldName); S.roleAvatarLoaded.add(newName);
+      }catch(avatarError){ avatarFailed=true; console.warn('[WN] role avatar rename',avatarError); }
       if(!storeFailed && pending) armReplyWindow(newName,pending.batchId);
       EDIT_STATE.busy=false; WN.closeEdit(false);
       await WN.refreshCurrentView(); renderSys(); refreshBadges();
-      toast(storeFailed?'角色名已更新，旧聊天迁移失败，可重新打开手机后再试':'角色名已改为 '+newName);
+      toast(storeFailed||avatarFailed
+        ?`角色名已更新${storeFailed?'，旧聊天迁移失败':''}${avatarFailed?'，本机头像迁移失败':''}`
+        :'角色名已改为 '+newName);
     }catch(err){
       if(pending) armReplyWindow(oldName,pending.batchId);
       EDIT_STATE.busy=false; $id('ve-save').disabled=false;
@@ -1855,6 +2198,8 @@ WN.removePromise=function(name,opener){
     '将从当前变量中删除约定“'+name+'”。该操作不会自动修改已经发生的剧情。');
 };
 document.addEventListener('click',e=>{
+  if(e.target===$id('avasheet')) WN.closeAvaCrop();
+  if(e.target===$id('roleavasheet')) WN.closeRoleAvaMenu();
   if(e.target===$id('vedit')) WN.closeEdit();
   if(e.target===$id('pactsheet')) WN.closePromiseSheet();
   if(e.target===$id('qsheet')) WN.closeChatOps();
@@ -2343,6 +2688,7 @@ function renderContacts(navigate=true){
 WN.contact = function(name,navigate=true){
   const c = characterOf(name); if(!c) return;
   const canMessage=c.联系方式===true;
+  const canEditRoleAvatar=!!(S.B&&typeof S.B.setRoleAvatar==='function'&&typeof S.B.deleteRoleAvatar==='function');
   const token=keyToken(name);
   const primaryPlaces=mapPrimaryChoices(), detailPlaces=mapDetailChoices(c.地点);
   const relationMeters=RELATION_AXES.map(axis=>{
@@ -2357,7 +2703,9 @@ WN.contact = function(name,navigate=true){
     el.dataset.wnView='contact'; el.dataset.wnKey=token;
     el.innerHTML = apphead('通讯录','') + `<div class="body">
       <div class="hero">
-        ${avaHtml(name,true)}
+        ${canEditRoleAvatar?`<button class="role-avatar-button" type="button" data-custom-avatar="${localRoleAvatarUrl(name)?'true':'false'}"
+          title="设置${esc(name)}的本机头像" aria-label="设置${esc(name)}的本机头像" ${keyAttrs('role-avatar',name)}>
+          ${avaHtml(name,true)}<span class="role-avatar-edit-dot" aria-hidden="true">✎</span></button>`:avaHtml(name,true)}
         <span class="hnm">${c.在场?'<span class="dot"></span>':''}${esc(name)}</span>
         <span class="chips"><span class="chip wn-edit" ${editData(['角色',name,'来源作品'],'来源作品','text',{maxLen:40,clearable:false})}>${esc(c.来源作品||'原创')}</span>
           <span class="chip wn-edit" ${editData(['角色',name,'在场'],'是否在场','bool')}>${c.在场?'在场':'不在场'}</span>
@@ -4436,8 +4784,19 @@ async function runCampusRefresh(extra,targetTab){
 }
 
 /* ---------- 世界书控制器 ---------- */
-const WB_STATIC_CATEGORIES=['通用规则','剧情','角色','叙事与世界规则','变量与系统','手机与配置','其他'];
-function wbCategories(){return [...phoneWorldbookWorkEntries().map(([work])=>phoneWorkLabel(work)||work),...WB_STATIC_CATEGORIES];}
+const WB_SYSTEM_CATEGORY='通用与系统';
+const WB_SUB_ORDER=['角色','剧情','家庭','地点','规则','世界观','未分类'];
+function wbCategories(){
+  const counts=new Map();
+  for(const entry of (S.wb&&Array.isArray(S.wb.entries)?S.wb.entries:[])){
+    const category=wbCategoryOf(entry);
+    counts.set(category,(counts.get(category)||0)+1);
+  }
+  return [
+    ...phoneWorldbookWorkEntries().map(([work])=>phoneWorkLabel(work)||work),
+    WB_SYSTEM_CATEGORY,
+  ].filter(category=>counts.has(category));
+}
 const WB_PROTECTED=new Set((Array.isArray(PHONE_WORK_CATALOG.worldbookPolicies)?PHONE_WORK_CATALOG.worldbookPolicies:[])
   .filter(policy=>policy&&policy.protected===true)
   .map(policy=>String(policy.comment||'').trim()).filter(Boolean));
@@ -4462,13 +4821,7 @@ function wbCategoryOf(entry){
   for(const [work,meta] of phoneWorkEntries()){
     if(meta&&meta.worldbookPrefix&&name.includes(String(meta.worldbookPrefix))) return phoneWorkLabel(work)||work;
   }
-  if(name.includes(String(PHONE_WORK_CATALOG.sharedWorldbookPrefix||'[RULE]'))) return '通用规则';
-  if(/剧情细纲|剧情年表|剧情梗概|卷[一二三四五六七八九十]|细纲使用说明/.test(name)) return '剧情';
-  if(/手机协议|通讯摘要|相册清单/.test(name)) return '手机与配置';
-  if(/InitVar|变量列表|mvu_update|变量更新|变量输出/.test(name)) return '变量与系统';
-  if(/mvu_plot|文风|叙事|世界观|故事基调|关系介入|时间|经济|风格|规则/.test(name)) return '叙事与世界规则';
-  if((Array.isArray(entry&&entry.keys)&&entry.keys.length)||/人设|语料|角色|人物|成员|家庭|档案|角色经历|角色速览/.test(name)||wbRoleTokens().some(token=>name.includes(token))) return '角色';
-  return '其他';
+  return WB_SYSTEM_CATEGORY;
 }
 function wbBaseName(entry){
   let name=String(entry&&entry.name||'').trim().replace(/^\[mvu_(?:plot|update)\]/,'');
@@ -4476,6 +4829,20 @@ function wbBaseName(entry){
     if(prefix&&name.startsWith(prefix)){name=name.slice(prefix.length);break;}
   }
   return name.replace(WB_DEFAULT_OFF_SUFFIX_RE,'').trim();
+}
+function wbSubCategoryOf(entry){
+  const base=wbBaseName(entry);
+  if(/^\[(?:剧情细纲|剧情年表|细纲使用说明)\]/.test(base)) return '剧情';
+  if(/^\[人设\]|语料|^角色速览|角色经历/.test(base)) return '角色';
+  if(/^家庭/.test(base)) return '家庭';
+  if(/^(?:地点|地图)/.test(base)) return '地点';
+  if(/^规则/.test(base)) return '规则';
+  if(/世界观|故事基调|叙事|关系介入|百合破坏/.test(base)) return '世界观';
+  if(wbRoleTokens().some(token=>base.includes(token))) return '角色';
+  return '未分类';
+}
+function wbIsWorkCategory(category){
+  return phoneWorldbookWorkEntries().some(([work])=>(phoneWorkLabel(work)||work)===category);
 }
 function wbDefaultOff(entry){return WB_DEFAULT_OFF_SUFFIX_RE.test(String(entry&&entry.name||'').trim());}
 function wbProtected(entry){
@@ -4540,17 +4907,39 @@ function paintWorldbookResults(category,root){
   if(!wb.loaded){ box.innerHTML='<div class="empty">尚未读取世界书</div>'; return; }
   const searchMode=!!String(wb.query||'').trim()||wb.filter!=='all';
   if(!category&&!searchMode){
-    box.innerHTML=wbCategories().map(name=>{
+    const categories=wbCategories();
+    box.innerHTML=categories.length?categories.map(name=>{
       const all=wb.entries.filter(entry=>wbCategoryOf(entry)===name);
       const enabled=all.filter(entry=>entry.enabled).length;
       return `<div class="wb-cat"><button class="go" ${keyAttrs('wb-category',name)}><span class="nm">${esc(name)}</span>
-        <span class="sub">${all.length?enabled+' 条开启':'暂无条目'}</span></button><span class="wb-count num">${enabled} / ${all.length}</span></div>`;
-    }).join('');
+        <span class="sub">${enabled} 条开启</span></button><span class="wb-count num">${enabled} / ${all.length}</span></div>`;
+    }).join(''):'<div class="empty">当前主世界书没有可浏览的分类</div>';
     return;
   }
   const scope=String(wb.query||'').trim()?null:category;
   const entries=wb.entries.filter(entry=>wbMatches(entry,scope));
-  box.innerHTML=entries.length?entries.map(entry=>wbEntryRow(entry,!scope)).join(''):'<div class="empty">没有符合条件的条目</div>';
+  if(!entries.length){ box.innerHTML='<div class="empty">没有符合条件的条目</div>'; return; }
+  if(scope&&wbIsWorkCategory(scope)){
+    box.innerHTML=wbGroupedWorldbookRows(entries);
+  }else{
+    box.innerHTML=entries.map(entry=>wbEntryRow(entry,!scope)).join('');
+  }
+}
+function wbGroupedWorldbookRows(entries){
+  const groups=new Map(WB_SUB_ORDER.map(name=>[name,[]]));
+  for(const entry of entries){
+    const sub=wbSubCategoryOf(entry);
+    const list=groups.get(sub);
+    if(list) list.push(entry);
+    else groups.set(sub,[entry]);
+  }
+  let html='';
+  for(const [sub,list] of groups){
+    if(!list.length) continue;
+    const enabled=list.filter(entry=>entry.enabled).length;
+    html+=`<div class="wb-group"><div class="wb-group-h"><span>${esc(sub)}</span><span class="num">${enabled} / ${list.length}</span></div>${list.map(entry=>wbEntryRow(entry,false)).join('')}</div>`;
+  }
+  return html;
 }
 function buildWorldbookSurface(el,title,category){
   el.dataset.wnView=category?'wb-category':'wb-home';
@@ -4677,8 +5066,9 @@ function renderGuide(navigate=true){
         </div></details>
         <details class="guide-sec"><summary>通讯录与变量修改</summary><div class="guide-copy">
           <p>通讯录显示当前追踪的角色。点联系人可看关系、四项数值、近况与重要经历；取得联系方式后可直接进入 LIME。</p>
+          <p>联系人头像右下角的铅笔可上传本机头像。角色头像与玩家头像共用自由裁切器，会显示在通讯录、详情、LIME、动态和正文对话中；恢复默认后重新使用相册清单头像或姓名占位。它不会替换相册 CG。</p>
           <p>改错内容时，先点顶部铅笔，再点被标出的字段。<b>清空</b>只恢复该字段，<b>删除</b>只用于整张角色变量或整条约定，执行前都会确认。</p>
-          <p>“来源作品”只记录角色出处，可填写注册表规范作品名、原创或其他作品名；它不会因作品开关而隐藏角色或禁用聊天、地图、相册与动态。修改角色名会一起迁移该角色的聊天和备忘，但不能覆盖已有同名角色。删除角色变量不会顺带删掉已有聊天或相册资源。</p>
+          <p>“来源作品”只记录角色出处，可填写注册表规范作品名、原创或其他作品名；它不会因作品开关而隐藏角色或禁用聊天、地图、相册与动态。修改角色名会一起迁移该角色的聊天、备忘和本机头像，但不能覆盖已有同名角色。删除角色变量不会顺带删掉已有聊天、相册资源或本机头像。</p>
         </div></details>
         <details class="guide-sec"><summary>相册与日程</summary><div class="guide-copy">
           <p><b>相册</b>会显示已经遇见角色的分册。锁定图片内会直接写解锁条件和当前进度；条件达成后永久解锁，角色情感倾向达到 200 时整册解锁。</p>
@@ -4691,6 +5081,7 @@ function renderGuide(navigate=true){
         </div></details>
         <details class="guide-sec"><summary>设置怎么选</summary><div class="guide-copy">
           <p><b>我的头像</b>可从设备上传，上传后会同时显示在手机名片、动态和正文中的玩家对话旁；图片只保存在当前浏览器，点“恢复”即可改回名字占位。</p>
+          <p><b>角色本机头像</b>保存在浏览器 IndexedDB，不进入角色变量或世界书。通常容量远高于压缩头像所需，但清除站点数据、无痕会话或浏览器回收存储仍可能移除；丢失时会自动回退默认头像。</p>
           <p><b>正文对话语言设置</b>默认中文；切到中日双语后，从下一次正文回复起，角色对话会同时生成日文与中文。旁白不受影响，固定开场白始终只保留中文。</p>
           <p><b>对话美化不会跟着手机自动切换。</b>请到酒馆的角色正则里，在“中文·深色 / 中文·浅色 / 中日双语·深色 / 中日双语·浅色”中手动启用一条，其余三条关闭。手机的深浅主题只影响手机界面。</p>
           <p><b>通讯摘要注入</b>建议开启，让正文记得手机里发生过的往来；<b>自动记忆整理</b>也建议开启，长时间聊天时更不容易忘记旧消息。</p>
@@ -4856,7 +5247,7 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">东京生活区·综漫手机 v0.31.4</div>
+<div class="empty" style="padding:14px">东京生活区·综漫手机 v0.31.6</div>
     </div></div>`;
   });
   paintDialogueLanguageControls();
@@ -5432,7 +5823,7 @@ async function boot(bridge){
   loadCfg(); saveCfg();
   await syncUserAva();
   await syncRemotePhoneState();
-  await refreshStat(); await loadStore();
+  await refreshStat(); await loadStore(); await syncRoleAvatars();
   recoverPendingReplies();
   /* v0.10.2→v0.10.3 迁移：旧的单段合并备忘转为分段制第一段 */
   if(get(S.store,'digestMemo','') && !get(S.store,'memoLog',[]).length){
@@ -5453,7 +5844,7 @@ async function boot(bridge){
     if(ev && ev.type==='chat'){
       S.wb={name:'',entries:[],loaded:false,loading:false,error:'',query:'',filter:'all',category:''}; S.wbBusy.clear();
       S.dialogueLang={mode:'',valid:false,loaded:false,loading:false,busy:false,error:'',name:'',entries:[]};
-      await refreshStat(); await loadStore(); await syncAlbumUnlocks(); await syncScheduleReminders(); recoverPendingReplies(); await moveSms(); paintNotes(); WN.home(); refreshBadges(); return;
+      await refreshStat(); await loadStore(); await syncRoleAvatars(); await syncAlbumUnlocks(); await syncScheduleReminders(); recoverPendingReplies(); await moveSms(); paintNotes(); WN.home(); refreshBadges(); return;
     }
     if(ev && ev.type==='player-turn'){
       /* 独立 API 使用上一轮稳定快照立即生成；主模型仍在正文结束后触发。 */
@@ -5461,6 +5852,7 @@ async function boot(bridge){
       return;
     }
     await refreshStat();
+    await syncRoleAvatars();
     await syncAlbumUnlocks();
     await syncScheduleReminders();
     if(ev && ev.type==='story-turn'){
