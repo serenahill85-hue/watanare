@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "1.0.0beta",
+  "version": "1.0.0-preview",
   "html": "https://raw.githubusercontent.com/serenahill85-hue/watanare/main/opening-page.html",
-  "sha256": "d087ed1e33c3b0618eed17e54043b448ca789cb4aeaee66c2205aa2b51dd2828",
-  "updatedAt": "2026-08-10T18:13:03Z"
+  "sha256": "6a888dd2de1e7c1b4d5a4605bca82f3d82cb115fab2dab9fe24c3201e01bf27a",
+  "updatedAt": "2026-08-12T13:19:50Z"
 }
