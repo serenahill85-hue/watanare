@@ -3742,7 +3742,9 @@ async function genReply(id,batchId,options){
     const inner=th.type==='group'
       ? activeMembers.map(n=>{ const c=characterOf(n)||{}; return c.内心独白?`${n}：${c.内心独白}`:''; }).filter(Boolean).join('\n')
       : String(c0&&c0.内心独白||'').trim();
+    const now=nowTD();
     const userP=[ctxBlock({memoThread:id,memo:500}),
+      `【时间语义】当前世界时间：${now.d||'日期未明'} ${now.t||'时刻未明'}。聊天记录中每行方括号内的日期和时刻是该条消息实际发送/送达的历史时间；即使与当前世界日期不同，也必须按历史时间理解，不能把前一天的消息当作今天刚发。`,
       th.type==='group'
         ? '【本轮可发言成员现状】\n'+activeMembers.map(n=>n+'：'+statDigestFor(n)).join('\n')
         : '【'+id+' 的现状】'+statDigestFor(id),
@@ -5077,7 +5079,7 @@ function renderGuide(navigate=true){
         </div></details>
         <details class="guide-sec"><summary>广场、手账与世界书</summary><div class="guide-copy">
           <p>广场分为论坛和媒体两个标签。下拉页面会直接刷新当前标签；右上角和页面底部的刷新按钮可以先填写这次想看的话题。</p>
-          <p><b>手账</b>只显示当前已启用作品，并按注册表读取对应的篇章、偏移与后续推演；未选择或已关闭的作品默认隐藏，已启用但尚无作品线时显示“未建立”。“已注册”不等于“本版本可选”，尚未发布内容的作品可能只保留变量兼容槽。当前的“邻家天使”仅作为入口骨架，不能从开场页选择，也不会自动注入它的论坛、媒体、地图、世界书或正式剧情内容；这不限制玩家在已有剧情中建立任意来源角色。<b>世界书</b>可查看并真实开关当前主世界书条目；作品开关重新开启时只恢复默认开启的基础条目，选开、勿开、二选一和建议关闭条目仍由各自控制。尚未发布世界书内容的入口作品不会显示空的分类或批量开关。关闭条目会影响所有共用这本世界书的聊天，受保护条目只能查看。</p>
+          <p><b>手账</b>只显示当前已启用作品，并按注册表读取对应的篇章、偏移与后续推演；未选择或已关闭的作品默认隐藏，已启用但尚无作品线时显示“未建立”。“已注册”不等于“本版本可选”：注册表中标记为尚未发布的入口作品只保留变量兼容槽，不能从开场页选择，也不会自动注入专属论坛、媒体、地图、世界书或正式剧情内容；这不限制玩家在已有剧情中建立任意来源角色。<b>世界书</b>可查看并真实开关当前主世界书条目；作品开关重新开启时只恢复默认开启的基础条目，选开、勿开、二选一和建议关闭条目仍由各自控制。尚未发布世界书内容的入口作品不会显示空的分类或批量开关。关闭条目会影响所有共用这本世界书的聊天，受保护条目只能查看。</p>
         </div></details>
         <details class="guide-sec"><summary>设置怎么选</summary><div class="guide-copy">
           <p><b>我的头像</b>可从设备上传，上传后会同时显示在手机名片、动态和正文中的玩家对话旁；图片只保存在当前浏览器，点“恢复”即可改回名字占位。</p>
@@ -5430,7 +5432,8 @@ async function moveSms(messageId){
     if(win && S.store) Object.values(get(S.store,'line.threads',{})).some(th=>
       (th.msgs||[]).some(m=>{ if(isGhost(m)){ hasGhost=true; } return hasGhost; }));
     if(!list.length && !seeds.length && !groups.length && !hasGhost) return;
-    const {d}=nowTD();
+    const currentTD=nowTD();
+    const {d}=currentTD;
     let added=0, purged=0;
     const arrivals=[];
     await mutStore(st=>{
@@ -5454,7 +5457,7 @@ async function moveSms(messageId){
         const id=groupThreadId(g.name);
         if(!threadOf(id,st)){
           const th={type:'group',name:g.name,members:members.slice(0,8),msgs:[],lastRead:0};
-          th.msgs.push({seq:++st.seq, sys:1, text:'你被拉进了群聊「'+g.name+'」', t:nowTD().t, d});
+          th.msgs.push({seq:++st.seq, sys:1, text:'你被拉进了群聊「'+g.name+'」', t:g.t||currentTD.t, d:g.d||d});
           st.line.threads[id]=th; added++;
         }
       });
@@ -5466,7 +5469,7 @@ async function moveSms(messageId){
         canonicalDmIdentity(th,from);
         /* 防回声：同线程近 20 条内已有同文来信则跳过 */
         if((th.msgs||[]).slice(-20).some(x=>x.dir!=='out' && !x.sys && x.text===m.text)) return;
-        th.msgs.push({seq:++st.seq, dir:'in', from, text:m.text, t:m.t||nowTD().t, d,
+        th.msgs.push({seq:++st.seq, dir:'in', from, text:m.text, t:m.t||currentTD.t, d:m.d||d,
           srcMid:(typeof m.srcMid==='number'?m.srcMid:undefined), hash:m.hash}); added++;
         arrivals.push({from, text:String(m.text||'')});
       });
@@ -5645,6 +5648,7 @@ async function summarizeMemo(w,manual,rebuild){
     const sysP=`你是手机通讯记忆整理器。把每个会话分别压缩为该会话自己的长期备忘，并另写一段供故事正文读取的全局通讯摘要。`
       + `每个联系人备忘只能使用该 id 对应区块中的既有备忘和消息，严禁把其他私聊或群聊的事实混入；`
       + `保留已经讲定的约定、关系变化、特殊称呼、未解决矛盾、重要偏好与有后续价值的具体事件，省略寒暄和重复话。`
+      + `涉及跨日等待、迟回、错过时间、预约、截止时间、先后顺序或“昨天/今天/明天”语义时，必须保留消息记录中的绝对日期与时刻，不得只写成“最近”“后来”或“当天”。`
       + `只陈述记录中确实发生的事，不补写心理、动机或未来结果。每个联系人 summary 不超过 350 字，global 不超过 500 字。`;
     const blocks=targets.map(x=>[
       `【会话 id=${JSON.stringify(x.id)}；名称=${x.name}；类型=${x.type}；整理至 #${x.through}】`,
