@@ -959,7 +959,7 @@
   <div class="row"><button id="del-cancel" type="button">取消</button>
     <button class="danger" id="del-confirm" type="button">删除</button></div>
 </div></div>
-<div id="vedit" aria-hidden="true"><form class="pane" role="dialog" aria-modal="true" aria-labelledby="ve-title" onsubmit="WN.saveEdit(event)">
+<div id="vedit" aria-hidden="true"><form class="pane" role="dialog" aria-modal="true" aria-labelledby="ve-title">
   <div class="vh2"><b id="ve-title">编辑变量</b><button type="button" aria-label="关闭" onclick="WN.closeEdit()">×</button></div>
   <label for="ve-input">变量值</label><div id="ve-field"></div>
   <div class="err" id="ve-error" role="alert"></div>
@@ -1008,7 +1008,7 @@
 "use strict";
 const WN = window.WN = {};
 /* =========================================================================
- * 东京生活区 · 悬浮手机 App 本体  v0.31.7
+ * 东京生活区 · 悬浮手机 App 本体  v0.31.8
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -2049,7 +2049,8 @@ WN.closeEdit=function(restore=true){
 WN.saveEdit=async function(e){
   e && e.preventDefault();
   const desc=EDIT_STATE.desc, input=$id('ve-input');
-  if(!desc || !input || EDIT_STATE.busy) return;
+  if(!desc || !input){ const missing=$id('ve-error'); if(missing) missing.textContent='编辑状态已失效，请重新打开'; return; }
+  if(EDIT_STATE.busy) return;
   const error=$id('ve-error'); let value;
   if(desc.type==='number'){
     value=Number(input.value);
@@ -2094,8 +2095,8 @@ WN.saveEdit=async function(e){
     }
     return;
   }
-  if(!S.B.setStatPath){ error.textContent='当前手机桥不支持变量写回'; return; }
-  EDIT_STATE.busy=true; $id('ve-save').disabled=true; error.textContent='';
+  if(!S.B || !S.B.setStatPath){ error.textContent='当前手机桥不支持变量写回'; return; }
+  EDIT_STATE.busy=true; $id('ve-save').disabled=true; error.textContent='正在保存…';
   try{
     const next=await S.B.setStatPath(desc.path,value);
     if(obj(next)) S.stat=next; else await refreshStat();
@@ -2107,6 +2108,17 @@ WN.saveEdit=async function(e){
     error.textContent=String(err&&err.message||err||'写入失败').slice(0,120);
   }
 };
+/* 手机 iframe 未开放 sandbox 表单提交权限，不能依赖 submit 按钮的默认动作。
+   原生 submit 处理键盘提交；按钮 click 直接保存并阻止默认提交。 */
+(function bindEditSubmit(){
+  const form=$id('vedit')&&$id('vedit').querySelector('form'), save=$id('ve-save');
+  if(!form || !save || form.dataset.wnSubmitBound==='1') return;
+  form.dataset.wnSubmitBound='1';
+  form.addEventListener('submit',event=>{ event.preventDefault(); WN.saveEdit(event); });
+  save.addEventListener('click',event=>{
+    event.preventDefault(); event.stopPropagation(); WN.saveEdit(event);
+  });
+})();
 function clearEditNote(desc){
   if(desc.clearHint) return String(desc.clearHint);
   if(desc.type==='number') return '该数值将恢复为 0，变量字段本身会保留。';
@@ -5249,7 +5261,7 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">东京生活区·综漫手机 v0.31.7</div>
+<div class="empty" style="padding:14px">东京生活区·综漫手机 v0.31.8</div>
     </div></div>`;
   });
   paintDialogueLanguageControls();
