@@ -1006,8 +1006,9 @@
 
 <script>
 "use strict";
+const WN = window.WN = {};
 /* =========================================================================
- * 东京生活区 · 悬浮手机 App 本体  v0.31.6
+ * 东京生活区 · 悬浮手机 App 本体  v0.31.7
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -1767,7 +1768,6 @@ async function loadStore(){
 async function mutStore(fn){ fn(S.store); await S.B.setPhoneStore(S.store); }
 
 /* ---------- 路由 ---------- */
-const WN = window.WN = {};
 WN.pickAva=pickAva; WN.resetAva=resetAva; WN.closeAvaCrop=closeAvaCrop; WN.saveAvaCrop=saveAvaCrop;
 WN.setAvaZoom=value=>applyAvaZoom(value);
 WN.stepAvaZoom=direction=>applyAvaZoom(AVA_CROP.zoom+(Number(direction)<0?-.1:.1));
@@ -5247,7 +5247,7 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">东京生活区·综漫手机 v0.31.6</div>
+<div class="empty" style="padding:14px">东京生活区·综漫手机 v0.31.7</div>
     </div></div>`;
   });
   paintDialogueLanguageControls();
