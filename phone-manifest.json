@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "0.31.9",
+  "version": "0.32.2",
   "bridge": 2,
-  "minShell": "0.31.6",
+  "minShell": "0.32.2",
   "html": "https://raw.githubusercontent.com/serenahill85-hue/watanare/main/phone_app.html",
-  "sha256": "51b26bde5c87969add5c8a505d3a86d3c3f5be96d1b3147c5880d71b53dea31a",
-  "updatedAt": "2026-08-25T13:16:47Z"
+  "sha256": "b1b2b6c9d194874af9e6377cdb2486a6bc4b148c3a557b0e146f697eeea5e046",
+  "updatedAt": "2026-09-12T14:44:52Z"
 }
