@@ -848,15 +848,23 @@
   }
 
   /* ── 世界书控制器 ── */
-  .wb-tools{padding:10px 14px 8px;background:var(--surface);display:grid;gap:8px}
+  .wb-tools{padding:10px 14px 8px;background:var(--surface);display:grid;gap:8px;flex:none}
+  .scr[data-wn-view^="wb-"]>.body{min-height:0}
+  .scr[data-wn-view^="wb-"] .apphead .t{max-width:48%}
+  .scr[data-wn-view^="wb-"] .apphead .sub{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis}
   .wb-search{width:100%;min-height:40px;border:0;border-radius:11px;background:var(--card2);
     color:var(--ink);padding:0 12px;font:13.5px var(--font-ui);outline:none;box-shadow:inset 0 0 0 1px var(--hair)}
   .wb-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:10px;background:var(--card2)}
   .wb-seg button{min-height:36px;border-radius:8px;color:var(--muted);font-size:12px}
   .wb-seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
-  .wb-work-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .wb-work{min-width:0;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:9px;background:var(--card);box-shadow:inset 0 0 0 1px var(--hair)}
-  .wb-work-copy{flex:1;min-width:0}.wb-work-copy b{display:block;font-size:12.5px}.wb-work-copy span{display:block;margin-top:2px;font-size:10.5px;color:var(--muted)}
+  .wb-work-toggle{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;border-radius:8px}
+  .wb-work-toggle[disabled]{opacity:.4;cursor:default}
+  .wb-work-toggle:focus-visible,.wb-cat .go:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+  .wb-cat .go{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+  .wb-cat .go>span:first-child{min-width:0}.wb-chevron{font-size:20px;color:var(--muted)}
+  .wb-current-work{display:flex;align-items:center;gap:10px;padding:6px 14px;border-bottom:1px solid var(--hair);background:var(--surface)}
+  .wb-current-work .copy{flex:1;min-width:0}.wb-current-work b{font-size:12px;font-weight:650}
+  .wb-current-work .sub{display:block;font-size:11px;color:var(--muted);overflow-wrap:anywhere}
   .wb-cat,.wb-entry{display:flex;align-items:center;gap:10px;min-height:58px;padding:8px 14px;
     border-bottom:1px solid var(--hair)}
   .wb-cat .go,.wb-entry .go{flex:1;min-width:0;text-align:left;min-height:44px}
@@ -878,7 +886,7 @@
   .wb-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;color:var(--muted);font-size:11px}
   .wb-content{margin:0;padding:12px;border-radius:10px;background:var(--card);color:var(--ink2);
     white-space:pre-wrap;overflow-wrap:anywhere;font:12.5px/1.72 var(--font-ui);box-shadow:var(--shadow)}
-  .wb-reload{min-height:38px;padding:0 10px;border-radius:9px;background:var(--card2);color:var(--ink2);
+  .wb-reload{min-height:38px;padding:0 10px;border-radius:9px;background:var(--card2);color:var(--ink2);flex:none;
     display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:12.5px;font-weight:650;
     box-shadow:inset 0 0 0 1px var(--hair);white-space:nowrap}
   .wb-reload span[aria-hidden]{font-size:16px;line-height:1}
@@ -1195,7 +1203,7 @@
 "use strict";
 const WN = window.WN = {};
 /* =========================================================================
- * 偏航的东京日常 · 悬浮手机 App 本体  v0.32.2
+ * 偏航的东京日常 · 悬浮手机 App 本体  v0.32.3
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -2131,7 +2139,7 @@ document.addEventListener('click',e=>{
   const row=e.target.closest && e.target.closest('.swipe-row');
   if(!row) closeSwipe();
   const el=e.target.closest && e.target.closest('[data-wn-action]');
-  if(!el) return;
+  if(!el||el.disabled) return;
   const key=keyFromToken(el.dataset.wnKey);
   if(key===undefined) return;
   const action=el.dataset.wnAction;
@@ -2152,6 +2160,7 @@ document.addEventListener('click',e=>{
   else if(action==='wb-category') WN.wbCategory(key);
   else if(action==='wb-entry') WN.wbEntry(Number(key)||0);
   else if(action==='wb-toggle') WN.wbToggle(Number(key)||0,el.dataset.wnEnable==='1',el);
+  else if(action==='wb-work-toggle') WN.wbWorkToggle(key,el.dataset.wnEnable==='1',el);
   else if(action==='note-open') WN.openNote(key);
   else if(action==='note-close') WN.closeNote(key);
   else if(action==='memo-save') WN.memoContactSave(key);
@@ -2681,6 +2690,8 @@ function mountOverviewStudy(root, options={}) {
   const themeButton = root.querySelector('.wo-theme');
   const state = {zoom:1, panX:0, panY:0, selected:'', theme:matchMedia('(prefers-color-scheme: light)').matches?'light':'dark', grid:.28};
   let minimumZoom=.1;
+  let paintFrame=0,labelMeasureKey='';const labelSizes=new Map();
+  function schedulePaint(){if(!paintFrame)paintFrame=requestAnimationFrame(()=>{paintFrame=0;paint();});}
   const regions = [
     {id:'seiseki',name:'圣迹樱丘',x:-64,y:65,extension:true,icon:'briefcase-business',color:'#64a8df',note:'多摩市京王线沿线，283事务所位于站南商业街的本卡落点。官方制作访谈支持圣迹樱丘区域，具体建筑为复合参考；不并入芦谷，也不提前加入整包角色或制作人身份。'},
     {id:'wago',name:'和合市',x:0,y:-16,extension:true,icon:'school',color:'#64a8df',note:'以和光市为地理参考，往池袋采用东武东上线方向。独立保留冰堂家、县立椿姬女子高中与取材场景，具体校宅街段为本卡安排。'},
@@ -2761,8 +2772,11 @@ function mountOverviewStudy(root, options={}) {
   const SVG_NS='http://www.w3.org/2000/svg';
   function svgNode(tag,attrs){const e=document.createElementNS(SVG_NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,String(v));return e;}
   function paint(){
+    if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}
     const width=viewport.clientWidth,height=viewport.clientHeight;
     if(width<=64||height<=184)return;
+    const measureKey=width+'|'+height+'|'+state.zoom;
+    if(!(drag?.active||drag?.kind==='pinch')||measureKey!==labelMeasureKey){labelSizes.clear();labelMeasureKey=measureKey;}
     const fit=wnOverviewFit(regions,curves,width,height),wasFit=state.zoom<=minimumZoom+1e-6;
     minimumZoom=fit.zoom;if(wasFit||state.zoom<minimumZoom){state.zoom=minimumZoom;state.panX=fit.panX;state.panY=fit.panY;}
     const insetX=20,insetY=62,plotW=width-40,plotH=height-122;
@@ -2782,7 +2796,8 @@ function mountOverviewStudy(root, options={}) {
       const region=regions.find(r=>r.id===button.dataset.region),[x,y]=project(region.x,region.y);
       button.style.left=x+'px';button.style.top=y+'px';
       button.setAttribute('aria-label',region.name+'，'+(overview?'放大查看地区':button.dataset.detailAction||'查看地区说明'));
-      const label=button.querySelector('.wo-name'),box=label.getBoundingClientRect();
+      const label=button.querySelector('.wo-name');let box=labelSizes.get(region.id);
+      if(!box){box=label.getBoundingClientRect();labelSizes.set(region.id,{width:box.width,height:box.height});}
       const item={id:region.id,x,y,w:box.width,h:box.height,special:region.id==='empty',ownLabel:true,nodeRadius:overview?(region.id==='empty'?41*state.zoom:target/2):undefined,labelAnchor:Math.abs(state.panX)+Math.abs(state.panY)<1?region.labelAnchor:undefined};
       const labelBox=wnMapStudyLabelLayout([item],width,height)[0];
       const shown=x>=22&&x<=width-22&&y>=(region.id==='empty'?60:82)&&y<=height-67&&(overview||labelBox?.score<1);
@@ -2811,14 +2826,19 @@ function mountOverviewStudy(root, options={}) {
   const local=e=>{const r=viewport.getBoundingClientRect();return {x:e.clientX-r.left-r.width/2,y:e.clientY-r.top-r.height/2};};
   function startGesture(){const points=[...pointers.values()];if(points.length>=2){const[a,b]=points;drag={kind:'pinch',zoom:state.zoom,panX:state.panX,panY:state.panY,mid:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},distance:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y))};for(const id of pointers.keys())viewport.setPointerCapture(id);closeDetail();suppressClick=performance.now()+260;}else if(points.length){drag={kind:'pan',start:points[0],panX:state.panX,panY:state.panY,active:false};}else drag=null;}
   viewport.addEventListener('pointerdown',e=>{if(e.target.closest('.wo-tools,.wo-detail')||e.button!==0)return;pointers.set(e.pointerId,local(e));startGesture();});
-  viewport.addEventListener('pointermove',e=>{if(!drag||!pointers.has(e.pointerId))return;pointers.set(e.pointerId,local(e));const[a,b]=[...pointers.values()];if(drag.kind==='pinch'&&b){Object.assign(state,wnOverviewPinch(drag,{x:(a.x+b.x)/2,y:(a.y+b.y)/2},Math.hypot(a.x-b.x,a.y-b.y),minimumZoom));suppressClick=performance.now()+260;paint();return;}const dx=a.x-drag.start.x,dy=a.y-drag.start.y;if(!drag.active&&Math.hypot(dx,dy)>6){drag.active=true;viewport.setPointerCapture(e.pointerId);viewport.classList.add('dragging');closeDetail();}if(drag.active){state.panX=drag.panX+dx;state.panY=drag.panY+dy;suppressClick=performance.now()+260;paint();}});
-  function release(e){if(!pointers.has(e.pointerId))return;if(drag?.active||drag?.kind==='pinch')suppressClick=performance.now()+260;pointers.delete(e.pointerId);viewport.classList.remove('dragging');if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId);startGesture();}
+  viewport.addEventListener('pointermove',e=>{if(!drag||!pointers.has(e.pointerId))return;pointers.set(e.pointerId,local(e));const[a,b]=[...pointers.values()];if(drag.kind==='pinch'&&b){Object.assign(state,wnOverviewPinch(drag,{x:(a.x+b.x)/2,y:(a.y+b.y)/2},Math.hypot(a.x-b.x,a.y-b.y),minimumZoom));suppressClick=performance.now()+260;schedulePaint();return;}const dx=a.x-drag.start.x,dy=a.y-drag.start.y;if(!drag.active&&Math.hypot(dx,dy)>6){drag.active=true;viewport.setPointerCapture(e.pointerId);viewport.classList.add('dragging');closeDetail();}if(drag.active){state.panX=drag.panX+dx;state.panY=drag.panY+dy;suppressClick=performance.now()+260;schedulePaint();}});
+  function release(e){
+    // Touch capture handed from a child icon to this viewport is not a release.
+    if(e.type==='lostpointercapture'&&e.target!==viewport)return;
+    if(!pointers.has(e.pointerId))return;if(drag?.active||drag?.kind==='pinch')suppressClick=performance.now()+260;
+    pointers.delete(e.pointerId);viewport.classList.remove('dragging');if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId);startGesture();schedulePaint();
+  }
   viewport.addEventListener('pointerup',release);viewport.addEventListener('pointercancel',release);viewport.addEventListener('lostpointercapture',release);
   viewport.addEventListener('wheel',e=>{if(e.target.closest('.wo-tools,.wo-detail'))return;e.preventDefault();const mid=local(e),start={zoom:state.zoom,panX:state.panX,panY:state.panY,mid,distance:1};Object.assign(state,wnOverviewPinch(start,mid,e.deltaY<0?1.15:1/1.15,minimumZoom));closeDetail();paint();},{passive:false});
   applyTheme();paint();
   const observer=new ResizeObserver(paint);observer.observe(viewport);
   if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:()=>{applyTheme();paint();}});tweak.addSelect(state,'theme',{label:'原手机主题',options:[{label:'日间',value:'light'},{label:'夜间',value:'dark'}]});tweak.addSlider(state,'grid',{label:'网格显著度',min:.15,max:.55,step:.05});}
-  return {paint,closeDetail,setTheme(theme){state.theme=theme==='light'?'light':'dark';applyTheme();},destroy(){observer.disconnect();}};
+  return {paint,closeDetail,canClick:()=>performance.now()>=suppressClick,setTheme(theme){state.theme=theme==='light'?'light':'dark';applyTheme();},destroy(){observer.disconnect();cancelAnimationFrame(paintFrame);paintFrame=0;}};
 }
 
 
@@ -2945,6 +2965,8 @@ function mountDistrictStudy(root,scene,interiorTargets={},options={}) {
   const characters=createMapCharacterPreview(root,scene,options);
   const svgNS='http://www.w3.org/2000/svg',buttons=new Map(),pointers=new Map();
   let suppressClick=0,gesture=null,initialFit=!!scene.interior;
+  let paintFrame=0,labelMeasureKey='';const labelSizes=new Map();
+  function schedulePaint(){if(!paintFrame)paintFrame=requestAnimationFrame(()=>{paintFrame=0;paint();});}
   const icons=()=>options.icons?options.icons(root):globalThis.lucide?.createIcons({attrs:{width:17,height:17}});
   const svgNode=(tag,attrs)=>{const e=document.createElementNS(svgNS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,String(v));return e;};
   function closeDetail(restoreFocus=false){const previous=state.selected;state.selected='';if(detail)detail.hidden=true;for(const b of buttons.values())b.setAttribute('aria-pressed','false');if(restoreFocus)buttons.get(previous)?.focus({preventScroll:true});}
@@ -2966,8 +2988,11 @@ function mountDistrictStudy(root,scene,interiorTargets={},options={}) {
     });
   }
   function paint(){
+    if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0;}
     const width=viewport.clientWidth,height=viewport.clientHeight;if(!width||!height)return;
     camera.resize(width,height);if(initialFit){camera.zoomTo(camera.minZoom);initialFit=false;}const project=camera.project,z=camera.state.zoom,overview=!scene.special&&z<camera.detailZoom-1e-6,compact=!overview&&z<.64&&!scene.interior;
+    const measureKey=width+'|'+height+'|'+z;
+    if(!(gesture?.active||gesture?.kind==='pinch')||measureKey!==labelMeasureKey){labelSizes.clear();labelMeasureKey=measureKey;}
     const targetSize=overview?districtOverviewTargetSize(scene.places.map(p=>project(p.x,p.y))):44;
     root.dataset.wmOverview=String(overview);root.style.setProperty('--wm-overview-target',targetSize+'px');root.style.setProperty('--wm-overview-ring',Math.min(14,targetSize*.72)+'px');root.style.setProperty('--wm-overview-scale',overview?z:1);
     if(!scene.special)root.querySelector('.wo-hint').textContent=scene.interior?'内部地图 · 非等比例':overview?(Object.keys(interiorTargets).length?'全图概览 · › 可展开':'全图概览 · 点选放大'):'拖动续看 · 非等比例';
@@ -2987,7 +3012,7 @@ function mountDistrictStudy(root,scene,interiorTargets={},options={}) {
       name.style.width='max-content';name.style.whiteSpace=compact?'pre-line':'nowrap';name.style.overflowWrap=compact?'anywhere':'normal';
       name.textContent=compact?(place.compactName||place.name):place.name;
       name.style.maxWidth=compact?'88px':'none';
-      const box=name.getBoundingClientRect();
+      let box=labelSizes.get(place.id);if(!box){box=name.getBoundingClientRect();labelSizes.set(place.id,{width:box.width,height:box.height});}
       const item={id:place.id,x,y,w:box.width,h:box.height,special:scene.special,labelAnchor:overview?undefined:place.labelAnchor};
       if(!overview&&place.labelAnchor&&wnMapStudyLabelLayout([item],width,height)[0].score>=1)b.style.visibility='hidden';
       if(b.style.visibility==='visible')visible.push(item);
@@ -3020,21 +3045,25 @@ function mountDistrictStudy(root,scene,interiorTargets={},options={}) {
   viewport.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('.wo-tools,.wo-detail,.wm-character-preview'))return;const r=viewport.getBoundingClientRect();pointers.set(e.pointerId,{x:e.clientX-r.left,y:e.clientY-r.top});beginGesture();if(pointers.size>=2){suppressClick=performance.now()+260;closeDetail();viewport.setPointerCapture(e.pointerId);}});
   viewport.addEventListener('pointermove',e=>{
     if(!pointers.has(e.pointerId)||!gesture)return;const r=viewport.getBoundingClientRect();pointers.set(e.pointerId,{x:e.clientX-r.left,y:e.clientY-r.top});const a=[...pointers.values()];
-    if(gesture.kind==='pinch'&&a.length>=2){const mid={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2};camera.zoomTo(gesture.zoom*Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)/gesture.distance,gesture.last);camera.panBy(mid.x-gesture.last.x,mid.y-gesture.last.y);gesture.last=mid;suppressClick=performance.now()+260;paint();return;}
+    if(gesture.kind==='pinch'&&a.length>=2){const mid={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2};camera.zoomTo(gesture.zoom*Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)/gesture.distance,gesture.last);camera.panBy(mid.x-gesture.last.x,mid.y-gesture.last.y);gesture.last=mid;suppressClick=performance.now()+260;schedulePaint();return;}
     if(gesture.kind==='pan'){
       if(!gesture.active&&Math.hypot(a[0].x-gesture.start.x,a[0].y-gesture.start.y)>6){gesture.active=true;closeDetail();viewport.classList.add('dragging');viewport.setPointerCapture(e.pointerId);}
-      if(gesture.active){camera.panBy(a[0].x-gesture.last.x,a[0].y-gesture.last.y);gesture.last=a[0];suppressClick=performance.now()+260;paint();}
+      if(gesture.active){camera.panBy(a[0].x-gesture.last.x,a[0].y-gesture.last.y);gesture.last=a[0];suppressClick=performance.now()+260;schedulePaint();}
     }
   });
-  function release(e){if(!pointers.has(e.pointerId))return;if(gesture?.active||gesture?.kind==='pinch')suppressClick=performance.now()+260;pointers.delete(e.pointerId);viewport.classList.remove('dragging');if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId);beginGesture();}
+  function release(e){
+    if(e.type==='lostpointercapture'&&e.target!==viewport)return;
+    if(!pointers.has(e.pointerId))return;if(gesture?.active||gesture?.kind==='pinch')suppressClick=performance.now()+260;
+    pointers.delete(e.pointerId);viewport.classList.remove('dragging');if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId);beginGesture();schedulePaint();
+  }
   for(const event of ['pointerup','pointercancel','lostpointercapture'])viewport.addEventListener(event,release);
   viewport.addEventListener('wheel',e=>{if(e.target.closest('.wo-tools,.wo-detail,.wm-character-preview'))return;e.preventDefault();const r=viewport.getBoundingClientRect();camera.zoomTo(camera.state.zoom*(e.deltaY<0?1.15:1/1.15),{x:e.clientX-r.left,y:e.clientY-r.top});closeDetail();paint();},{passive:false});
   applyTheme();paint();const observer=new ResizeObserver(paint);observer.observe(viewport);
-  const dispose=()=>{observer.disconnect();characters?.dispose();window.removeEventListener('pagehide',onPageHide);};
+  const dispose=()=>{observer.disconnect();cancelAnimationFrame(paintFrame);paintFrame=0;characters?.dispose();window.removeEventListener('pagehide',onPageHide);};
   const onPageHide=event=>{if(!event.persisted)dispose();};
   window.addEventListener('pagehide',onPageHide);
   if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:()=>{applyTheme();paint();}});tweak.addSelect(state,'theme',{label:'原手机主题',options:[{label:'日间',value:'light'},{label:'夜间',value:'dark'}]});tweak.addToggle(state,'buildings',{label:'浅色建筑轮廓'});tweak.addToggle(state,'annotations',{label:'街巷注记'});}
-  return {paint,camera,closeDetail,setTheme(theme){state.theme=theme==='light'?'light':'dark';applyTheme();},destroy:dispose};
+  return {paint,camera,closeDetail,canClick:()=>performance.now()>=suppressClick,setTheme(theme){state.theme=theme==='light'?'light':'dark';applyTheme();},destroy:dispose};
 }
 
 /* Maintained phone-map adapter. Drawings/binders are compiled from shared sources.
@@ -3126,7 +3155,7 @@ function mountPhoneMap(host,options){
     const span=document.createElement('span');span.className='wm-person-avatar';span.setAttribute('aria-hidden','true');span.textContent=Array.from(name)[0]||'?';
     const url=options.avatar?.(name);
     if(typeof url==='string'&&/^(?:https?:\/\/|blob:|data:image\/(?:png|jpeg|webp|gif);base64,)/i.test(url)){
-      const img=document.createElement('img');img.alt='';img.referrerPolicy='no-referrer';img.src=url;img.addEventListener('error',()=>{img.remove();span.textContent=Array.from(name)[0]||'?';},{once:true});span.textContent='';span.append(img);
+      const img=document.createElement('img');img.alt='';img.draggable=false;img.referrerPolicy='no-referrer';img.src=url;img.addEventListener('error',()=>{img.remove();span.textContent=Array.from(name)[0]||'?';},{once:true});span.textContent='';span.append(img);
     }
     return span;
   }
@@ -3145,7 +3174,7 @@ function mountPhoneMap(host,options){
   function paintPresence(view,frame){
     const {root:section,visible,labelBoxes,width,height,targetSize,overview}=frame;
     const layer=section.querySelector('.wm-presence-layer');if(!layer)return;
-    layer.replaceChildren();
+    const badges=new Map([...layer.children].map(b=>[b.dataset.presencePlace,b])),kept=new Set();
     const occupied=[...labelBoxes,...visible.map(p=>({x:p.x-targetSize/2,y:p.y-targetSize/2,w:targetSize,h:targetSize}))];
     const overlaps=(a,b)=>a.x<b.x+b.w+2&&a.x+a.w+2>b.x&&a.y<b.y+b.h+2&&a.y+a.h+2>b.y;
     for(const node of section.querySelectorAll('.wo-point')){
@@ -3155,20 +3184,30 @@ function mountPhoneMap(host,options){
     }
     for(const p of visible){
       const members=groupMembers(view,p.id);if(!members.length)continue;
-      const badge=document.createElement('button');badge.type='button';badge.className='wm-presence-mark';badge.dataset.presencePlace=p.id;badge.setAttribute('aria-label','查看'+members.map(r=>r.name).join('、')+'的所在地');
       const w=overview?20:Math.min(members.length,2)*15+14,h=overview?16:22,gap=targetSize/2+3;
       const candidates=[[p.x+gap,p.y-h/2],[p.x-gap-w,p.y-h/2],[p.x-w/2,p.y-gap-h],[p.x-w/2,p.y+gap]];
-      let box=candidates.map(([x,y])=>({x,y,w,h})).find(b=>b.x>=10&&b.x+b.w<=width-10&&b.y>=58&&b.y+b.h<=height-43&&!occupied.some(o=>overlaps(b,o)));
+      let countOnly=overview,box=candidates.map(([x,y])=>({x,y,w,h})).find(b=>b.x>=10&&b.x+b.w<=width-10&&b.y>=58&&b.y+b.h<=height-43&&!occupied.some(o=>overlaps(b,o)));
       if(!box){
         // Dense panorama: a tiny count touches only its own ring. It never
         // hides the location itself or guesses another anchor.
-        box={x:p.x+4,y:p.y-15,w:16,h:16};badge.classList.add('is-count');badge.textContent=String(members.length);
+        box={x:p.x+4,y:p.y-15,w:16,h:16};countOnly=true;
         if(occupied.some(o=>overlaps(box,o)&&!((o.x===p.x-targetSize/2)&&(o.y===p.y-targetSize/2))))continue;
-      }else if(overview){badge.classList.add('is-count');badge.textContent=String(members.length);}
-      else{for(const r of members.slice(0,2))badge.append(avatar(r.name));if(members.length>2)badge.append(document.createTextNode('+'+(members.length-2)));}
-      badge.style.left=box.x+'px';badge.style.top=box.y+'px';layer.append(badge);occupied.push(box);
-      badge.addEventListener('pointerdown',e=>e.stopPropagation());badge.addEventListener('click',e=>{e.stopPropagation();selectedGroup=p.id;renderFooter();});
+      }
+      let badge=badges.get(p.id);
+      if(!badge){
+        badge=document.createElement('button');badge.type='button';badge.className='wm-presence-mark';badge.dataset.presencePlace=p.id;layer.append(badge);
+        badge.addEventListener('click',e=>{e.stopPropagation();if(mounted.get(view)?.canClick()===false)return;selectedGroup=p.id;renderFooter();});
+      }
+      kept.add(p.id);
+      const signature=JSON.stringify([countOnly,members.map(r=>[r.name,options.avatar?.(r.name)])]);
+      if(badge.dataset.signature!==signature){
+        badge.dataset.signature=signature;badge.classList.toggle('is-count',countOnly);badge.replaceChildren();badge.setAttribute('aria-label','查看'+members.map(r=>r.name).join('、')+'的所在地');
+        if(countOnly)badge.textContent=String(members.length);
+        else{for(const r of members.slice(0,2))badge.append(avatar(r.name));if(members.length>2)badge.append(document.createTextNode('+'+(members.length-2)));}
+      }
+      badge.style.left=box.x+'px';badge.style.top=box.y+'px';occupied.push(box);
     }
+    for(const[id,badge]of badges)if(!kept.has(id))badge.remove();
   }
   function mount(view){
     if(views.has(view))return views.get(view);
@@ -3261,7 +3300,7 @@ WN.open = function(app){
 
 /* ---------- 通讯录 ---------- */
 /* __WN_PHONE_WORK_CATALOG_START__ — generated by sync_runtime_catalogs.py */
-const PHONE_WORK_CATALOG={"schema":2,"worldId":"tokyo-life","worldLabel":"东京生活区","originalSourceName":"原创","sharedWorldbookPrefix":"[RULE]","defaultOffSuffixes":["选开","勿开","二选一","建议"],"promptFragments":{"worldIntro":"故事发生在现代日本的「{worldLabel}」，这里是多部日常系作品共享的连续现实。","activeWorks":"当前任务涉及的来源作品为：{works}。","noSource":"当前任务没有匹配到已启用作品的专属内容，只按现有角色、当前变量与已发生剧情生成。","continuity":"当前变量、已经发生的剧情和已有手机记录优先于原著默认进度。","crossWork":"跨作品角色只有在当前剧情或已有记录中建立过联系时，才视为彼此认识。"},"worldbookPolicies":[{"comment":"[InitVar]","suffix":"","enabled":false,"protected":true},{"comment":"[相册清单]","suffix":"（勿开）","enabled":false,"protected":true},{"comment":"[手机协议]","suffix":"","enabled":true,"protected":true},{"comment":"[通讯摘要]","suffix":"","enabled":true,"protected":true},{"comment":"变量列表","suffix":"","enabled":true,"protected":true},{"comment":"变量更新规则","suffix":"","enabled":true,"protected":true},{"comment":"变量输出格式","suffix":"","enabled":true,"protected":true},{"comment":"露西·列斐伏尔（dlc）","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]序卷：关系的原点","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第一卷：真唯卷-六月恋友竞赛","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第二卷：纱月卷-两周恋人契约","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第三卷：紫阳花卷-暑假与开学","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第四卷：幕张Cosplay高峰会","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第五卷：球技大赛决战","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第六卷：遥奈拒学与未婚妻来日","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第七卷：同学会决战与文化祭","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第八卷：假婚约风波与圣诞宣战","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[细纲使用说明]","suffix":"（建议只打开当前所在卷，其他手动关闭）","enabled":false,"protected":false},{"comment":"对话输出格式·中文","suffix":"（二选一）","enabled":true,"protected":true},{"comment":"对话输出格式·中日双语","suffix":"（二选一）","enabled":false,"protected":true}],"works":{"恋人不行":{"id":"muri","uiKey":"watanare","shortTitle":"恋人不行","title":"我怎么可能成为你的恋人，不行不行！","worldbookPrefix":"[MURI]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":true,"openingSelected":true},"theme":{"tone":"watanare","mapTone":"wata","accent":"#b77b87","soft":"#f3e7e8"},"map":{"zoneId":"watanare"},"plot":{"defaultChapter":"第一卷","chapterPattern":"^(?:|第[一二三四五六七八]卷(?:[·后：:\\s-].*)?)$","chapters":[{"value":"第一卷·真唯卷-六月恋友竞赛","label":"第一卷：真唯卷－六月恋友竞赛","events":["顶楼坠落结友","告白与比赛约定","恋人日与挚友日的对照","格斗赌局与清单磨合","织袜赠母","台场挚友约会","暴雨饭店初吻","赴法道别与越洋争吵","与紫阳花初出游","回国突袭与派对和解","母女晚餐暗流","玲真挚友之约"]},{"value":"第二卷·纱月卷-两周恋人契约","label":"第二卷：纱月卷－两周恋人契约","events":["派对未婚妻风波","求爱与两周契约","契约磨合与辅导","琴家留宿与初吻","三角关系界线","和谈破裂与三人赌局","周六特训与FPS决战","结业庆生和好","膝枕与三吻"]},{"value":"第三卷·紫阳花卷-暑假与开学","label":"第三卷：紫阳花卷－暑假与开学","events":["时装秀与家访风波","深夜离家宣言","出走第一日：启程与温泉夜话","出走第二日：真唯入伙与小镇散策","浴衣祭典与烟火顿悟","浴场夜话与吻别归途","濑名家公主待遇","泪崩之谜与求教","甜甜圈自习插曲","街头坦白与水族馆","公园告白与一个月之约","开学与恋情宣告","纱月家夜诉","咖啡厅姐妹误会"]},{"value":"第四卷·幕张Cosplay高峰会","label":"第四卷：幕张Cosplay高峰会","events":["顶楼崩溃与旧照","旧友重逢与决裂","和好与Cos委托","初摄影会受挫与魔改作战","摄影成功与旅馆坦白","游乐园双人约会","搭档承诺与顶楼剖白","特训誓言","高峰会三人告白","相框归位"]},{"value":"第五卷·球技大赛决战","label":"第五卷：球技大赛决战","events":["恋人规则与宣战","交往试行与分组","篮球起步与首次约会","正式应战与联合备战","过劳与探病","篮球决战","顶楼之吻","日常异变与新阴谋"]},{"value":"第六卷·遥奈拒学与未婚妻来日","label":"第六卷：遥奈拒学与未婚妻来日","events":["咖啡厅闲谈与秋千异样","陪同日与拒学宣言","风波共有与劝说分工","花取的动摇","紫阳花出阵：嫉妒课题与登门劝说","邂逅露西","耀子的试探与纱耀裂痕","纱月的家教契约","中庭的四人假设","真唯出马：醋意盘点与酒店密谈","浴室里的确认","两个月的期限","鬼屋决议与筹备","狩猎之约与纱月家的周六","涩谷的真相","姐妹排位战与养成日记的结局","关心的点拨与小町的名字","站在你这边","星来的协力与梨地凑的冲击","遥奈的空白日子","未婚妻来日","房门口的质问与婚约发表","婚约风波与第一次埋伏","突然的复学宣言"]},{"value":"第七卷·同学会决战与文化祭","label":"第七卷：同学会决战与文化祭","events":["考试末日与同学会邀请函","超市重逢与浴室风波","客厅的审判与归途的真相","手铐下的委托","假装交往的提案","动物园的决裂","屋顶作战会议","装备收集周","同学会决战","夜路的情报与魔女的独白","深海底的对决","同床的和解","花取的心停","文化祭的接待与学妹们的来访","再婚约的冲击"]},{"value":"第八卷·假婚约风波与圣诞宣战","label":"第八卷：假婚约风波与圣诞宣战","events":["屋顶说明会","风波下的日常","公主的委托与总部前的冲突","公园的倾诉与夜总会之夜","旅馆之夜","卧室的试探","终章的后日谈","饺子派对约会","深山的审判","天台的真相","月下的宣战","终章的来电"]}]},"opening":{"selectable":true,"coverUrl":"https://birdimage.kdns.fr/PicGo/%E6%81%8B%E4%BA%BA%E4%B8%8D%E8%A1%8C%E9%BB%98%E8%AE%A4%E5%B1%95%E5%BC%80%E5%BA%95%E5%9B%BE.jpg","presets":[{"id":"watanare_rooftop","swipe":0,"title":"顶楼初遇","summary":"午休时误闯顶楼，撞见玲奈子与真唯的秘密。"},{"id":"watanare_mai_engagement","swipe":1,"title":"真唯婚约会面","summary":"以王冢家安排的婚约对象身份与真唯初次会面。"},{"id":"watanare_sayuki_family","swipe":2,"title":"纱月家庭会面","summary":"双方家庭初次会面，纱月被迫面对新的准继亲关系。"},{"id":"watanare_ajisai_station","swipe":3,"title":"紫阳花车站重逢","summary":"紫阳花离家出走时，在车站与童年旧友重逢。"},{"id":"watanare_renako_online","swipe":4,"title":"玲奈子网友修机","summary":"小五损坏后，长期网友关系即将走进现实。"},{"id":"watanare_kaho_comiket","swipe":5,"title":"香穗夏CM初遇","summary":"在夏CM会场帮助香穗处理损坏的Cosplay道具。"},{"id":"watanare_lucy_arrival","swipe":6,"title":"兄妹来日履约","summary":"与露西一同抵达日本，以真唯婚约者身份赴约。"}]},"forums":[{"id":"ashitani","name":"芦谷高中匿名闲聊板","locations":["芦谷高中","芦谷市街区"]},{"id":"aomori","name":"青森中学匿名闲聊板","locations":["青森中学"]}],"promptFragments":{"context":["校园关系、家庭与城市日常以当前变量和世界书为准。"],"publicMedia":["王冢真唯的公开模特活动可以自然出现在公共媒体中，但不能泄露私人信息"]},"characterAliases":{"玲奈子":["甘织玲奈子"],"真唯":["王冢真唯"],"紫阳花":["濑名紫阳花"],"纱月":["琴纱月"],"香穗":["小柳香穗"],"遥奈":["甘织遥奈"],"露西":["露西·列斐伏尔","列斐伏尔露西"],"耀子":["照泽耀子"],"凑":["梨地凑"],"星来":["鬼瓦星来"],"单衣":["花取单衣"],"美代子":["琴美代子","琴纱月母亲","琴纱月的母亲","琴母亲"],"芮妮":["王冢芮妮"],"卑弥呼":["高田卑弥呼"],"铃兰":["羽贺铃兰"],"千鹤":["龟崎千鹤"],"美姬":["根本美姬"]}},"孤独摇滚":{"id":"btr","uiKey":"bocchi","shortTitle":"孤独摇滚","title":"孤独摇滚！","worldbookPrefix":"[BTR]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"bocchi","mapTone":"bocchi","accent":"#d4a43e","soft":"#f4edcf"},"map":{"zoneId":"bocchi"},"plot":{"defaultChapter":"结束乐队结成初期","chapterPattern":"^.{0,80}$","chapters":[{"value":"第一卷《孤独少女的初次合奏》","label":"第一卷：孤独少女的初次合奏","events":["立志学吉他","纸箱内的首次登台","首届乐队会议","打工第一天","喜多郁代归队"]},{"value":"第二卷《吉他、孤独与蓝色星球》","label":"第二卷：吉他、孤独与蓝色星球","events":["乐队风范会议","原创歌词的完成","试演取得资格","五张票的指标"]},{"value":"第三卷《名为\"孤独\"的摇滚》","label":"第三卷：名为\"孤独\"的摇滚","events":["演出T恤的设计","台风日的演出","庆功会与真正的梦想","江之岛的夏日回忆"]},{"value":"第四卷《绝不会忘记的文化祭》","label":"第四卷：绝不会忘记的文化祭","events":["秀华祭报名波折","新宿FOLT之夜","秀华祭第一天","秀华祭舞台演出","属于自己的吉他"]},{"value":"原作阶段后自由发展","label":"后续：原作阶段后自由发展","events":["新的现场演出","乐队日常","自由剧情"]}]},"opening":{"selectable":true,"coverUrl":"https://birdimage.kdns.fr/PicGo/%E5%AD%A4%E7%8B%AC%E6%91%87%E6%BB%9A%E6%8A%98%E5%8F%A0%E5%BA%95%E5%9B%BE.png","presets":[{"id":"bocchi_runaway_guitarist","swipe":7,"title":"逃跑的吉他手","summary":"虹夏与青梅竹马在下北泽寻找临时吉他手，发现了独坐秋千的一里。","sourceFile":"src/opening/greetings/bocchi_runaway_guitarist.txt"}]},"forums":[{"id":"shuka","name":"秀华高中匿名闲聊板","locations":["秀华高中"]},{"id":"shimokita-school","name":"下北泽高中匿名闲聊板","locations":["下北泽高中"]},{"id":"shimokita-music","name":"下北泽地下音乐匿名板","locations":["下北泽","STARRY","新宿 FOLT"]}],"promptFragments":{"context":["乐队、演出与音乐圈活动以当前变量和世界书为准。"],"publicMedia":["可以出现livehouse公告、乐器店、演出活动和乐队账号；角色是否公开出名以当前剧情为准"]},"characterAliases":{"一里":["后藤一里","后藤","后藤同学","一里同学","波奇","小孤独","吉他英雄","Hitori"],"虹夏":["伊地知虹夏","伊地知","伊地知同学","虹夏同学","虹夏酱","下北泽大天使","Nijika"],"凉":["山田凉","山田","山田同学","凉同学","Ryo"],"郁代":["喜多郁代","喜多","喜多同学","喜多喜多","Kita"],"星歌":["伊地知星歌"],"菊里":["广井菊里","广井菊理","菊理"],"二里":["后藤二里"],"直树":["后藤直树"],"美智代":["后藤美智代"],"吉米亨":["ジミヘン"],"悠悠子":["大槻悠悠子"],"志麻":["岩下志麻"],"伊莱莎":["清水伊莱莎"],"银次郎":["吉田银次郎"],"枫子":["本城枫子"],"幽幽子":["内田幽幽子","内田幽幽","幽幽"],"阿库比":["长谷川阿库比"],"久留代":["喜多久留代"],"实":["喜多实"],"恭一":["山田恭一"],"京香":["山田京香"],"PA小姐":["PA桑","PAさん"],"PoisonYami":["Poison♡Yami","佐藤爱子"],"一号粉丝":["粉丝1号"],"二号粉丝":["粉丝2号"]}},"邻家天使":{"id":"neighbor-angel","uiKey":"neighbor-angel","shortTitle":"邻家天使","title":"关于我在无意间被隔壁的天使变成废柴这件事","worldbookPrefix":"[NEIGHBOR_ANGEL]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"neighbor-angel","mapTone":"neighbor-angel","accent":"#7d9fc7","soft":"#e9f0f8"},"map":{"zoneId":"single-apartment","available":true,"runtimeSource":"map_registry.visualMaps","worldbookLocationPolicy":"manual-with-registry-validation"},"content":{"status":"active","notes":"已录入椎名真昼人物档案、单身公寓地点与雨天公园初遇预设；其他角色和篇章正文尚未提供，后续保持围绕真昼与{{user}}的轻量日常自由发展。"},"plot":{"defaultChapter":"自由发展","chapterPattern":"^.{0,80}$","chapters":[{"value":"自由发展","label":"自由发展","events":["真昼与{{user}}的邻居日常"]}]},"opening":{"selectable":true,"coverUrl":"https://birdimage.kdns.fr/PicGo/neighbor_angel/openingpage.png","presets":[{"id":"neighbor_angel_rainy_park","swipe":8,"title":"雨中公园初遇","summary":"放学回家的雨天，在公园秋千旁第一次向淋雨的椎名真昼伸出援手。","sourceFile":"src/opening/greetings/neighbor_angel_rainy_park.txt"}]},"forums":[],"promptFragments":{"context":["邻家天使当前已录入椎名真昼人物档案、单身公寓地点与雨天公园初遇预设；其他专属资料未录入，须以当前变量、已发生剧情和用户在开场提供的设定为准。","本作按轻量DLC运行，主要围绕椎名真昼与{{user}}的邻居、校园和居家日常；不主动展开原作剧情线，不凭空引入未登记的主要配角、复杂家庭线或跨作品关系。当前变量、已发生对话和手机记录优先于原著默认发展。"],"publicMedia":[]},"characterAliases":{"真昼":["椎名真昼","椎名","椎名同学","真昼同学","天使大人","Mahiru","Shiina Mahiru"]}},"白圣女与黑牧师":{"id":"white-saint-black-pastor","uiKey":"white-saint-black-pastor","shortTitle":"白圣女与黑牧师","title":"白圣女与黑牧师","worldbookPrefix":"[WHITE_SAINT]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"white-saint-black-pastor","mapTone":"white-saint-black-pastor","accent":"#a78bc4","soft":"#f4effa"},"map":{"zoneId":"sacred-heart-church","available":true,"runtimeSource":"map_registry.visualMaps","worldbookLocationPolicy":"manual-with-registry-validation"},"content":{"status":"active","notes":"已录入塞西莉亚完整人物档案与圣心堂地点；其他角色、篇章正文与开场预设尚未提供，后续保持围绕塞西莉亚与{{user}}的轻量教堂日常自由发展。"},"plot":{"defaultChapter":"自由发展","chapterPattern":"^.{0,80}$","chapters":[{"value":"自由发展","label":"自由发展","events":["塞西莉亚与{{user}}的教堂日常"]}]},"opening":{"selectable":true,"coverUrl":"https://birdimage.kdns.fr/PicGo/white_sanit/openingpage.png","presets":[]},"forums":[],"promptFragments":{"context":["白圣女与黑牧师当前已录入塞西莉亚人物档案与圣心堂地点；其他专属资料未录入，须以当前变量、已发生剧情和用户在开场提供的设定为准。","本作按轻量DLC运行，主要围绕塞西莉亚与{{user}}在圣心堂及附近街区的日常互动；不主动展开原作剧情线，不凭空引入未登记的主要配角、复杂教会权力线或跨作品关系。当前变量、已发生对话和手机记录优先于原著默认发展。"],"publicMedia":[]},"characterAliases":{"塞西莉亚":["Cecilia","圣女小姐","圣心堂少女牧师","少女牧师"]}},"25时":{"id":"pjsk","uiKey":"pjsk","shortTitle":"25时（PJSK）","title":"25时、Nightcord见。","worldbookPrefix":"[PJSK]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"pjsk","mapTone":"pjsk","accent":"#827da9","soft":"#efedf6"},"map":{"available":false,"zoneId":""},"content":{"status":"scaffold","notes":"已规划地图；25时成员可玩资料尚待接入，不代表世界计划全角色开放。"},"plot":{"defaultChapter":"","chapterPattern":"^$","chapters":[]},"opening":{"selectable":false,"presets":[]},"forums":[],"promptFragments":{"context":[],"publicMedia":[]},"characterAliases":{}},"路人女主":{"id":"saekano","uiKey":"saekano","shortTitle":"路人女主","title":"路人女主的养成方法","worldbookPrefix":"[SAEKANO]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"saekano","mapTone":"saekano","accent":"#b77b87","soft":"#f3e7e8"},"map":{"available":false,"zoneId":""},"content":{"status":"scaffold","notes":"已规划地图；可玩角色与开场资料尚待接入。"},"plot":{"defaultChapter":"","chapterPattern":"^$","chapters":[]},"opening":{"selectable":false,"presets":[]},"forums":[],"promptFragments":{"context":[],"publicMedia":[]},"characterAliases":{}},"MyGO／Ave Mujica":{"id":"mygo-mujica","uiKey":"mygo-mujica","shortTitle":"MyGO／Ave Mujica","title":"BanG Dream! It's MyGO!!!!!／Ave Mujica","worldbookPrefix":"[MYGO_MUJICA]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"mygo-mujica","mapTone":"mygo-mujica","accent":"#6685a3","soft":"#e9eef4"},"map":{"available":false,"zoneId":""},"content":{"status":"scaffold","notes":"两部动画共用一个作品开关；已规划地图，可玩资料尚待接入。"},"plot":{"defaultChapter":"","chapterPattern":"^$","chapters":[]},"opening":{"selectable":false,"presets":[]},"forums":[],"promptFragments":{"context":[],"publicMedia":[]},"characterAliases":{}}}};
+const PHONE_WORK_CATALOG={"schema":2,"worldId":"tokyo-life","worldLabel":"东京生活区","originalSourceName":"原创","sharedWorldbookPrefix":"[RULE]","defaultOffSuffixes":["选开","勿开","二选一","建议"],"promptFragments":{"worldIntro":"故事发生在现代日本的「{worldLabel}」，这里是多部日常系作品共享的连续现实。","activeWorks":"当前任务涉及的来源作品为：{works}。","noSource":"当前任务没有匹配到已启用作品的专属内容，只按现有角色、当前变量与已发生剧情生成。","continuity":"当前变量、已经发生的剧情和已有手机记录优先于原著默认进度。","crossWork":"跨作品角色只有在当前剧情或已有记录中建立过联系时，才视为彼此认识。"},"worldbookPolicies":[{"comment":"[前史]01·MyGO／Ave Mujica·高松灯的童年与校园经历","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]02·MyGO／Ave Mujica·长崎素世的家庭与转学","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]03·MyGO／Ave Mujica·要乐奈与SPACE","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]04·MyGO／Ave Mujica·千早爱音的留学与归国","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]05·MyGO／Ave Mujica·丰川家与岛上的姐妹","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]06·MyGO／Ave Mujica·CRYCHIC的结成与首演","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]07·MyGO／Ave Mujica·丰川家变与CRYCHIC离散","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]01·MyGO·相遇与组队","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]02·MyGO·离散与重聚","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]01·Ave Mujica·结成与解散","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]02·Ave Mujica·解散后的重逢","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]03·Ave Mujica·重组与复活","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]04·Ave Mujica·身世与终章","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]01·组合主线：真冬失联","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]02·提线木偶～黯淡色彩：人偶与复画","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]03·黯淡色彩～我的足迹：天台约定","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]04·交织旋律～烛香回忆：画室与家庭限制","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]05·不协和音～新学年：真冬离家","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]06·水底寻影～Dream Stage：暂住生活","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]07·荆棘之路～一针心意：瑞希归队","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]08·不可靠音符／泡沫／指针：母女重谈","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]09·难解明日～摇曳之光：升学与创作","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]10·世界连结Ⅲ·奏：作曲少女","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]11·飞向尽头：小梦告别","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]12·世界连结Ⅲ·真冬：影像少女","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]13·不褪色的当下：四人微旅行","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]14·世界连结Ⅲ·瑞希：升学争执","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]15·世界连结Ⅲ·绘名：漫画兄弟","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]16·Mix&Make：跨团派对","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]路人女主·伦也与英梨梨","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]路人女主·伦也与诗羽","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]路人女主·英梨梨与诗羽","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]路人女主·波岛兄妹","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]路人女主·美智留与icy tail","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]路人女主·伦也的升学与校园往事","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]路人女主·红坂朱音","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]01·路人女主·坡道相遇与社团成立","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]02·路人女主·制作筹备与女主角设定","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]03·路人女主·大纲分歧与通宵改稿","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]04·路人女主·波岛兄妹回归与夏展准备","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]05·夏展与英梨梨争执","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]06·路人女主·秋季取材与毕业打算","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]07·路人女主·美智留暂住与音乐邀请","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]08·路人女主·乐队首演与御宅入门","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]09·路人女主·温泉取材与湾岸夜谈","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]10·路人女主·试玩合宿与剧本重写","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]11·路人女主·校庆与剧本定稿","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]12·路人女主·冬展赶工与那须闭关","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]13·路人女主·病中照料、冬展与社团冷战","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]14·英梨梨、诗羽离队","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]15·路人女主·毕业、告别与社团重建","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]16·路人女主·出海加入与新的游戏企划","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]17·出海瓶颈与游戏剧本","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]18·路人女主·惠与英梨梨的和好","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]19·路人女主·同人活动、专场演出与新工作","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]20·伊豆合宿与诗羽低谷","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]21·路人女主·夏展与第一女主角的剧本","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]22·路人女主·生日失约与朱音住院","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]23·路人女主·商业制作支援与各自的选择","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]24·社团重聚与伦惠交往","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]25·路人女主·最后的赶工与新作完成","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]26·路人女主·冬展完售与年末告别","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]27·路人女主·毕业与升学出路","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[日常补篇]路人女主·御宅店巡访与海边邀约","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[特典分支]海边取材","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[特典分支]生日如期赴约","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧场版后日谈]01·重考与接案","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧场版后日谈]02·分别与电影工作","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧场版后日谈]03·公司经营与新作","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧场版后日谈]04·家族团聚与求婚","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[InitVar]","suffix":"","enabled":false,"protected":true},{"comment":"[相册清单]","suffix":"（勿开）","enabled":false,"protected":true},{"comment":"[手机协议]","suffix":"","enabled":true,"protected":true},{"comment":"[通讯摘要]","suffix":"","enabled":true,"protected":true},{"comment":"变量列表","suffix":"","enabled":true,"protected":true},{"comment":"变量更新规则","suffix":"","enabled":true,"protected":true},{"comment":"变量输出格式","suffix":"","enabled":true,"protected":true},{"comment":"露西·列斐伏尔（dlc）","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]序卷：关系的原点","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第一卷：真唯卷-六月恋友竞赛","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第二卷：纱月卷-两周恋人契约","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第三卷：紫阳花卷-暑假与开学","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第四卷：幕张Cosplay高峰会","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第五卷：球技大赛决战","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第六卷：遥奈拒学与未婚妻来日","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第七卷：同学会决战与文化祭","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情细纲]第八卷：假婚约风波与圣诞宣战","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[细纲使用说明]","suffix":"（建议只打开当前所在卷，其他手动关闭）","enabled":false,"protected":false},{"comment":"对话输出格式·中文","suffix":"（二选一）","enabled":true,"protected":true},{"comment":"对话输出格式·中日双语","suffix":"（二选一）","enabled":false,"protected":true},{"comment":"[前史]宵崎奏","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]朝比奈真冬","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]东云绘名","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[前史]晓山瑞希","suffix":"（选开）","enabled":false,"protected":false},{"comment":"[剧情年表]00·结成回忆：25时成立","suffix":"（选开）","enabled":false,"protected":false}],"works":{"恋人不行":{"id":"muri","uiKey":"watanare","shortTitle":"恋人不行","title":"我怎么可能成为你的恋人，不行不行！","worldbookPrefix":"[MURI]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":true,"openingSelected":true},"theme":{"tone":"watanare","mapTone":"wata","accent":"#b77b87","soft":"#f3e7e8"},"map":{"zoneId":"watanare"},"plot":{"defaultChapter":"第一卷","chapterPattern":"^(?:|第[一二三四五六七八]卷(?:[·后：:\\s-].*)?)$","chapters":[{"value":"第一卷·真唯卷-六月恋友竞赛","label":"第一卷：真唯卷－六月恋友竞赛","events":["顶楼坠落结友","告白与比赛约定","恋人日与挚友日的对照","格斗赌局与清单磨合","织袜赠母","台场挚友约会","暴雨饭店初吻","赴法道别与越洋争吵","与紫阳花初出游","回国突袭与派对和解","母女晚餐暗流","玲真挚友之约"]},{"value":"第二卷·纱月卷-两周恋人契约","label":"第二卷：纱月卷－两周恋人契约","events":["派对未婚妻风波","求爱与两周契约","契约磨合与辅导","琴家留宿与初吻","三角关系界线","和谈破裂与三人赌局","周六特训与FPS决战","结业庆生和好","膝枕与三吻"]},{"value":"第三卷·紫阳花卷-暑假与开学","label":"第三卷：紫阳花卷－暑假与开学","events":["时装秀与家访风波","深夜离家宣言","出走第一日：启程与温泉夜话","出走第二日：真唯入伙与小镇散策","浴衣祭典与烟火顿悟","浴场夜话与吻别归途","濑名家公主待遇","泪崩之谜与求教","甜甜圈自习插曲","街头坦白与水族馆","公园告白与一个月之约","开学与恋情宣告","纱月家夜诉","咖啡厅姐妹误会"]},{"value":"第四卷·幕张Cosplay高峰会","label":"第四卷：幕张Cosplay高峰会","events":["顶楼崩溃与旧照","旧友重逢与决裂","和好与Cos委托","初摄影会受挫与魔改作战","摄影成功与旅馆坦白","游乐园双人约会","搭档承诺与顶楼剖白","特训誓言","高峰会三人告白","相框归位"]},{"value":"第五卷·球技大赛决战","label":"第五卷：球技大赛决战","events":["恋人规则与宣战","交往试行与分组","篮球起步与首次约会","正式应战与联合备战","过劳与探病","篮球决战","顶楼之吻","日常异变与新阴谋"]},{"value":"第六卷·遥奈拒学与未婚妻来日","label":"第六卷：遥奈拒学与未婚妻来日","events":["咖啡厅闲谈与秋千异样","陪同日与拒学宣言","风波共有与劝说分工","花取的动摇","紫阳花出阵：嫉妒课题与登门劝说","邂逅露西","耀子的试探与纱耀裂痕","纱月的家教契约","中庭的四人假设","真唯出马：醋意盘点与酒店密谈","浴室里的确认","两个月的期限","鬼屋决议与筹备","狩猎之约与纱月家的周六","涩谷的真相","姐妹排位战与养成日记的结局","关心的点拨与小町的名字","站在你这边","星来的协力与梨地凑的冲击","遥奈的空白日子","未婚妻来日","房门口的质问与婚约发表","婚约风波与第一次埋伏","突然的复学宣言"]},{"value":"第七卷·同学会决战与文化祭","label":"第七卷：同学会决战与文化祭","events":["考试末日与同学会邀请函","超市重逢与浴室风波","客厅的审判与归途的真相","手铐下的委托","假装交往的提案","动物园的决裂","屋顶作战会议","装备收集周","同学会决战","夜路的情报与魔女的独白","深海底的对决","同床的和解","花取的心停","文化祭的接待与学妹们的来访","再婚约的冲击"]},{"value":"第八卷·假婚约风波与圣诞宣战","label":"第八卷：假婚约风波与圣诞宣战","events":["屋顶说明会","风波下的日常","公主的委托与总部前的冲突","公园的倾诉与夜总会之夜","旅馆之夜","卧室的试探","终章的后日谈","饺子派对约会","深山的审判","天台的真相","月下的宣战","终章的来电"]}]},"opening":{"selectable":true,"coverUrl":"https://birdimage.kdns.fr/PicGo/%E6%81%8B%E4%BA%BA%E4%B8%8D%E8%A1%8C%E9%BB%98%E8%AE%A4%E5%B1%95%E5%BC%80%E5%BA%95%E5%9B%BE.jpg","presets":[{"id":"watanare_rooftop","swipe":0,"title":"顶楼初遇","summary":"午休时误闯顶楼，撞见玲奈子与真唯的秘密。"},{"id":"watanare_mai_engagement","swipe":1,"title":"真唯婚约会面","summary":"以王冢家安排的婚约对象身份与真唯初次会面。"},{"id":"watanare_sayuki_family","swipe":2,"title":"纱月家庭会面","summary":"双方家庭初次会面，纱月被迫面对新的准继亲关系。"},{"id":"watanare_ajisai_station","swipe":3,"title":"紫阳花车站重逢","summary":"紫阳花离家出走时，在车站与童年旧友重逢。"},{"id":"watanare_renako_online","swipe":4,"title":"玲奈子网友修机","summary":"小五损坏后，长期网友关系即将走进现实。"},{"id":"watanare_kaho_comiket","swipe":5,"title":"香穗夏CM初遇","summary":"在夏CM会场帮助香穗处理损坏的Cosplay道具。"},{"id":"watanare_lucy_arrival","swipe":6,"title":"兄妹来日履约","summary":"与露西一同抵达日本，以真唯婚约者身份赴约。"}]},"forums":[{"id":"ashitani","name":"芦谷高中匿名闲聊板","locations":["芦谷高中","芦谷市街区"]},{"id":"aomori","name":"青森中学匿名闲聊板","locations":["青森中学"]}],"promptFragments":{"context":["校园关系、家庭与城市日常以当前变量和世界书为准。"],"publicMedia":["王冢真唯的公开模特活动可以自然出现在公共媒体中，但不能泄露私人信息"]},"characterAliases":{"玲奈子":["甘织玲奈子"],"真唯":["王冢真唯"],"紫阳花":["濑名紫阳花"],"纱月":["琴纱月"],"香穗":["小柳香穗"],"遥奈":["甘织遥奈"],"露西":["露西·列斐伏尔","列斐伏尔露西"],"耀子":["照泽耀子"],"凑":["梨地凑"],"星来":["鬼瓦星来"],"单衣":["花取单衣"],"美代子":["琴美代子","琴纱月母亲","琴纱月的母亲","琴母亲"],"芮妮":["王冢芮妮"],"卑弥呼":["高田卑弥呼"],"铃兰":["羽贺铃兰"],"千鹤":["龟崎千鹤"],"美姬":["根本美姬"]}},"孤独摇滚":{"id":"btr","uiKey":"bocchi","shortTitle":"孤独摇滚","title":"孤独摇滚！","worldbookPrefix":"[BTR]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"bocchi","mapTone":"bocchi","accent":"#d4a43e","soft":"#f4edcf"},"map":{"zoneId":"bocchi"},"plot":{"defaultChapter":"结束乐队结成初期","chapterPattern":"^.{0,80}$","chapters":[{"value":"第一卷《孤独少女的初次合奏》","label":"第一卷：孤独少女的初次合奏","events":["立志学吉他","纸箱内的首次登台","首届乐队会议","打工第一天","喜多郁代归队"]},{"value":"第二卷《吉他、孤独与蓝色星球》","label":"第二卷：吉他、孤独与蓝色星球","events":["乐队风范会议","原创歌词的完成","试演取得资格","五张票的指标"]},{"value":"第三卷《名为\"孤独\"的摇滚》","label":"第三卷：名为\"孤独\"的摇滚","events":["演出T恤的设计","台风日的演出","庆功会与真正的梦想","江之岛的夏日回忆"]},{"value":"第四卷《绝不会忘记的文化祭》","label":"第四卷：绝不会忘记的文化祭","events":["秀华祭报名波折","新宿FOLT之夜","秀华祭第一天","秀华祭舞台演出","属于自己的吉他"]},{"value":"原作阶段后自由发展","label":"后续：原作阶段后自由发展","events":["新的现场演出","乐队日常","自由剧情"]}]},"opening":{"selectable":true,"coverUrl":"https://birdimage.kdns.fr/PicGo/%E5%AD%A4%E7%8B%AC%E6%91%87%E6%BB%9A%E6%8A%98%E5%8F%A0%E5%BA%95%E5%9B%BE.png","presets":[{"id":"bocchi_runaway_guitarist","swipe":7,"title":"逃跑的吉他手","summary":"虹夏与青梅竹马在下北泽寻找临时吉他手，发现了独坐秋千的一里。","sourceFile":"src/opening/greetings/bocchi_runaway_guitarist.txt"}]},"forums":[{"id":"shuka","name":"秀华高中匿名闲聊板","locations":["秀华高中"]},{"id":"shimokita-school","name":"下北泽高中匿名闲聊板","locations":["下北泽高中"]},{"id":"shimokita-music","name":"下北泽地下音乐匿名板","locations":["下北泽","STARRY","新宿 FOLT"]}],"promptFragments":{"context":["乐队、演出与音乐圈活动以当前变量和世界书为准。"],"publicMedia":["可以出现livehouse公告、乐器店、演出活动和乐队账号；角色是否公开出名以当前剧情为准"]},"characterAliases":{"一里":["后藤一里","后藤","后藤同学","一里同学","波奇","小孤独","吉他英雄","Hitori"],"虹夏":["伊地知虹夏","伊地知","伊地知同学","虹夏同学","虹夏酱","下北泽大天使","Nijika"],"凉":["山田凉","山田","山田同学","凉同学","Ryo"],"郁代":["喜多郁代","喜多","喜多同学","喜多喜多","Kita"],"星歌":["伊地知星歌"],"菊里":["广井菊里","广井菊理","菊理"],"二里":["后藤二里"],"直树":["后藤直树"],"美智代":["后藤美智代"],"吉米亨":["ジミヘン"],"悠悠子":["大槻悠悠子"],"志麻":["岩下志麻"],"伊莱莎":["清水伊莱莎"],"银次郎":["吉田银次郎"],"枫子":["本城枫子"],"幽幽子":["内田幽幽子","内田幽幽","幽幽"],"阿库比":["长谷川阿库比"],"久留代":["喜多久留代"],"实":["喜多实"],"恭一":["山田恭一"],"京香":["山田京香"],"PA小姐":["PA桑","PAさん"],"PoisonYami":["Poison♡Yami","佐藤爱子"],"一号粉丝":["粉丝1号"],"二号粉丝":["粉丝2号"]}},"邻家天使":{"id":"neighbor-angel","uiKey":"neighbor-angel","shortTitle":"邻家天使","title":"关于我在无意间被隔壁的天使变成废柴这件事","worldbookPrefix":"[NEIGHBOR_ANGEL]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"neighbor-angel","mapTone":"neighbor-angel","accent":"#7d9fc7","soft":"#e9f0f8"},"map":{"zoneId":"single-apartment","available":true,"runtimeSource":"map_registry.visualMaps","worldbookLocationPolicy":"manual-with-registry-validation"},"content":{"status":"active","notes":"已录入椎名真昼人物档案、单身公寓地点与雨天公园初遇预设；其他角色和篇章正文尚未提供，后续保持围绕真昼与{{user}}的轻量日常自由发展。"},"plot":{"defaultChapter":"自由发展","chapterPattern":"^.{0,80}$","chapters":[{"value":"自由发展","label":"自由发展","events":["真昼与{{user}}的邻居日常"]}]},"opening":{"selectable":true,"coverUrl":"https://birdimage.kdns.fr/PicGo/neighbor_angel/openingpage.png","presets":[{"id":"neighbor_angel_rainy_park","swipe":8,"title":"雨中公园初遇","summary":"放学回家的雨天，在公园秋千旁第一次向淋雨的椎名真昼伸出援手。","sourceFile":"src/opening/greetings/neighbor_angel_rainy_park.txt"}]},"forums":[],"promptFragments":{"context":["邻家天使当前已录入椎名真昼人物档案、单身公寓地点与雨天公园初遇预设；其他专属资料未录入，须以当前变量、已发生剧情和用户在开场提供的设定为准。","本作按轻量DLC运行，主要围绕椎名真昼与{{user}}的邻居、校园和居家日常；不主动展开原作剧情线，不凭空引入未登记的主要配角、复杂家庭线或跨作品关系。当前变量、已发生对话和手机记录优先于原著默认发展。"],"publicMedia":[]},"characterAliases":{"真昼":["椎名真昼","椎名","椎名同学","真昼同学","天使大人","Mahiru","Shiina Mahiru"]}},"白圣女与黑牧师":{"id":"white-saint-black-pastor","uiKey":"white-saint-black-pastor","shortTitle":"白圣女与黑牧师","title":"白圣女与黑牧师","worldbookPrefix":"[WHITE_SAINT]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"white-saint-black-pastor","mapTone":"white-saint-black-pastor","accent":"#a78bc4","soft":"#f4effa"},"map":{"zoneId":"sacred-heart-church","available":true,"runtimeSource":"map_registry.visualMaps","worldbookLocationPolicy":"manual-with-registry-validation"},"content":{"status":"active","notes":"已录入塞西莉亚完整人物档案与圣心堂地点；其他角色、篇章正文与开场预设尚未提供，后续保持围绕塞西莉亚与{{user}}的轻量教堂日常自由发展。"},"plot":{"defaultChapter":"自由发展","chapterPattern":"^.{0,80}$","chapters":[{"value":"自由发展","label":"自由发展","events":["塞西莉亚与{{user}}的教堂日常"]}]},"opening":{"selectable":true,"coverUrl":"https://birdimage.kdns.fr/PicGo/white_sanit/openingpage.png","presets":[]},"forums":[],"promptFragments":{"context":["白圣女与黑牧师当前已录入塞西莉亚人物档案与圣心堂地点；其他专属资料未录入，须以当前变量、已发生剧情和用户在开场提供的设定为准。","本作按轻量DLC运行，主要围绕塞西莉亚与{{user}}在圣心堂及附近街区的日常互动；不主动展开原作剧情线，不凭空引入未登记的主要配角、复杂教会权力线或跨作品关系。当前变量、已发生对话和手机记录优先于原著默认发展。"],"publicMedia":[]},"characterAliases":{"塞西莉亚":["Cecilia","圣女小姐","圣心堂少女牧师","少女牧师"]}},"25时":{"id":"pjsk","uiKey":"pjsk","shortTitle":"25时（PJSK）","title":"25时、Nightcord见。","worldbookPrefix":"[PJSK]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"pjsk","mapTone":"pjsk","accent":"#827da9","soft":"#efedf6"},"map":{"available":false,"zoneId":""},"content":{"status":"active","notes":"25时四位主体人物与相关亲友资料已接入，可按开局启用；不代表世界计划其他团体全部开放。"},"plot":{"defaultChapter":"正篇前夕","chapterPattern":"^(?:|正篇前夕|组合主线|人偶与绘名复画|相处与等待|画室与家庭限制|第一次离家与暂住|湖泊与新的生活|瑞希的秘密与归队|共同梦境与母女会谈|各自的未来|共同世界与作曲少女|小梦与告别|影像少女与真冬的坦白|四人的微旅行|排球部的升学争执|漫画兄弟|交流派对|原作阶段后自由发展|自定义阶段)$","chapters":[{"value":"正篇前夕","label":"正篇前夕","events":["按已选开局保留此前经历"]},{"value":"组合主线","label":"01·组合主线：真冬失联","events":["组合主线"]},{"value":"人偶与绘名复画","label":"02·提线木偶～黯淡色彩：人偶与复画","events":["人偶与绘名复画"]},{"value":"相处与等待","label":"03·黯淡色彩～我的足迹：天台约定","events":["相处与等待"]},{"value":"画室与家庭限制","label":"04·交织旋律～烛香回忆：画室与家庭限制","events":["画室与家庭限制"]},{"value":"第一次离家与暂住","label":"05·不协和音～新学年：真冬离家","events":["第一次离家与暂住"]},{"value":"湖泊与新的生活","label":"06·水底寻影～Dream Stage：暂住生活","events":["湖泊与新的生活"]},{"value":"瑞希的秘密与归队","label":"07·荆棘之路～一针心意：瑞希归队","events":["瑞希的秘密与归队"]},{"value":"共同梦境与母女会谈","label":"08·不可靠音符／泡沫／指针：母女重谈","events":["共同梦境与母女会谈"]},{"value":"各自的未来","label":"09·难解明日～摇曳之光：升学与创作","events":["各自的未来"]},{"value":"共同世界与作曲少女","label":"10·世界连结Ⅲ·奏：作曲少女","events":["共同世界与作曲少女"]},{"value":"小梦与告别","label":"11·飞向尽头：小梦告别","events":["小梦与告别"]},{"value":"影像少女与真冬的坦白","label":"12·世界连结Ⅲ·真冬：影像少女","events":["影像少女与真冬的坦白"]},{"value":"四人的微旅行","label":"13·不褪色的当下：四人微旅行","events":["四人的微旅行"]},{"value":"排球部的升学争执","label":"14·世界连结Ⅲ·瑞希：升学争执","events":["排球部的升学争执"]},{"value":"漫画兄弟","label":"15·世界连结Ⅲ·绘名：漫画兄弟","events":["漫画兄弟"]},{"value":"交流派对","label":"16·Mix&Make：跨团派对","events":["交流派对"]},{"value":"原作阶段后自由发展","label":"原作阶段后自由发展","events":["依据已发生剧情继续生活"]},{"value":"自定义阶段","label":"自定义阶段","events":["按玩家给出的时间点与已有经历推进"]}]},"opening":{"selectable":true,"presets":[],"coverUrl":"https://birdimage.kdns.fr/PicGo/pjsk/Nightcord_at_25_new.jpg"},"forums":[],"promptFragments":{"context":[],"publicMedia":[]},"characterAliases":{"绘名":["东云绘名","東雲絵名","東雲 絵名","絵名","えななん"],"奏":["宵崎奏","宵崎 奏","かなで","Kanade"],"真冬":["朝比奈真冬","朝比奈まふゆ","朝比奈 まふゆ","まふゆ"],"瑞希":["晓山瑞希","暁山瑞希","暁山 瑞希","Amia"]}},"路人女主":{"id":"saekano","uiKey":"saekano","shortTitle":"路人女主","title":"路人女主的养成方法","worldbookPrefix":"[SAEKANO]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"saekano","mapTone":"saekano","accent":"#b77b87","soft":"#f3e7e8"},"map":{"available":false,"zoneId":""},"content":{"status":"active","notes":"五位主要女角及相关配角资料已接入，可在自由开场选择作品和剧情阶段；41条年表仍默认关闭、逐条选开。安艺伦也仅接入头像，暂不新增独立档案。"},"plot":{"defaultChapter":"正篇前夕","chapterPattern":"^(?:|正篇前夕|坡道相遇与社团成立|制作筹备与女主角设定|大纲分歧与通宵改稿|波岛兄妹回归与夏展准备|夏展与青梅竹马的争执|秋季取材与毕业打算|美智留暂住与音乐邀请|乐队首演与御宅入门|温泉取材与湾岸夜谈|试玩合宿与剧本重写|校庆与剧本定稿|冬展赶工与那须闭关|病中照料、冬展与社团冷战|商业邀约与离队决定|毕业、告别与社团重建|出海加入与新的游戏企划|出海的瓶颈与青梅竹马路线|惠与英梨梨的和好|同人活动、专场演出与新工作|伊豆合宿与学姐路线|夏展与第一女主角的剧本|生日失约与朱音住院|商业制作支援与各自的选择|重聚、告白与恋人相处|最后的赶工与新作完成|冬展完售与年末告别|毕业与升学出路|原作阶段后自由发展|自定义阶段)$","chapters":[{"value":"正篇前夕","label":"正篇前夕","events":["按已选开局保留此前经历"]},{"value":"坡道相遇与社团成立","label":"01·坡道相遇与社团成立","events":["坡道相遇与社团成立"]},{"value":"制作筹备与女主角设定","label":"02·制作筹备与女主角设定","events":["制作筹备与女主角设定"]},{"value":"大纲分歧与通宵改稿","label":"03·大纲分歧与通宵改稿","events":["大纲分歧与通宵改稿"]},{"value":"波岛兄妹回归与夏展准备","label":"04·波岛兄妹回归与夏展准备","events":["波岛兄妹回归与夏展准备"]},{"value":"夏展与青梅竹马的争执","label":"05·夏展与英梨梨争执","events":["夏展与青梅竹马的争执"]},{"value":"秋季取材与毕业打算","label":"06·秋季取材与毕业打算","events":["秋季取材与毕业打算"]},{"value":"美智留暂住与音乐邀请","label":"07·美智留暂住与音乐邀请","events":["美智留暂住与音乐邀请"]},{"value":"乐队首演与御宅入门","label":"08·乐队首演与御宅入门","events":["乐队首演与御宅入门"]},{"value":"温泉取材与湾岸夜谈","label":"09·温泉取材与湾岸夜谈","events":["温泉取材与湾岸夜谈"]},{"value":"试玩合宿与剧本重写","label":"10·试玩合宿与剧本重写","events":["试玩合宿与剧本重写"]},{"value":"校庆与剧本定稿","label":"11·校庆与剧本定稿","events":["校庆与剧本定稿"]},{"value":"冬展赶工与那须闭关","label":"12·冬展赶工与那须闭关","events":["冬展赶工与那须闭关"]},{"value":"病中照料、冬展与社团冷战","label":"13·病中照料、冬展与社团冷战","events":["病中照料、冬展与社团冷战"]},{"value":"商业邀约与离队决定","label":"14·英梨梨、诗羽离队","events":["商业邀约与离队决定"]},{"value":"毕业、告别与社团重建","label":"15·毕业、告别与社团重建","events":["毕业、告别与社团重建"]},{"value":"出海加入与新的游戏企划","label":"16·出海加入与新的游戏企划","events":["出海加入与新的游戏企划"]},{"value":"出海的瓶颈与青梅竹马路线","label":"17·出海瓶颈与游戏剧本","events":["出海的瓶颈与青梅竹马路线"]},{"value":"惠与英梨梨的和好","label":"18·惠与英梨梨的和好","events":["惠与英梨梨的和好"]},{"value":"同人活动、专场演出与新工作","label":"19·同人活动、专场演出与新工作","events":["同人活动、专场演出与新工作"]},{"value":"伊豆合宿与学姐路线","label":"20·伊豆合宿与诗羽低谷","events":["伊豆合宿与学姐路线"]},{"value":"夏展与第一女主角的剧本","label":"21·夏展与第一女主角的剧本","events":["夏展与第一女主角的剧本"]},{"value":"生日失约与朱音住院","label":"22·生日失约与朱音住院","events":["生日失约与朱音住院"]},{"value":"商业制作支援与各自的选择","label":"23·商业制作支援与各自的选择","events":["商业制作支援与各自的选择"]},{"value":"重聚、告白与恋人相处","label":"24·社团重聚与伦惠交往","events":["重聚、告白与恋人相处"]},{"value":"最后的赶工与新作完成","label":"25·最后的赶工与新作完成","events":["最后的赶工与新作完成"]},{"value":"冬展完售与年末告别","label":"26·冬展完售与年末告别","events":["冬展完售与年末告别"]},{"value":"毕业与升学出路","label":"27·毕业与升学出路","events":["毕业与升学出路"]},{"value":"原作阶段后自由发展","label":"原作阶段后自由发展","events":["依据已发生剧情继续生活"]},{"value":"自定义阶段","label":"自定义阶段","events":["按玩家给出的时间点与已有经历推进"]}]},"opening":{"selectable":true,"presets":[],"coverUrl":"https://birdimage.kdns.fr/PicGo/Saekano/Saekanoopeningpicture.jpg"},"forums":[],"promptFragments":{"context":[],"publicMedia":[]},"characterAliases":{"美智留":["冰堂美智留","氷堂美智留","氷堂 美智留","Michiru","Hyodo Michiru","Hyōdō Michiru","Michiru Hyodo"],"出海":["波岛出海","波島出海","波島 出海","Izumi","Hashima Izumi","Izumi Hashima"],"诗羽":["霞之丘诗羽","霞ヶ丘詩羽","霞ヶ丘 詩羽","詩羽","霞诗子","霞詩子","Utaha","Kasumigaoka Utaha","Utaha Kasumigaoka"],"惠":["加藤惠","加藤恵","加藤 惠","加藤 恵","Kato Megumi","Megumi Kato","恵","Megumi"],"朱音":["红坂朱音","紅坂朱音","高坂茜"],"苑子":["町田苑子"],"小百合":["泽村小百合","澤村小百合"],"英梨梨":["泽村·斯宾塞·英梨梨","泽村·史宾瑟·英梨梨","澤村・スペンサー・英梨々","英梨々","柏木英理","柏木エリ","Eriri Spencer Sawamura","Sawamura Spencer Eriri","Eriri"],"伊织":["波岛伊织","波島伊織"],"时乃":["姬川时乃","姫川時乃","トキ"],"睿智佳":["水原睿智佳","水原叡智佳","叡智佳"],"蓝子":["森丘蓝子","森丘藍子","ランコ"],"伦也":["安艺伦也","安藝倫也","安芸倫也","安芸 倫也","倫也","Tomoya","Aki Tomoya","Tomoya Aki"]}},"MyGO／Ave Mujica":{"id":"mygo-mujica","uiKey":"mygo-mujica","shortTitle":"MyGO／Ave Mujica","title":"BanG Dream! It's MyGO!!!!!／Ave Mujica","worldbookPrefix":"[MYGO_MUJICA]","defaults":{"freshEnabled":false,"legacyMigrationEnabled":false,"openingSelected":false},"theme":{"tone":"mygo-mujica","mapTone":"mygo-mujica","accent":"#6685a3","soft":"#e9eef4"},"map":{"available":false,"zoneId":""},"content":{"status":"active","notes":"两部动画共用一个作品开关；两团10位成员与真奈资料已接入，可在自由开场选择作品和剧情阶段；7条共享前史、2条MyGO年表和4条Ave Mujica年表仍默认关闭、逐条选开。"},"plot":{"defaultChapter":"正篇前夕","chapterPattern":"^(?:|正篇前夕|MyGO·相遇与组队|MyGO·离散与重聚|Ave Mujica·结成与解散|Ave Mujica·解散后的重逢|Ave Mujica·重组与复活|Ave Mujica·身世与终章|原作阶段后自由发展|自定义阶段)$","chapters":[{"value":"正篇前夕","label":"正篇前夕","events":["按已选开局保留此前经历"]},{"value":"MyGO·相遇与组队","label":"MyGO·相遇与组队","events":["爱音转入羽丘与新的相遇","新乐队结成与初次合练","第一次Live之前","首演成功与旧关系破裂"]},{"value":"MyGO·离散与重聚","label":"MyGO·离散与重聚","events":["解散与《诗超绊》","五个人的新歌与新名字","庆功、会面与Ave Mujica首演"]},{"value":"Ave Mujica·结成与解散","label":"Ave Mujica·结成与解散","events":["Ave Mujica筹备与首演","武道馆：匿名约定被打破","巡演：睦沉睡，Mortis走到台前"]},{"value":"Ave Mujica·解散后的重逢","label":"Ave Mujica·解散后的重逢","events":["解散之后：回家与幸福纸条","Mortis求助与CRYCHIC的告别"]},{"value":"Ave Mujica·重组与复活","label":"Ave Mujica·重组与复活","events":["CRYCHIC与Ave Mujica的重组提议","重组与RiNG复活Live"]},{"value":"Ave Mujica·身世与终章","label":"Ave Mujica·身世与终章","events":["初音失联与岛上的坦白","返京、搬家与恢复活动","终章：两支乐队各自的舞台"]},{"value":"原作阶段后自由发展","label":"原作阶段后自由发展","events":["依据已发生剧情继续生活"]},{"value":"自定义阶段","label":"自定义阶段","events":["按玩家给出的时间点与已有经历推进"]}]},"opening":{"selectable":true,"presets":[],"coverUrl":"https://birdimage.kdns.fr/PicGo/mygo_mujica/mygo_mujica.png"},"forums":[],"promptFragments":{"context":[],"publicMedia":[]},"characterAliases":{"祥子":["丰川祥子","豊川祥子","豊川 祥子","Oblivionis","さきこ","Sakiko","Togawa Sakiko"],"睦":["若叶睦","若葉睦","若葉 睦","Mutsumi","睦ちゃん","Wakaba Mutsumi","Mortis","モーティス"],"初华":["三角初华","三角初華","三角 初華","初華","三角初音","三角 初音","Misumi Uika","Doloris","Uika"],"海铃":["八幡海铃","八幡海鈴","八幡 海鈴","八幡海玲","海鈴","海玲","Yahata Umiri","Timoris","Umiri"],"若麦":["祐天寺若麦","祐天寺若麥","祐天寺喵梦","祐天寺喵夢","祐天寺にゃむ","祐天寺 にゃむ","若麥","喵梦","喵夢","にゃむ","にゃむち","Yutenji Nyamu","Yūtenji Nyamu","Amoris","Nyamu"],"真奈":["纯田真奈","純田まな","まな","純田真奈","純田 まな","Mana","Sumita Mana"],"乐奈":["要乐奈","要楽奈","要 楽奈","楽奈","Kaname Rana","Kaname Rāna","要樂奈","樂奈","らーな","Rana"],"立希":["椎名立希","椎名 立希","Shiina Taki","たき","Taki"],"灯":["高松灯","高松燈","高松 燈","Takamatsu Tomori","Tomori","燈"],"爱音":["千早爱音","千早愛音","千早 愛音","愛音","Chihaya Anon","Anon Chihaya","Anon","あのん"],"素世":["长崎素世","长崎爽世","長崎そよ","長崎 そよ","爽世","そよ","Nagasaki Soyo","Soyo Nagasaki","Soyo","長崎素世","長崎爽世"],"诗船":["都筑诗船","都築詩船","乐奈的外婆","乐奈外婆"],"清告":["丰川清告","豊川清告","祥子的父亲"],"定治":["丰川定治","豊川定治","祥子的祖父"],"美奈美":["森美奈美","森みなみ","睦的母亲"]}}}};
 /* __WN_PHONE_WORK_CATALOG_END__ */
 function charList(){ return Object.entries(obj(S.stat&&S.stat.角色)?S.stat.角色:{}); }
 function phoneWorks(){ return obj(PHONE_WORK_CATALOG.works)?PHONE_WORK_CATALOG.works:{}; }
@@ -4752,6 +4791,12 @@ async function readCardAlbum(){
   const parsed=txt?JSON.parse(txt):null;
   return normalizeAlbumManifest(parsed,{remote:false});
 }
+async function mergeCardAvatarFallback(manifest){
+  let card; try{ card=await readCardAlbum(); }catch(_){ return manifest; }
+  // 只补头像与姓名别名；远端分册和解锁条件仍按原清单使用。
+  return {...manifest,头像:{...card.头像,...manifest.头像},
+    头像别名:{...card.头像别名,...manifest.头像别名}};
+}
 function albumHasContent(manifest){
   return obj(manifest) && (Object.keys(manifest.头像||{}).length>0 ||
     Object.entries(manifest).some(([key,value])=>key!=='剧情'&&Array.isArray(value)&&value.length));
@@ -4762,9 +4807,10 @@ async function refreshRemoteAlbum(){
   ALBUM_REFRESH=(async()=>{
     try{
       const remote=await fetchRemoteAlbum();
-      writeCachedAlbum(remote); ALBUM=remote; S.ava=remote.头像; S.avaAlias=remote.头像别名||{};
+      writeCachedAlbum(remote); ALBUM=await mergeCardAvatarFallback(remote);
+      S.ava=ALBUM.头像; S.avaAlias=ALBUM.头像别名||{};
       ALBUM_INFO.source='remote'; ALBUM_INFO.revision=remote.revision||''; ALBUM_INFO.error='';
-      await syncAlbumUnlocks(remote);
+      await syncAlbumUnlocks(ALBUM);
       try{ if(typeof WN.refreshCurrentView==='function') await WN.refreshCurrentView(); }catch(_){}
       return true;
     }catch(error){ ALBUM_INFO.error=albumErrorText(error); return false; }
@@ -4787,7 +4833,7 @@ async function loadAlbum(force=false){
     if(cached){
       ALBUM_INFO.source='cache'; ALBUM_INFO.revision=cached.revision||''; ALBUM_INFO.error='';
       setTimeout(()=>{ refreshRemoteAlbum().catch(()=>{}); },0);
-      return cached;
+      return mergeCardAvatarFallback(cached);
     }
     let card;
     try{ card=await readCardAlbum(); }catch(_){ card={base:'',头像:{},头像别名:{},剧情:[]}; }
@@ -5476,9 +5522,11 @@ function renderJournal(navigate=true){
       <div class="journal-line-head"><span class="work">${esc(label)}</span><span class="journal-off">未建立</span></div>
       <div class="journal-disabled-copy">这部作品已启用，但当前存档尚未建立作品线。</div></div>`;
     const shiftCls={'无':'b-good','轻微':'b-warn','显著':'b-warn','分歧':'b-crit'}[m.偏移]||'b-good';
+    const chapter=phoneWorkMeta(key)?.meta?.plot?.chapters?.find(item=>item.value===m.篇章);
+    const chapterLabel=chapter?.label||m.篇章||'—';
     return `<div class="card1 journal-line ${tone}" style="--wn-work-accent:${accent}">
       <div class="journal-line-head"><span class="work">${esc(label)}</span>
-        <span class="arc wn-edit" ${editData(['剧情','作品线',lineKey,'篇章'],label+' · 篇章','text',{maxLen:80,clearable:false})}>${esc(m.篇章||'—')}</span></div>
+        <span class="arc wn-edit" ${editData(['剧情','作品线',lineKey,'篇章'],label+' · 篇章','text',{maxLen:80,clearable:false})}>${esc(chapterLabel)}</span></div>
       <div class="jmeta"><span class="badge wn-edit ${shiftCls}" ${editData(['剧情','作品线',lineKey,'偏移'],label+' · 偏移','text',{choices:['无','轻微','显著','分歧'],clearLabel:'恢复默认',clearHint:'该作品线偏移将恢复为“无”，字段本身不会删除。'})}><i></i>偏移·${esc(m.偏移||'无')}</span></div>
       <div class="m4b">
         <div class="cur wn-edit" ${editData(['剧情','作品线',lineKey,'当前节点'],label+' · 当前节点','text',{long:true,maxLen:200})}><em>当前节点</em><span>${esc(m.当前节点||'—')}</span></div>
@@ -5788,7 +5836,7 @@ function wbBaseName(entry){
 }
 function wbSubCategoryOf(entry){
   const base=wbBaseName(entry);
-  if(/^\[(?:剧情细纲|剧情年表|细纲使用说明)\]/.test(base)) return '剧情';
+  if(/^\[(?:剧情细纲|剧情年表|细纲使用说明|前史|日常补篇|特典分支|剧场版补充|剧场版后日谈)\]/.test(base)) return '剧情';
   if(/^\[人设\]|语料|^角色速览|角色经历/.test(base)) return '角色';
   if(/^家庭/.test(base)) return '家庭';
   if(/^(?:地点|地图)/.test(base)) return '地点';
@@ -5827,12 +5875,43 @@ function wbMatches(entry,category){
   if(!q) return true;
   return [entry.name,(entry.keys||[]).join(' '),entry.content].join('\n').toLocaleLowerCase().includes(q);
 }
+function wbWorkState(category){
+  const hit=phoneWorldbookWorkEntries().find(([work])=>(phoneWorkLabel(work)||work)===category);
+  if(!hit) return null;
+  const [work,meta]=hit, prefix=String(meta&&meta.worldbookPrefix||'');
+  const entries=S.wb.entries.filter(entry=>prefix&&entry.name.includes(prefix));
+  const base=entries.filter(entry=>!wbDefaultOff(entry)),on=base.filter(entry=>entry.enabled).length;
+  const totalOn=entries.filter(entry=>entry.enabled).length,independent=entries.length-base.length;
+  return {work:phoneWorkId(work),label:phoneWorkLabel(work)||work,base:base.length,on,total:entries.length,totalOn,
+    independent,independentOn:totalOn-on,all:base.length>0&&on===base.length};
+}
+function wbWorkSummary(work){
+  return work.independent?`基础 ${work.on}/${work.base} · 独立 ${work.independentOn}/${work.independent}`:`已开启 ${work.totalOn}/${work.total}`;
+}
+function wbWorkButton(work){
+  const busy=S.wb.loading||!!S.wbWorkBusy||S.wbBusy.size>0;
+  const status=work.all?'基础全部开启':work.on?'基础部分开启':'基础关闭';
+  const action=work.all?`关闭${work.label}全部世界书`:`开启${work.label}基础世界书`;
+  return `<button type="button" class="wb-work-toggle" ${keyAttrs('wb-work-toggle',work.work)}
+    data-wn-enable="${work.all?'0':'1'}" data-wn-base-count="${work.base}" ${busy||!work.base?'disabled':''}
+    role="switch" aria-checked="${work.all?'true':'false'}" aria-busy="${S.wbWorkBusy===work.work?'true':'false'}"
+    aria-label="${esc(action+'；当前'+status)}"><span class="wb-switch ${work.all?'on':''}" aria-hidden="true"></span></button>`;
+}
+function wbCategoryRow(name){
+  const work=wbWorkState(name),entries=S.wb.entries.filter(entry=>wbCategoryOf(entry)===name);
+  const summary=work?wbWorkSummary(work):`已开启 ${entries.filter(entry=>entry.enabled).length}/${entries.length}`;
+  return `<div class="wb-cat"><button class="go" ${keyAttrs('wb-category',name)}>
+    <span><span class="nm">${esc(name)}</span><span class="sub num">${esc(summary)}</span></span>
+    <span class="wb-chevron" aria-hidden="true">›</span></button>${work?wbWorkButton(work):''}</div>`;
+}
+function wbCurrentWorkHtml(category){
+  const work=wbWorkState(category); if(!work) return '';
+  return `<div class="wb-current-work"><span class="copy"><b>作品开关</b>
+    <span class="sub num">${esc(wbWorkSummary(work))}</span></span>${wbWorkButton(work)}</div>`;
+}
 function wbToolsHtml(){
   const wb=S.wb;
-  const workControl=(work,prefix,label)=>{const entries=wb.entries.filter(entry=>entry.name.includes(prefix)),base=entries.filter(entry=>!wbDefaultOff(entry)),on=base.filter(entry=>entry.enabled).length,totalOn=entries.filter(entry=>entry.enabled).length,all=base.length>0&&on===base.length,independent=entries.length-base.length,busy=wb.loading||S.wbWorkBusy===work;return `<div class="wb-work"><span class="wb-work-copy"><b>${label}</b><span>${totalOn} / ${entries.length} 条开启${independent?`（基础 ${on} / ${base.length}，另 ${independent} 条独立控制）`:''}</span></span><button class="wb-switch ${all?'on':''}" ${busy||!base.length?'disabled':''} onclick="WN.wbWorkToggle('${work}',${all?'false':'true'},this)" role="switch" aria-checked="${all?'true':'false'}" aria-label="${all?'关闭':'开启'}${label}基础世界书"></button></div>`};
-  const workControls=phoneWorldbookWorkEntries().map(([work,meta])=>workControl(phoneWorkId(work),String(meta&&meta.worldbookPrefix||''),phoneWorkLabel(work)||work)).join('');
   return `<div class="wb-tools"><input class="wb-search" type="search" value="${esc(wb.query)}" placeholder="搜索全部条目" aria-label="搜索全部世界书条目" oninput="WN.wbSearch(this.value)">
-    <div class="wb-work-controls">${workControls}</div>
     <div class="wb-seg" aria-label="条目状态筛选">
       <button class="${wb.filter==='all'?'on':''}" onclick="WN.wbFilter('all')">全部</button>
       <button class="${wb.filter==='enabled'?'on':''}" onclick="WN.wbFilter('enabled')">已开启</button>
@@ -5840,7 +5919,7 @@ function wbToolsHtml(){
     </div></div>`;
 }
 function wbEntryRow(entry,showCategory){
-  const category=wbCategoryOf(entry), locked=wbProtected(entry), busy=S.wbBusy.has(entry.uid);
+  const category=wbCategoryOf(entry), locked=wbProtected(entry), busy=S.wb.loading||!!S.wbWorkBusy||S.wbBusy.has(entry.uid);
   return `<div class="wb-entry">
     <button class="go" ${keyAttrs('wb-entry',String(entry.uid))}><span class="nm">${esc(entry.name)}</span>
       <span class="sub">${showCategory?esc(category)+' · ':''}${esc(wbStrategyLabel(entry))}${entry.keys.length?' · '+entry.keys.length+' 个关键词':''}</span></button>
@@ -5858,27 +5937,32 @@ function paintWorldbookResults(category,root){
   const active=root||$id(S.stack[S.stack.length-1]);
   const box=active&&active.querySelector('[data-wb-results]'); if(!box) return;
   const wb=S.wb;
-  if(wb.loading){ box.innerHTML='<div class="empty">正在读取当前角色的主世界书…</div>'; return; }
-  if(wb.error){ box.innerHTML=`<div class="empty">${esc(wb.error)}<br><button class="refresh" onclick="WN.wbReload()">重新读取</button></div>`; return; }
-  if(!wb.loaded){ box.innerHTML='<div class="empty">尚未读取世界书</div>'; return; }
+  const paint=markup=>{
+    const top=box.scrollTop,focused=document.activeElement;
+    const action=focused&&box.contains(focused)&&focused.dataset.wnAction,key=action&&focused.dataset.wnKey;
+    box.innerHTML=markup; box.scrollTop=top;
+    if(action){
+      const next=Array.from(box.querySelectorAll('[data-wn-action]')).find(el=>el.dataset.wnAction===action&&el.dataset.wnKey===key);
+      if(next&&!next.disabled) next.focus({preventScroll:true});
+    }
+  };
+  if(wb.loading&&!wb.loaded){ paint('<div class="empty">正在读取当前角色的主世界书…</div>'); return; }
+  if(wb.error){ paint(`<div class="empty">${esc(wb.error)}<br><button class="refresh" onclick="WN.wbReload()">重新读取</button></div>`); return; }
+  if(!wb.loaded){ paint('<div class="empty">尚未读取世界书</div>'); return; }
   const searchMode=!!String(wb.query||'').trim()||wb.filter!=='all';
   if(!category&&!searchMode){
     const categories=wbCategories();
-    box.innerHTML=categories.length?categories.map(name=>{
-      const all=wb.entries.filter(entry=>wbCategoryOf(entry)===name);
-      const enabled=all.filter(entry=>entry.enabled).length;
-      return `<div class="wb-cat"><button class="go" ${keyAttrs('wb-category',name)}><span class="nm">${esc(name)}</span>
-        <span class="sub">${enabled} 条开启</span></button><span class="wb-count num">${enabled} / ${all.length}</span></div>`;
-    }).join(''):'<div class="empty">当前主世界书没有可浏览的分类</div>';
+    paint(categories.length?categories.map(wbCategoryRow).join(''):'<div class="empty">当前主世界书没有可浏览的分类</div>');
     return;
   }
   const scope=String(wb.query||'').trim()?null:category;
+  const control=scope?wbCurrentWorkHtml(scope):'';
   const entries=wb.entries.filter(entry=>wbMatches(entry,scope));
-  if(!entries.length){ box.innerHTML='<div class="empty">没有符合条件的条目</div>'; return; }
+  if(!entries.length){ paint(control+'<div class="empty">没有符合条件的条目</div>'); return; }
   if(scope&&wbIsWorkCategory(scope)){
-    box.innerHTML=wbGroupedWorldbookRows(entries);
+    paint(control+wbGroupedWorldbookRows(entries));
   }else{
-    box.innerHTML=entries.map(entry=>wbEntryRow(entry,!scope)).join('');
+    paint(entries.map(entry=>wbEntryRow(entry,!scope)).join(''));
   }
 }
 function wbGroupedWorldbookRows(entries){
@@ -5898,18 +5982,55 @@ function wbGroupedWorldbookRows(entries){
   return html;
 }
 function buildWorldbookSurface(el,title,category){
+  const oldBody=el.querySelector('[data-wb-results]'),top=oldBody?oldBody.scrollTop:0;
+  const oldSearch=el.querySelector('.wb-search'),searchFocused=oldSearch&&document.activeElement===oldSearch;
   el.dataset.wnView=category?'wb-category':'wb-home';
   if(category) el.dataset.wnCategory=keyToken(category); else delete el.dataset.wnCategory;
   el.innerHTML=apphead(title,S.wb.name||'主世界书',`<button class="wb-reload" onclick="WN.wbReload()"
     aria-label="重新读取当前主世界书" title="重新读取当前主世界书的条目与开关状态"><span aria-hidden="true">↻</span><span class="wb-reload-label">重读</span></button>`)
     +wbToolsHtml()+'<div class="body" data-wb-results></div>';
   paintWorldbookResults(category||null,el);
+  el.querySelector('[data-wb-results]').scrollTop=top;
+  if(searchFocused) el.querySelector('.wb-search').focus({preventScroll:true});
 }
 function setWorldbookReloadBusy(busy){
   document.querySelectorAll('.wb-reload').forEach(button=>{
-    button.disabled=!!busy; button.setAttribute('aria-busy',String(!!busy));
+    button.disabled=!!busy||!!S.wbWorkBusy||S.wbBusy.size>0; button.setAttribute('aria-busy',String(!!busy));
     const label=button.querySelector('.wb-reload-label'); if(label) label.textContent=busy?'读取中':'重读';
   });
+}
+function syncWorldbookBusy(){
+  setWorldbookReloadBusy(S.wb.loading);
+  document.querySelectorAll('[data-wn-action="wb-work-toggle"]').forEach(button=>{
+    button.disabled=S.wb.loading||!!S.wbWorkBusy||S.wbBusy.size>0||!Number(button.dataset.wnBaseCount);
+    button.setAttribute('aria-busy',String(S.wbWorkBusy===keyFromToken(button.dataset.wnKey)));
+  });
+  document.querySelectorAll('[data-wn-action="wb-toggle"]').forEach(button=>{
+    button.disabled=S.wb.loading||!!S.wbWorkBusy||S.wbBusy.has(Number(keyFromToken(button.dataset.wnKey)));
+  });
+}
+function refreshWorldbookSurfaces(opener){
+  const screen=opener&&opener.closest('[data-wn-view]'),focused=document.activeElement;
+  const restore=screen&&screen.id===S.stack[S.stack.length-1]
+    &&(!focused||focused===opener||focused===document.body||focused===document.documentElement||!focused.isConnected);
+  document.querySelectorAll('[data-wn-view="wb-home"],[data-wn-view="wb-category"]').forEach(el=>{
+    const category=el.dataset.wnView==='wb-category'?keyFromToken(el.dataset.wnCategory):null;
+    const subtitle=el.querySelector('.apphead .sub'); if(subtitle) subtitle.textContent=S.wb.name||'主世界书';
+    const search=el.querySelector('.wb-search'); if(search&&search.value!==S.wb.query) search.value=S.wb.query;
+    el.querySelectorAll('.wb-seg button').forEach((button,i)=>button.classList.toggle('on',
+      (i===0&&S.wb.filter==='all')||(i===1&&S.wb.filter==='enabled')||(i===2&&S.wb.filter==='disabled')));
+    paintWorldbookResults(category||null,el);
+  });
+  const active=$id(S.stack[S.stack.length-1]);
+  if(active&&active.dataset.wnView==='wb-detail'){
+    const top=active.querySelector('.body').scrollTop;
+    WN.wbEntry(Number(active.dataset.wnUid)); active.querySelector('.body').scrollTop=top;
+  }
+  syncWorldbookBusy();
+  if(!restore) return;
+  const current=$id(screen.id),next=current&&Array.from(current.querySelectorAll('[data-wn-action]'))
+    .find(el=>el.dataset.wnAction===opener.dataset.wnAction&&el.dataset.wnKey===opener.dataset.wnKey);
+  if(next&&!next.disabled) next.focus({preventScroll:true});
 }
 async function renderWorldbook(navigate=true){
   const el=ensureScr('scr-worldbook'); buildWorldbookSurface(el,'世界书',null);
@@ -5917,22 +6038,20 @@ async function renderWorldbook(navigate=true){
   if(!S.wb.loaded&&!S.wb.loading) await WN.wbReload();
 }
 WN.wbReload=async function(){
-  if(S.wb.loading) return;
+  if(S.wb.loading||S.wbWorkBusy||S.wbBusy.size) return;
   if(!S.B||typeof S.B.getWorldbookState!=='function'){
     S.wb.error='当前手机外壳不支持世界书控制器'; S.wb.loaded=false; paintWorldbookResults(activeWorldbookCategory()); return;
   }
-  S.wb.loading=true; S.wb.error=''; setWorldbookReloadBusy(true); paintWorldbookResults(activeWorldbookCategory());
+  const requestState=S.wb;
+  S.wb.loading=true; S.wb.error=''; syncWorldbookBusy();
+  if(!S.wb.loaded) paintWorldbookResults(activeWorldbookCategory());
   try{
     const data=normalizeWorldbookState(await S.B.getWorldbookState());
+    if(S.wb!==requestState) return;
     S.wb.name=data.name; S.wb.entries=data.entries; S.wb.loaded=true;
-  }catch(e){ S.wb.error=String(e&&e.message||e||'世界书读取失败').slice(0,240); S.wb.loaded=false; }
+  }catch(e){ if(S.wb===requestState){S.wb.error=String(e&&e.message||e||'世界书读取失败').slice(0,240); S.wb.loaded=false;} }
   finally{
-    S.wb.loading=false; setWorldbookReloadBusy(false);
-    const active=$id(S.stack[S.stack.length-1]);
-    if(active&&active.dataset.wnView==='wb-home') buildWorldbookSurface(active,'世界书',null);
-    else if(active&&active.dataset.wnView==='wb-category'){
-      const category=keyFromToken(active.dataset.wnCategory); if(category!==undefined) buildWorldbookSurface(active,category,category);
-    }else paintWorldbookResults(null);
+    if(S.wb===requestState){ S.wb.loading=false; refreshWorldbookSurfaces(); }
   }
 };
 WN.wbSearch=function(value){ S.wb.query=String(value||'').slice(0,120); paintWorldbookResults(activeWorldbookCategory()); };
@@ -5950,7 +6069,7 @@ WN.wbCategory=function(category){
 };
 WN.wbEntry=function(uid){
   const entry=S.wb.entries.find(item=>item.uid===Number(uid)); if(!entry) return;
-  const category=wbCategoryOf(entry), locked=wbProtected(entry), busy=S.wbBusy.has(entry.uid);
+  const category=wbCategoryOf(entry), locked=wbProtected(entry), busy=S.wb.loading||!!S.wbWorkBusy||S.wbBusy.has(entry.uid);
   const id='scr-wbe-'+entry.uid;
   const el=ensureScr(id,screen=>{
     screen.dataset.wnView='wb-detail'; screen.dataset.wnUid=String(entry.uid);
@@ -5967,36 +6086,42 @@ WN.wbEntry=function(uid){
 };
 WN.wbToggle=async function(uid,enable,opener){
   uid=Number(uid); const entry=S.wb.entries.find(item=>item.uid===uid);
-  if(!entry||wbProtected(entry)||S.wbBusy.has(uid)) return;
-  const want=enable===true;
+  if(!entry||wbProtected(entry)||S.wb.loading||S.wbWorkBusy||S.wbBusy.has(uid)) return;
+  const want=enable===true,requestState=S.wb;
   if(!want){
     const ok=await askConfirm('关闭世界书条目',`关闭「${entry.name}」后，所有使用主世界书「${S.wb.name}」的聊天都会受到影响。`,'关闭',opener);
     if(!ok) return;
   }
+  if(S.wb!==requestState||S.wb.loading||S.wbWorkBusy||S.wbBusy.has(uid)) return;
   if(!S.B||typeof S.B.setWorldbookEntryEnabled!=='function'){ toast('当前手机外壳不支持世界书写入'); return; }
-  S.wbBusy.add(uid); paintWorldbookResults(activeWorldbookCategory());
+  S.wbBusy.add(uid); syncWorldbookBusy();
   try{
     const data=normalizeWorldbookState(await S.B.setWorldbookEntryEnabled(uid,want));
+    if(S.wb!==requestState) return;
     S.wb.name=data.name; S.wb.entries=data.entries; S.wb.loaded=true; S.wb.error='';
     toast(want?'条目已开启':'条目已关闭');
-  }catch(e){ toast('世界书更新失败：'+String(e&&e.message||e||'写入错误')); }
+  }catch(e){ if(S.wb===requestState) toast('世界书更新失败：'+String(e&&e.message||e||'写入错误')); }
   finally{
-    S.wbBusy.delete(uid);
-    const active=$id(S.stack[S.stack.length-1]);
-    if(active&&active.dataset.wnView==='wb-detail'){
-      const current=Number(active.dataset.wnUid); active.remove(); S.stack.pop(); WN.wbEntry(current);
-    }else paintWorldbookResults(activeWorldbookCategory());
+    if(S.wb===requestState){
+      S.wbBusy.delete(uid);
+      refreshWorldbookSurfaces(opener);
+    }
   }
 };
 WN.wbWorkToggle=async function(work,enable,opener){
-  if(S.wbWorkBusy) return; const hit=phoneWorkMeta(work),label=hit&&(phoneWorkLabel(hit.name)||hit.name); if(!hit||!label||!phoneWorkHasPublishedContent(hit.meta)){toast(`${label||'该作品'}尚未发布世界书内容`);return;}
-  const want=enable===true;
+  if(S.wbWorkBusy||S.wb.loading||S.wbBusy.size) return; const hit=phoneWorkMeta(work),label=hit&&(phoneWorkLabel(hit.name)||hit.name); if(!hit||!label||!phoneWorkHasPublishedContent(hit.meta)){toast(`${label||'该作品'}尚未发布世界书内容`);return;}
+  const want=enable===true,requestState=S.wb;
   if(!want){const ok=await askConfirm('关闭作品世界书',`将关闭「${label}」的全部世界书条目，所有使用主世界书「${S.wb.name}」的聊天都会受到影响。`,'全部关闭',opener);if(!ok)return;}
+  if(S.wb!==requestState||S.wbWorkBusy||S.wb.loading||S.wbBusy.size) return;
   if(!S.B||typeof S.B.setWorldbookWorkEnabled!=='function'){toast('当前手机外壳不支持作品世界书批量开关');return;}
-  S.wbWorkBusy=work; const active=$id(S.stack[S.stack.length-1]); if(active&&active.dataset.wnView==='wb-home')buildWorldbookSurface(active,'世界书',null);
-  try{const data=normalizeWorldbookState(await S.B.setWorldbookWorkEnabled(work,want));S.wb.name=data.name;S.wb.entries=data.entries;S.wb.loaded=true;S.wb.error='';toast(want?`${label}世界书已恢复默认开启条目`:`${label}世界书已全部关闭`);}
-  catch(e){toast('作品世界书更新失败：'+String(e&&e.message||e||'写入错误'));}
-  finally{S.wbWorkBusy='';const now=$id(S.stack[S.stack.length-1]);if(now&&now.dataset.wnView==='wb-home')buildWorldbookSurface(now,'世界书',null);else paintWorldbookResults(activeWorldbookCategory());}
+  S.wbWorkBusy=work; syncWorldbookBusy();
+  try{
+    const data=normalizeWorldbookState(await S.B.setWorldbookWorkEnabled(work,want));
+    if(S.wb!==requestState) return;
+    S.wb.name=data.name;S.wb.entries=data.entries;S.wb.loaded=true;S.wb.error='';
+    toast(want?`${label}世界书已恢复默认开启条目`:`${label}世界书已全部关闭`);
+  }catch(e){if(S.wb===requestState)toast('作品世界书更新失败：'+String(e&&e.message||e||'写入错误'));}
+  finally{if(S.wb===requestState){S.wbWorkBusy='';refreshWorldbookSurfaces(opener);}}
 };
 
 /* ---------- 说明书 ---------- */
@@ -6212,7 +6337,7 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">偏航的东京日常·小手机 v0.32.2</div>
+<div class="empty" style="padding:14px">偏航的东京日常·小手机 v0.32.3</div>
     </div></div>`;
   });
   paintDialogueLanguageControls();
@@ -6452,16 +6577,18 @@ async function moveSms(messageId){
         }
       });
       list.forEach(m=>{
-        const from=enabledSmsRole(m&&m.from); if(!from) return;
+        const outgoing=m&&m.from==='user', dir=outgoing?'out':'in';
+        const peer=enabledSmsRole(outgoing?m.to:m&&m.from); if(!peer) return;
         if(st.smsSeen[m.hash]) return;
         st.smsSeen[m.hash]=1;
-        const th=threadOf(from,st)||(st.line.threads[from]={type:'dm',name:from,members:[from],msgs:[],lastRead:0});
-        canonicalDmIdentity(th,from);
-        /* 防回声：同线程近 20 条内已有同文来信则跳过 */
-        if((th.msgs||[]).slice(-20).some(x=>x.dir!=='out' && !x.sys && x.text===m.text)) return;
-        th.msgs.push({seq:++st.seq, dir:'in', from, text:m.text, t:m.t||currentTD.t, d:m.d||d,
+        const th=threadOf(peer,st)||(st.line.threads[peer]={type:'dm',name:peer,members:[peer],msgs:[],lastRead:0});
+        canonicalDmIdentity(th,peer);
+        /* 防回声：同线程近20条仅比较同方向，不吞掉双方相同的回复。 */
+        if((th.msgs||[]).slice(-20).some(x=>(x.dir==='out')===outgoing && !x.sys && x.text===m.text)) return;
+        th.msgs.push({seq:++st.seq, dir, from:outgoing?'me':peer, text:m.text, t:m.t||currentTD.t, d:m.d||d,
           srcMid:(typeof m.srcMid==='number'?m.srcMid:undefined), hash:m.hash}); added++;
-        arrivals.push({from, text:String(m.text||'')});
+        /* 正文去信是已发送记录，不计未读、不提醒自己，也不排队生成角色回复。 */
+        if(!outgoing) arrivals.push({from:peer, text:String(m.text||'')});
       });
       seeds.forEach(sd=>{
         if(sd && sd.hash && st.smsSeen[sd.hash]) return;
@@ -7140,7 +7267,7 @@ async function boot(bridge){
       momentRefreshEpoch++; momentRefreshBusy=false;
       WN.gsheet(false); momentRefreshDraft=''; refreshSheetTarget='campus';
       mapResetForChat();
-      S.wb={name:'',entries:[],loaded:false,loading:false,error:'',query:'',filter:'all',category:''}; S.wbBusy.clear();
+      S.wb={name:'',entries:[],loaded:false,loading:false,error:'',query:'',filter:'all',category:''}; S.wbBusy.clear(); S.wbWorkBusy='';
       S.dialogueLang={mode:'',valid:false,loaded:false,loading:false,busy:false,error:'',name:'',entries:[]};
       await refreshStat(); await loadStore(); await syncRoleAvatars(); await syncAlbumUnlocks(); await syncScheduleReminders(); recoverPendingReplies(); await moveSms(); paintNotes(); WN.home(); refreshBadges(); return;
     }
