@@ -493,7 +493,7 @@ dialog{padding:20px;border-radius:8px}
     <div class="guide-layout">
       <div><div class="guide-item"><h3>作品与剧情</h3><p>可以同时启用多部作品。剧情条目需在小手机的世界书控制器中另行开启。</p></div><div class="guide-item"><h3>选择故事的起点</h3><p>预设开场有固定的时间与关系前提；自定义开场可选择剧情阶段，自行补充情境。</p></div><div class="guide-item"><h3>留白也可以开始</h3><p>地点和玩家资料均可留空。开始后，本次资料会写入角色共用世界书，留空项清除旧值；作品开关也会影响共用此世界书的聊天。</p></div></div>
       <div class="guide-side"><h3 class="section-label">提示词与须知</h3><details class="disclosure"><summary>开场示例</summary><div class="detail-body"><pre class="prompt-text" id="examplePrompt">我刚搬到东京，平时喜欢画画。想从放学后的一次偶遇开始，和登场人物还不认识。请留出让我回应和行动的空间。</pre><button class="text-btn" data-copy="examplePrompt">复制示例</button></div></details><details class="disclosure"><summary>保留玩家的选择</summary><div class="detail-body"><pre class="prompt-text" id="agencyPrompt">请从当前情境开始正文，不要复述设定表。不要替我发言、决定行动或确立重大关系；人物只知道已经发生并且有途径得知的事情。</pre><button class="text-btn" data-copy="agencyPrompt">复制提示词</button></div></details><details class="disclosure"><summary>世界书与存档</summary><div class="detail-body">作品页点击“继续”即保存作品开关，影响共用同一份世界书的聊天；玩家资料在开始故事时保存。</div></details><details class="disclosure"><summary>使用约定</summary><div class="detail-body legal">仅供个人非商业使用。禁止出售、付费分发、商业改编、打包售卖，以及用于任何收费服务。</div></details></div>
-    </div><div class="attribution"><div class="credit-meta"><span>作者：<b>Pigeon</b></span><span>版本：<b>v3.1</b></span></div><a href="https://discord.com/channels/1380075940285124724/1531578349636554782" target="_blank" rel="noopener noreferrer">发布与交流</a></div>
+    </div><div class="attribution"><div class="credit-meta"><span>作者：<b>Pigeon</b></span><span>版本：<b>v3.1fix</b></span></div><a href="https://discord.com/channels/1380075940285124724/1531578349636554782" target="_blank" rel="noopener noreferrer">发布与交流</a></div>
   </section>
   <section class="screen" id="view-works" hidden aria-labelledby="worksTitle">
     <div class="page-heading"><div><h2 id="worksTitle" tabindex="-1">选择作品</h2><p>可多选 · 继续即保存世界书开关</p></div><div class="selection-count">已选<strong id="workCount">1</strong>部</div></div>
@@ -522,7 +522,7 @@ dialog{padding:20px;border-radius:8px}
       <section class="accepted-opening" id="acceptedOpening" hidden aria-label="已采用的开场草稿"><div class="accepted-title">开场正文已备好</div><p class="accepted-excerpt" id="acceptedExcerpt"></p><p class="accepted-meta" id="acceptedMeta"></p><div class="accepted-actions"><button class="text-btn" id="editAi">编辑全文</button><button class="text-btn" id="removeAi">取消采用</button></div></section>
     <details class="disclosure preview-block" id="messageDetails"><summary>查看开场设定</summary><div class="detail-body"><pre id="messagePreview"></pre><button class="text-btn" data-copy="messagePreview">复制设定</button></div></details>
   </section>
-  <footer class="footer" id="footer" hidden><button class="btn back" id="backBtn">返回</button><div class="page-count" id="pageCount"></div><button class="btn primary next" id="nextBtn">下一步</button><div class="status-line" role="status" id="formStatus"></div></footer>
+  <footer class="footer" id="footer" hidden><button class="btn back" id="backBtn">返回</button><div class="page-count" id="pageCount"></div><button class="btn primary next" id="nextBtn">下一步</button><div class="status-line" role="status" id="formStatus"></div><div class="status-line" role="status" id="draftStatus"></div></footer>
 </main>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -1131,7 +1131,11 @@ function receiveHostMessage(e){
     $('formStatus').textContent=d.text||'';toast(d.text||'');if(d.done)submitted=true;setSubmitBusy(d.busy===true);
   }else if(d.type==='generation-result'||d.type==='works-result'){
     const p=pendingHost.get(d.requestId);if(!p)return;pendingHost.delete(d.requestId);clearTimeout(p.timer);d.ok?p.resolve(d):p.reject(new Error(d.text||'生成未完成。'));
-  }else if(d.type==='draft-status'&&d.error)toast(d.text);
+  }else if(d.type==='draft-status'){
+    const text=d.error?d.text||'草稿暂未保存，当前输入仍在页面。':'';
+    if(text&&$('draftStatus').textContent!==text)toast(text);
+    $('draftStatus').textContent=text;
+  }
 }
 function connectHost(){
   if(window.parent===window)return;
