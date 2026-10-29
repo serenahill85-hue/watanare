@@ -1443,7 +1443,7 @@
 "use strict";
 const WN = window.WN = {};
 /* =========================================================================
- * 偏航的东京日常 · 悬浮手机 App 本体  v0.35.1
+ * 偏航的东京日常 · 悬浮手机 App 本体  v0.35.2
  * 运行环境：外壳脚本创建的 Blob iframe（外壳注入 WNBridge 后调用 window.WNBoot(bridge)）
  * 独立打开：600ms 内未收到 bridge 时进入演示模式（内置样例数据 + 模拟生成）
  * 安全：所有动态值经 esc() 或 textContent；图片 src 仅允许 https
@@ -5527,7 +5527,8 @@ function attachVision(messages,images){
   return out;
 }
 function stripPhoneDialogueFormats(text){
-  return String(text||'').replace(/<对话输出格式·(中文|中日双语|日繁双语)>[\s\S]*?<\/对话输出格式·\1>/gu,'').trim();
+  return String(text||'').replace(/<对话输出格式·(中文|中日双语|日繁双语)>[\s\S]*?<\/对话输出格式·\1>/gu,'')
+    .replace(/<手机协议>[\s\S]*?<\/手机协议>/gu,'').trim();
 }
 function phoneReplyLanguagePrompt(language,task){
   const label=normalizePhoneReplyLanguage(language)==='zh-Hant'?'繁體中文':'简体中文';
@@ -8006,6 +8007,7 @@ function renderGuide(navigate=true){
           <p><b>角色本机头像</b>保存在浏览器 IndexedDB，不进入角色变量或世界书。通常容量远高于压缩头像所需，但清除站点数据、无痕会话或浏览器回收存储仍可能移除；丢失时会自动回退默认头像。</p>
           <p><b>正文对话语言设置</b>默认中文，也可选日语＋简体或日语＋繁体，从下一次正文回复起生效。繁体模式下，对话译文和美化框内的动作使用繁体，正文叙述保持原来的语言，角色名沿用登记写法。已有消息和固定开场白保留原文，小手机聊天由“小手机回复语言”单独控制。</p>
           <p><b>对话美化主题</b>可直接选深色或浅色，保留当前对话语言。切换语言时也会保留美化主题，两种双语共用现有“中日双语”美化，每次只启用一条对应规则。手机的深浅主题只影响手机界面。</p>
+          <p>正文和其中的 LIME 消息需要写在 &lt;story&gt; 与 &lt;/story&gt; 之间才会美化；没有标签的旧回复显示普通文字。标签由模型按对话格式输出，无需手动填写。此功能需要酒馆 1.19 或支持同等消息处理接口的版本。</p>
           <p><b>通讯摘要注入</b>建议开启，让正文记得手机里发生过的往来；<b>自动记忆整理</b>也建议开启，长时间聊天时更不容易忘记旧消息。</p>
           <p><b>正文预设参考</b>只让手机参考当前正文预设的通用表达，不会修改预设。<b>自动来信与动态</b>会增加角色主动活动，想要更热闹时再开；开启后约定到期当天，相关且关系够近的角色可能主动来信；关系数值升段时她也可能察觉并开口；天气或地点刚变化时偶尔有人发一条呼应的动态；深夜时段来信更频繁。所有后台活动合计每剧情轮最多静默调用一次模型，前台手动操作不占这个额度。</p>
           <p><b>手机界面更新</b>会在每次正常进入或刷新酒馆页面后静默检查一次，不会反复打扰。想立即确认时点旁边的<b>手动检查</b>；发现新版后会在安全时机应用。</p>
@@ -8368,7 +8370,7 @@ function renderSettings(navigate=true){
         <span><i style="background:${S.demo?'var(--warn)':'var(--good)'}"></i>${S.demo?'演示模式':'实机桥接'}</span>
       </div>
       <button class="btn-danger" onclick="WN.wipe()">清空手机数据（LIME/动态/论坛/媒体）</button>
-<div class="empty" style="padding:14px">偏航的东京日常·小手机 v0.35.1</div>
+<div class="empty" style="padding:14px">偏航的东京日常·小手机 v0.35.2</div>
     </div></div>`;
   });
   paintVariableRead();
