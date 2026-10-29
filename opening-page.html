@@ -823,7 +823,7 @@ function createPlotContract(catalog, stageBriefs = {}) {
     const clean = value => {
       let name = String(value || '').trim().replace(/^\[mvu_(?:plot|update)\]/, '');
       for (;;) {
-        const next = name.replace(/[（(](?:旧|勿开|选开|二选一|新|废弃|建议[^）)]*|其他[^）)]*)[）)]\s*$/u, '').trim();
+        const next = name.replace(/[（(](?:旧|勿开|选开|二选一|三选一|新|废弃|建议[^）)]*|其他[^）)]*)[）)]\s*$/u, '').trim();
         if (next === name) return name;
         name = next;
       }

@@ -619,6 +619,8 @@
   .dialogue-language-row .lang-seg{width:100%}
   .dialogue-language-row .lang-seg button{flex:1;min-width:0;min-height:44px;padding:0 5px}
   .dialogue-language-row .lang-seg button:focus-visible{outline:2px solid var(--fav);outline-offset:2px}
+  .lang-seg button[data-dialogue-theme]{min-height:44px}
+  .lang-seg button[data-dialogue-theme]:focus-visible{outline:2px solid var(--fav);outline-offset:2px}
   .srow input[type=text],.srow input[type=password]{width:100%;min-height:36px;border:0;
     border-radius:10px;background:var(--card2);color:var(--ink);padding:0 12px;font:13.5px var(--font-ui);
     outline:none;box-shadow:inset 0 0 0 1px var(--hair)}
@@ -8003,7 +8005,7 @@ function renderGuide(navigate=true){
           <p><b>我的头像</b>可从设备上传，上传后会同时显示在手机名片、动态和正文中的玩家对话旁；图片只保存在当前浏览器，点“恢复”即可改回名字占位。</p>
           <p><b>角色本机头像</b>保存在浏览器 IndexedDB，不进入角色变量或世界书。通常容量远高于压缩头像所需，但清除站点数据、无痕会话或浏览器回收存储仍可能移除；丢失时会自动回退默认头像。</p>
           <p><b>正文对话语言设置</b>默认中文，也可选日语＋简体或日语＋繁体，从下一次正文回复起生效。繁体模式下，对话译文和美化框内的动作使用繁体，正文叙述保持原来的语言，角色名沿用登记写法。已有消息和固定开场白保留原文，小手机聊天由“小手机回复语言”单独控制。</p>
-          <p><b>对话美化随正文语言切换。</b>两种双语共用现有“中日双语”美化，保留当前深浅主题，只启用一条对应规则，并关闭其余三条；再次点击当前语言也可修正冲突。要改变美化深浅主题，仍可到角色正则里选择“中文·深色 / 中文·浅色 / 中日双语·深色 / 中日双语·浅色”中的一条。手机的深浅主题只影响手机界面。</p>
+          <p><b>对话美化主题</b>可直接选深色或浅色，保留当前对话语言。切换语言时也会保留美化主题，两种双语共用现有“中日双语”美化，每次只启用一条对应规则。手机的深浅主题只影响手机界面。</p>
           <p><b>通讯摘要注入</b>建议开启，让正文记得手机里发生过的往来；<b>自动记忆整理</b>也建议开启，长时间聊天时更不容易忘记旧消息。</p>
           <p><b>正文预设参考</b>只让手机参考当前正文预设的通用表达，不会修改预设。<b>自动来信与动态</b>会增加角色主动活动，想要更热闹时再开；开启后约定到期当天，相关且关系够近的角色可能主动来信；关系数值升段时她也可能察觉并开口；天气或地点刚变化时偶尔有人发一条呼应的动态；深夜时段来信更频繁。所有后台活动合计每剧情轮最多静默调用一次模型，前台手动操作不占这个额度。</p>
           <p><b>手机界面更新</b>会在每次正常进入或刷新酒馆页面后静默检查一次，不会反复打扰。想立即确认时点旁边的<b>手动检查</b>；发现新版后会在安全时机应用。</p>
@@ -8096,6 +8098,17 @@ function paintDialogueLanguageControls(){
     button.title=dialogueLanguageAvailable(mode)?'':'请更新角色卡与绑定的世界书';
     button.setAttribute('aria-busy',String(dl.busy));
     button.setAttribute('aria-pressed',String(dl.valid&&dl.mode===mode));
+  });
+  const themeSupported=S.B?.dialogueThemeSwitch===1&&typeof S.B.setDialogueTheme==='function';
+  const themeNote=$id('dialogue-theme-note');
+  if(themeNote)themeNote.textContent=themeSupported?'只改变正文对话美化，保留当前语言':'请更新角色卡内手机外壳以切换美化主题';
+  document.querySelectorAll('[data-dialogue-theme]').forEach(button=>{
+    const selected=dl.beautify?.valid===true&&dl.beautify.theme===button.dataset.dialogueTheme;
+    button.classList.toggle('on',selected);
+    button.disabled=dl.loading||dl.busy||!dl.loaded||!dl.valid||!dl.beautify?.supported
+      ||S.B?.dialogueRegexLink!==1||!themeSupported;
+    button.setAttribute('aria-busy',String(dl.busy));
+    button.setAttribute('aria-pressed',String(selected));
   });
 }
 function paintPhoneReplyLanguageControls(){
@@ -8273,6 +8286,11 @@ function renderSettings(navigate=true){
           <button type="button" data-dialogue-lang="bilingual" onclick="WN.setDialogueLanguage('bilingual')">日语＋简体</button>
           <button type="button" data-dialogue-lang="bilingual_traditional" onclick="WN.setDialogueLanguage('bilingual_traditional')">日语＋繁体</button>
         </span></div>
+      <div class="srow"><span class="t">对话美化主题<small id="dialogue-theme-note">只改变正文对话美化，保留当前语言</small></span>
+        <span class="lang-seg" role="group" aria-label="对话美化主题">
+          <button type="button" data-dialogue-theme="dark" onclick="WN.setDialogueTheme('dark')">深色</button>
+          <button type="button" data-dialogue-theme="light" onclick="WN.setDialogueTheme('light')">浅色</button>
+        </span></div>
       <div class="srow"><span class="t">小手机回复语言<small>从下一次手机生成起生效</small></span>
         <span class="lang-seg" role="group" aria-label="小手机回复语言">
           <button type="button" data-phone-reply-lang="zh-Hans" onclick="WN.setPhoneReplyLanguage('zh-Hans')">简体中文</button>
@@ -8364,18 +8382,25 @@ WN.setPhoneReplyLanguage=language=>{
   if(!['zh-Hans','zh-Hant'].includes(language)) return;
   S.cfg.replyLanguage=language; saveCfg(); paintPhoneReplyLanguageControls();
 };
-WN.setDialogueLanguage=async mode=>{
-  if(!Object.hasOwn(DIALOGUE_LANGUAGE_LABELS,mode)||S.dialogueLang.busy||S.dialogueLang.loading) return;
+async function saveDialogueAppearance({mode,theme}){
+  const themeOnly=theme!==undefined;
+  if((themeOnly?!['dark','light'].includes(theme):!Object.hasOwn(DIALOGUE_LANGUAGE_LABELS,mode))
+    ||S.dialogueLang.busy||S.dialogueLang.loading) return;
   const bridge=S.B, pending=S.dialogueLang;
-  if(!bridge||typeof bridge.setDialogueLanguage!=='function'){ toast('当前手机外壳不支持切换'); return; }
+  const method=themeOnly?'setDialogueTheme':'setDialogueLanguage';
+  if(!bridge||typeof bridge[method]!=='function'||(themeOnly&&bridge.dialogueThemeSwitch!==1)){
+    toast('请更新角色卡内手机外壳以使用此设置'); return;
+  }
   if(bridge.dialogueRegexLink!==1){ toast('请更新角色卡内手机外壳，以联动语言与美化'); return; }
-  if(!dialogueLanguageAvailable(mode)){ toast('请更新角色卡与绑定的世界书，以使用日语＋繁体'); return; }
+  if(!themeOnly&&!dialogueLanguageAvailable(mode)){ toast('请更新角色卡与绑定的世界书，以使用日语＋繁体'); return; }
+  if(themeOnly&&!pending.valid){ toast('请先选择一种正文对话语言'); return; }
   const current=()=>S.B===bridge&&S.dialogueLang===pending;
   pending.busy=true; pending.error=''; paintDialogueLanguageControls();
   try{
-    const next=normalizeDialogueLanguageState(await bridge.setDialogueLanguage(mode));
+    const next=normalizeDialogueLanguageState(await bridge[method](themeOnly?theme:mode));
     if(!current()) return;
-    if(!next.valid||next.mode!==mode||!next.beautify.supported||!next.beautify.valid||next.beautify.mode!==dialogueRenderMode(mode))
+    if(!next.valid||!next.beautify.supported||!next.beautify.valid||next.beautify.mode!==dialogueRenderMode(next.mode)
+      ||(themeOnly?next.beautify.theme!==theme:next.mode!==mode))
       throw new Error('未能确认语言与美化同步，请核对当前设置');
     S.dialogueLang=next;
     if(S.wb.loaded){
@@ -8384,7 +8409,8 @@ WN.setDialogueLanguage=async mode=>{
         if(entry) entry.enabled=changed.enabled;
       }
     }
-    toast('已切换为'+DIALOGUE_LANGUAGE_LABELS[mode]+'，并同步'+(next.beautify.theme==='light'?'浅色':'深色')+'美化'
+    toast((themeOnly?'对话美化已切为'+(next.beautify.theme==='light'?'浅色':'深色')+'，保留'+DIALOGUE_LANGUAGE_LABELS[next.mode]
+      :'已切换为'+DIALOGUE_LANGUAGE_LABELS[next.mode]+'，并同步'+(next.beautify.theme==='light'?'浅色':'深色')+'美化')
       +(next.beautify.error?'；'+next.beautify.error:''));
   }catch(e){
     if(!current()) return;
@@ -8401,7 +8427,9 @@ WN.setDialogueLanguage=async mode=>{
     toast(S.dialogueLang.error);
   }
   paintDialogueLanguageControls();
-};
+}
+WN.setDialogueLanguage=async mode=>saveDialogueAppearance({mode});
+WN.setDialogueTheme=async theme=>saveDialogueAppearance({theme});
 WN.checkPhoneUi=async()=>{
   if(!S.B||typeof S.B.checkPhoneRemote!=='function'){ toast('当前手机外壳不支持手动检查'); return; }
   if(S.remote&&S.remote.status==='checking') return;
@@ -9662,6 +9690,7 @@ setTimeout(()=>{ if(S.B) return;
     },
     dialogueRegexLink:1,
     dialogueLanguageModes:Object.keys(DIALOGUE_LANGUAGE_LABELS),
+    dialogueThemeSwitch:1,
     getStat:async()=>demoStat,
     setStatPath:async(path,value)=>{ let cur=demoStat;
       for(let i=0;i<path.length-1;i++){ if(!obj(cur)||!own(cur,path[i])) throw new Error('变量路径不存在'); cur=cur[path[i]]; }
@@ -9745,6 +9774,13 @@ setTimeout(()=>{ if(S.B) return;
       return {name:'演示主世界书',entries:demoWorldbook.map(entry=>({...entry}))};
     },
     getDialogueLanguage:async()=>demoDialogueLanguage(),
+    setDialogueTheme:async theme=>{
+      if(!['dark','light'].includes(theme))throw new Error('对话美化主题无效');
+      const current=demoDialogueLanguage();
+      if(!current.valid)throw new Error('请先选择一种正文对话语言');
+      demoDialogueBeautify={...demoDialogueBeautify,valid:true,mode:dialogueRenderMode(current.mode),theme};
+      return demoDialogueLanguage();
+    },
     setDialogueLanguage:async mode=>{
       if(!Object.hasOwn(DIALOGUE_LANGUAGE_LABELS,mode)) throw new Error('正文对话语言模式无效');
       demoWorldbook=demoWorldbook.map(entry=>entry.uid===4?{...entry,enabled:mode==='zh'}:
