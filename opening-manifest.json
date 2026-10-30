@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "3.3.2",
+  "version": "3.3.4",
   "protocol": 9,
-  "cardVersion": "偏航的东京日常v3.3.2",
+  "cardVersion": "偏航的东京日常v3.3.4",
   "html": "https://raw.githubusercontent.com/serenahill85-hue/watanare/main/opening-page.html",
-  "sha256": "53a32832ada4f8b07a40c355c3fa86c804e2a6ab9715c9100288e11c3f1c8ca1",
-  "updatedAt": "2026-10-29T07:41:40Z"
+  "sha256": "78126df6da39e98d1914a365eb8d8d3ca0f4edfe8d8b3993df72a3d46d336871",
+  "updatedAt": "2026-10-30T02:36:33Z"
 }
